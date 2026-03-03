@@ -15,11 +15,12 @@ Pure Python — no API calls needed.
 
 # Urgency color codes and emoji
 URGENCY_DISPLAY = {
-    "EMERGENCY": {"emoji": "🔴", "label": "EMERGENCY", "color": "#FF0000"},
-    "URGENT":    {"emoji": "🟠", "label": "URGENT",    "color": "#FF6600"},
-    "SOON":      {"emoji": "🟡", "label": "SEE DOCTOR SOON", "color": "#FFCC00"},
-    "ROUTINE":   {"emoji": "🟢", "label": "ROUTINE",   "color": "#00CC00"},
-    "SELF_CARE": {"emoji": "🔵", "label": "SELF-CARE", "color": "#0099FF"},
+    "EMERGENCY":          {"emoji": "🔴", "label": "EMERGENCY",         "color": "#FF0000"},
+    "URGENT":             {"emoji": "🟠", "label": "URGENT",            "color": "#FF6600"},
+    "SOON":               {"emoji": "🟡", "label": "SEE DOCTOR SOON",   "color": "#FFCC00"},
+    "ROUTINE":            {"emoji": "🟢", "label": "ROUTINE",           "color": "#00CC00"},
+    "SELF_CARE":          {"emoji": "🔵", "label": "SELF-CARE",         "color": "#0099FF"},
+    "NEEDS_CLARIFICATION":{"emoji": "⚪", "label": "MORE INFO NEEDED",  "color": "#999999"},
 }
 
 

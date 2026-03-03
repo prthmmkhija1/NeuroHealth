@@ -9,9 +9,17 @@ __pycache__/
 dist/
 build/
 
-# Data (too large for GitHub)
-data/raw/
-data/vector_db/
+# Data (too large for GitHub — .gitkeep files are tracked)
+data/raw/*
+data/processed/*
+data/vector_db/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/vector_db/.gitkeep
+
+# Evaluation outputs (generated at runtime)
+evaluation/ablation_results.json
+evaluation/profiling_results.json
 
 # Virtual environments
 venv/

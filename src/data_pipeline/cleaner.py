@@ -35,8 +35,10 @@ def clean_text(text):
     # Replace multiple spaces/newlines with single space
     text = re.sub(r'\s+', ' ', text)
 
-    # Remove any characters that aren't normal text
-    text = re.sub(r'[^\w\s.,;:?!()\-\']', ' ', text)
+    # Remove characters that aren't normal text, BUT preserve medical chars
+    # Keep: ° (degrees, e.g. 103°F), % (e.g. 95% saturation), / (e.g. 120/80),
+    #       " (inches), + (e.g. COVID+), # (e.g. #1), @ ≥ ≤ < > —
+    text = re.sub(r'[^\w\s.,;:?!()\-\'°%/"#+<>≥≤—&@]', ' ', text)
 
     # Final cleanup
     text = text.strip()

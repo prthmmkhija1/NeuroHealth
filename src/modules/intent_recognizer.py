@@ -19,7 +19,8 @@ EMERGENCY_KEYWORDS = [
     "heart attack", "can't breathe", "cannot breathe", "not breathing",
     "stroke", "unconscious", "passed out", "seizure", "uncontrollable bleeding",
     "overdose", "suicide", "kill myself", "chest crushing", "throat closing",
-    "anaphylaxis", "911", "dying", "going to die"
+    "anaphylaxis", "911", "dying", "going to die", "took too many pills",
+    "swallowed poison", "drank bleach"
 ]
 
 
@@ -54,6 +55,7 @@ Categories:
 - EMERGENCY: User describes a life-threatening situation
 - GENERAL_INFO: User asking general health/medical information
 - MENTAL_HEALTH: User describing emotional or mental health concerns
+- PREVENTIVE_CARE: User asking about wellness, screenings, vaccinations, or preventive health
 - FOLLOW_UP: User following up on a previous medical encounter
 - OUT_OF_SCOPE: Message is not related to health
 
@@ -80,7 +82,7 @@ Respond with ONLY a JSON object like this:
         result_text_upper = result_text.upper() if isinstance(result_text, str) else ""
         for intent in ["EMERGENCY", "SYMPTOM_CHECK", "FIND_DOCTOR", "MEDICATION_INFO",
                         "APPOINTMENT_BOOK", "GENERAL_INFO", "MENTAL_HEALTH",
-                        "FOLLOW_UP", "OUT_OF_SCOPE"]:
+                        "PREVENTIVE_CARE", "FOLLOW_UP", "OUT_OF_SCOPE"]:
             if intent in result_text_upper:
                 return {
                     "intent": intent,

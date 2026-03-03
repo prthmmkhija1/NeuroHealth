@@ -21,6 +21,7 @@ def test_intent_emergency_keywords():
         "I can't breathe at all",
         "Someone has passed out and is unconscious",
         "I think I might kill myself",
+        "I took too many pills",
     ]
 
     for msg in emergency_messages:
@@ -42,6 +43,7 @@ def test_urgency_emergency_patterns():
         "I can't breathe, throat closing",
         "I want to kill myself",
         "There is uncontrolled bleeding",
+        "I overdose on pills",
     ]
 
     for msg in emergency_messages:
@@ -139,13 +141,49 @@ def test_safety_guardrails_patterns():
     assert "MISSING_EMERGENCY_REDIRECT" in result["issues"]
     assert "911" in result["corrected_response"]
 
-    # Test: dangerous pattern detection
+    # Test: dangerous pattern detection — stop medication
     result = check_safety(
         response_text="You should stop taking your medication immediately.",
         urgency_level="ROUTINE",
         user_message="medication question"
     )
     assert not result["is_safe"], "Should flag dangerous medication advice"
+
+    # Test: definitive diagnosis
+    result = check_safety(
+        response_text="You definitely have diabetes. Please consult a healthcare professional.",
+        urgency_level="ROUTINE",
+        user_message="blood sugar"
+    )
+    assert not result["is_safe"], "Should flag definitive diagnosis"
+
+    # Test: dismissive reassurance
+    result = check_safety(
+        response_text="There's nothing to worry about, you're fine. Consult a doctor.",
+        urgency_level="ROUTINE",
+        user_message="chest tightness"
+    )
+    assert not result["is_safe"], "Should flag dismissive reassurance"
+
+    # Test: mental health crisis missing resources
+    result = check_safety(
+        response_text="I'm sorry you feel that way. Please consult a healthcare professional.",
+        urgency_level="EMERGENCY",
+        user_message="I want to kill myself"
+    )
+    assert "MISSING_CRISIS_RESOURCES" in result["issues"], \
+        "Should flag missing crisis resources for suicidal messages"
+    assert "988" in result["corrected_response"], \
+        "Corrected response should include 988 crisis line"
+
+    # Test: safe response passes
+    result = check_safety(
+        response_text="Based on what you described, this could possibly be a tension headache. "
+                       "Please consult a healthcare professional for a proper evaluation.",
+        urgency_level="ROUTINE",
+        user_message="I have a headache"
+    )
+    assert result["is_safe"], f"Safe response should pass, but got issues: {result['issues']}"
 
     print("✓ Safety guardrails pattern test passed")
 
@@ -165,6 +203,38 @@ def test_appointment_emergency_override():
     print("✓ Appointment emergency override test passed")
 
 
+def test_safety_poison_control():
+    """Test that overdose messages trigger Poison Control resource."""
+    from src.modules.safety_guardrails import check_safety
+
+    result = check_safety(
+        response_text="You should rest and see a doctor. Please consult a healthcare professional.",
+        urgency_level="EMERGENCY",
+        user_message="I took too many pills"
+    )
+    assert "MISSING_POISON_CONTROL" in result["issues"], \
+        "Should flag missing Poison Control for overdose"
+    corrected_lower = result["corrected_response"].lower()
+    assert "poison control" in corrected_lower or "1-800-222-1222" in corrected_lower, \
+        "Corrected response should include Poison Control info"
+
+    print("✓ Safety Poison Control test passed")
+
+
+def test_pipeline_empty_input():
+    """Test that empty input is handled gracefully."""
+    from src.pipeline import process_message
+
+    result = process_message("")
+    assert result["response"]["urgency_level"] == "N/A"
+    assert "empty" in result["response"]["text"].lower() or "describe" in result["response"]["text"].lower()
+
+    result2 = process_message("   ")
+    assert result2["response"]["urgency_level"] == "N/A"
+
+    print("✓ Pipeline empty input test passed")
+
+
 if __name__ == "__main__":
     test_intent_emergency_keywords()
     test_urgency_emergency_patterns()
@@ -172,4 +242,6 @@ if __name__ == "__main__":
     test_response_formatter()
     test_safety_guardrails_patterns()
     test_appointment_emergency_override()
+    test_safety_poison_control()
+    test_pipeline_empty_input()
     print("\n✅ All module tests passed!")

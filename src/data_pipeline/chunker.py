@@ -74,17 +74,27 @@ def chunk_document(doc):
 
     chunk_docs = []
     for i, chunk in enumerate(chunks):
+        # Build a unique chunk_id: title + source-hash + index
+        import hashlib
+        title_slug = doc.get("title", "unknown").replace(" ", "_")[:60]
+        source_hash = hashlib.md5(doc.get("source", "").encode()).hexdigest()[:6]
+        chunk_id = f"{title_slug}_{source_hash}_{i}"
+
         chunk_doc = {
-            "chunk_id": f"{doc.get('title', 'unknown')}_{i}",
+            "chunk_id": chunk_id,
             "chunk_index": i,
             "total_chunks": len(chunks),
             "content": chunk,
             "title": doc.get("title", ""),
             "source": doc.get("source", ""),
-            "topic": doc.get("topic", ""),
             "url": doc.get("url", ""),
+            # Support both old and new collector output fields
+            "topic": doc.get("topic", ""),
             "urgency": doc.get("urgency", ""),
             "category": doc.get("category", ""),
+            "categories": doc.get("categories", []),
+            "data_type": doc.get("data_type", ""),
+            "also_called": doc.get("also_called", []),
         }
         chunk_docs.append(chunk_doc)
 

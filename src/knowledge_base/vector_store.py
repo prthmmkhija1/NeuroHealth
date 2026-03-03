@@ -13,6 +13,7 @@ And it returns the most relevant medical chunks — even if the exact words don'
 
 import os
 import json
+import hashlib
 from pathlib import Path
 import chromadb
 from dotenv import load_dotenv
@@ -21,6 +22,9 @@ load_dotenv()
 
 PROCESSED_DATA_DIR = Path("data/processed")
 VECTOR_DB_PATH = os.getenv("VECTOR_DB_PATH", "./data/vector_db")
+
+# Singleton embedding model for search (avoid reloading on every query)
+_search_model = None
 
 
 def build_vector_store():
@@ -40,6 +44,20 @@ def build_vector_store():
 
     with open(embedded_path, "r") as f:
         chunks = json.load(f)
+
+    # Deduplicate chunk IDs (in case of collisions)
+    seen_ids = set()
+    deduped_chunks = []
+    for chunk in chunks:
+        cid = chunk["chunk_id"]
+        if cid in seen_ids:
+            # Append a hash suffix to make unique
+            suffix = hashlib.md5(chunk["content"][:100].encode()).hexdigest()[:8]
+            cid = f"{cid}_{suffix}"
+            chunk["chunk_id"] = cid
+        seen_ids.add(cid)
+        deduped_chunks.append(chunk)
+    chunks = deduped_chunks
 
     print(f"Loading {len(chunks)} chunks into ChromaDB...")
 
@@ -74,6 +92,7 @@ def build_vector_store():
                 "topic": chunk.get("topic", ""),
                 "urgency": chunk.get("urgency", ""),
                 "category": chunk.get("category", ""),
+                "data_type": chunk.get("data_type", ""),
             } for chunk in batch]
         )
 
@@ -106,11 +125,15 @@ def search_knowledge_base(query, n_results=5):
     """
     collection = get_vector_store()
 
-    # Embed the query using the same local model
-    from sentence_transformers import SentenceTransformer
+    # Singleton embedding model—loaded once, reused on every search
+    global _search_model
+    if _search_model is None:
+        from sentence_transformers import SentenceTransformer
+        _search_model = SentenceTransformer(
+            os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+        )
 
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    query_embedding = model.encode([query]).tolist()[0]
+    query_embedding = _search_model.encode([query]).tolist()[0]
 
     # Search the collection
     results = collection.query(

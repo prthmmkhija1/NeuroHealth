@@ -29,6 +29,8 @@ IMMEDIATE_EMERGENCY_PATTERNS = {
     "trauma": ["uncontrolled bleeding", "major injury", "unconscious"],
     "mental_health_crisis": ["suicide", "kill myself", "want to die",
                               "hurting myself"],
+    "overdose_poisoning": ["overdose", "took too many pills", "swallowed poison",
+                            "drank bleach", "ingested chemicals", "poisoning"],
 }
 
 

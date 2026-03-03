@@ -43,6 +43,26 @@ def process_message(user_message, session_id=None):
     Returns:
         dict with response and all intermediate data
     """
+    # ── INPUT VALIDATION ─────────────────────────────────
+    if not user_message or not user_message.strip():
+        return {
+            "session_id": session_id or "none",
+            "response": {
+                "text": "It looks like your message was empty. Could you describe your symptoms or health question?",
+                "urgency_level": "N/A",
+                "urgency_color": "#888888",
+                "metadata": {}
+            },
+            "intent": {"intent": "INVALID_INPUT", "confidence": 1.0, "reasoning": "Empty input"}
+        }
+
+    # Truncate very long input to prevent token overflow / abuse
+    MAX_INPUT_LENGTH = 2000
+    if len(user_message) > MAX_INPUT_LENGTH:
+        user_message = user_message[:MAX_INPUT_LENGTH] + "..."
+
+    user_message = user_message.strip()
+
     print(f"\n{'='*50}")
     print(f"Processing: '{user_message[:80]}'")
     print('='*50)

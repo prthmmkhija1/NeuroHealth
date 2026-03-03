@@ -2,9 +2,9 @@
 
 """
 Tests for the data pipeline modules:
-- collector.py
-- cleaner.py
-- chunker.py
+- collector.py  →  collect_data() / run_data_collection()
+- cleaner.py    →  run_cleaning()
+- chunker.py    →  run_chunking()
 """
 
 import json
@@ -34,37 +34,41 @@ def test_collector():
             data = json.load(fh)
         assert isinstance(data, list), f"{f.name} should contain a list"
         if len(data) > 0:
-            assert "question" in data[0] or "title" in data[0], \
-                f"{f.name} entries should have 'question' or 'title' field"
+            first = data[0]
+            assert "question" in first or "title" in first or "content" in first, \
+                f"{f.name} entries should have 'question', 'title', or 'content' field"
 
     print("✓ Collector test passed")
 
 
 def test_cleaner():
     """Test that cleaner processes raw data."""
-    from src.data_pipeline.cleaner import clean_data
+    from src.data_pipeline.cleaner import run_cleaning
 
-    clean_data()
+    run_cleaning()
 
-    cleaned_path = Path("data/processed/cleaned_data.json")
-    assert cleaned_path.exists(), "cleaned_data.json should exist after cleaning"
+    processed_dir = Path("data/processed")
+    assert processed_dir.exists(), "data/processed directory should exist after cleaning"
 
-    with open(cleaned_path) as f:
-        data = json.load(f)
-    assert isinstance(data, list), "Cleaned data should be a list"
-    assert len(data) > 0, "Cleaned data should not be empty"
+    cleaned_files = list(processed_dir.glob("cleaned_*.json"))
+    assert len(cleaned_files) > 0, "Should have at least one cleaned_*.json file"
+
+    for cf in cleaned_files:
+        with open(cf) as f:
+            data = json.load(f)
+        assert isinstance(data, list), f"{cf.name} should contain a list"
 
     print("✓ Cleaner test passed")
 
 
 def test_chunker():
     """Test that chunker creates text chunks."""
-    from src.data_pipeline.chunker import chunk_data
+    from src.data_pipeline.chunker import run_chunking
 
-    chunk_data()
+    run_chunking()
 
-    chunks_path = Path("data/processed/chunks.json")
-    assert chunks_path.exists(), "chunks.json should exist after chunking"
+    chunks_path = Path("data/processed/all_chunks.json")
+    assert chunks_path.exists(), "all_chunks.json should exist after chunking"
 
     with open(chunks_path) as f:
         chunks = json.load(f)
@@ -80,8 +84,20 @@ def test_chunker():
     print("✓ Chunker test passed")
 
 
+def test_clean_text_preserves_medical():
+    """Test that cleaning preserves medical characters like °, %, /."""
+    from src.data_pipeline.cleaner import clean_text
+
+    assert "°" in clean_text("fever of 103°F"), "Should preserve degree symbol"
+    assert "%" in clean_text("95% oxygen saturation"), "Should preserve percent"
+    assert "/" in clean_text("blood pressure 120/80"), "Should preserve slash"
+
+    print("✓ Clean text medical preservation test passed")
+
+
 if __name__ == "__main__":
     test_collector()
     test_cleaner()
     test_chunker()
+    test_clean_text_preserves_medical()
     print("\n✅ All data pipeline tests passed!")
