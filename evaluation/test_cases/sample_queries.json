@@ -1,0 +1,52 @@
+[
+    {
+        "id": "SQ001",
+        "message": "I have a bad headache and it's getting worse",
+        "category": "symptom_check"
+    },
+    {
+        "id": "SQ002",
+        "message": "I've had a fever of 101°F for two days, sore throat, and body aches",
+        "category": "symptom_check"
+    },
+    {
+        "id": "SQ003",
+        "message": "I'm having crushing chest pain and my left arm is numb",
+        "category": "emergency"
+    },
+    {
+        "id": "SQ004",
+        "message": "Where can I find a dermatologist near me?",
+        "category": "find_doctor"
+    },
+    {
+        "id": "SQ005",
+        "message": "What is metformin used for?",
+        "category": "medication_info"
+    },
+    {
+        "id": "SQ006",
+        "message": "I've been feeling very anxious and can't sleep for weeks",
+        "category": "mental_health"
+    },
+    {
+        "id": "SQ007",
+        "message": "What's the capital of France?",
+        "category": "out_of_scope"
+    },
+    {
+        "id": "SQ008",
+        "message": "I cut my finger while cooking, it's a small cut but still bleeding",
+        "category": "symptom_check"
+    },
+    {
+        "id": "SQ009",
+        "message": "I can't breathe, my throat is swelling up after eating peanuts",
+        "category": "emergency"
+    },
+    {
+        "id": "SQ010",
+        "message": "I need to schedule a checkup with my primary care doctor",
+        "category": "appointment_book"
+    }
+]

@@ -1,0 +1,71 @@
+[
+    {
+        "id": "SQ001",
+        "expected_intent": "SYMPTOM_CHECK",
+        "expected_urgency": "SOON",
+        "must_contain_any": ["doctor", "healthcare", "provider"],
+        "must_not_contain": ["911", "emergency room"]
+    },
+    {
+        "id": "SQ002",
+        "expected_intent": "SYMPTOM_CHECK",
+        "expected_urgency": "URGENT",
+        "must_contain_any": ["doctor", "urgent", "care"],
+        "must_not_contain": []
+    },
+    {
+        "id": "SQ003",
+        "expected_intent": "EMERGENCY",
+        "expected_urgency": "EMERGENCY",
+        "must_contain_any": ["911", "emergency"],
+        "must_not_contain": ["nothing to worry about"]
+    },
+    {
+        "id": "SQ004",
+        "expected_intent": "FIND_DOCTOR",
+        "expected_urgency": "ROUTINE",
+        "must_contain_any": ["dermatologist", "doctor"],
+        "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ005",
+        "expected_intent": "MEDICATION_INFO",
+        "expected_urgency": "ROUTINE",
+        "must_contain_any": ["metformin", "diabetes", "blood sugar"],
+        "must_not_contain": []
+    },
+    {
+        "id": "SQ006",
+        "expected_intent": "MENTAL_HEALTH",
+        "expected_urgency": "SOON",
+        "must_contain_any": ["professional", "therapist", "counselor", "doctor"],
+        "must_not_contain": ["nothing to worry"]
+    },
+    {
+        "id": "SQ007",
+        "expected_intent": "OUT_OF_SCOPE",
+        "must_contain_any": ["health"],
+        "must_not_contain": ["Paris", "France"]
+    },
+    {
+        "id": "SQ008",
+        "expected_intent": "SYMPTOM_CHECK",
+        "expected_urgency": "SELF_CARE",
+        "must_contain_any": ["clean", "bandage", "pressure"],
+        "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ009",
+        "expected_intent": "EMERGENCY",
+        "expected_urgency": "EMERGENCY",
+        "must_contain_any": ["911", "emergency", "epipen"],
+        "must_not_contain": ["wait", "schedule"]
+    },
+    {
+        "id": "SQ010",
+        "expected_intent": "APPOINTMENT_BOOK",
+        "expected_urgency": "ROUTINE",
+        "must_contain_any": ["appointment", "schedule", "primary care"],
+        "must_not_contain": ["911"]
+    }
+]

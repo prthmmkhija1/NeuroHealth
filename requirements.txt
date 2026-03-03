@@ -1,0 +1,44 @@
+# NeuroHealth: AI-Powered Health Assistant
+# Core Dependencies
+
+# --- LLM & AI ---
+torch
+transformers
+accelerate
+bitsandbytes
+sentence-transformers
+huggingface-hub
+
+# --- RAG & Vector DB ---
+langchain
+langchain-community
+chromadb
+faiss-cpu
+
+# --- NLP ---
+spacy
+nltk
+
+# --- Web UI ---
+streamlit
+
+# --- API ---
+fastapi
+uvicorn
+
+# --- Data Processing ---
+pandas
+numpy
+scikit-learn
+requests
+beautifulsoup4
+lxml
+tiktoken
+
+# --- Utilities ---
+python-dotenv
+pydantic
+
+# --- Testing ---
+pytest
+pytest-asyncio
