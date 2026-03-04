@@ -7,17 +7,23 @@ Requires the data pipeline to have been run first.
 
 import json
 import sys
+import pytest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from tests.helpers import vector_store_ready
+
+
+# Use shared helper from conftest
+_vector_store_ready = vector_store_ready
 
 
 def test_vector_store_build():
     """Test building the vector store (requires embedded_chunks.json)."""
     embedded_path = Path("data/processed/embedded_chunks.json")
     if not embedded_path.exists():
-        print("⚠ Skipping vector store test — run embedder.py first")
-        return
+        pytest.skip("embedded_chunks.json not found — run embedder.py first")
 
     from src.knowledge_base.vector_store import build_vector_store, get_vector_store
 
@@ -31,36 +37,36 @@ def test_vector_store_build():
 
 def test_vector_store_search():
     """Test searching the vector store."""
-    try:
-        from src.knowledge_base.vector_store import search_knowledge_base
+    if not _vector_store_ready():
+        pytest.skip("Vector DB not built — run vector_store.py first")
 
-        results = search_knowledge_base("headache and fever", n_results=3)
-        assert isinstance(results, list), "Search should return a list"
-        assert len(results) > 0, "Should find at least one result"
+    from src.knowledge_base.vector_store import search_knowledge_base
 
-        # Check result structure
-        first = results[0]
-        assert "content" in first, "Results should have 'content'"
-        assert "rank" in first, "Results should have 'rank'"
-        assert first["rank"] == 1, "First result should have rank 1"
+    results = search_knowledge_base("headache and fever", n_results=3)
+    assert isinstance(results, list), "Search should return a list"
+    assert len(results) > 0, "Should find at least one result"
 
-        print("✓ Vector store search test passed")
-    except Exception as e:
-        print(f"⚠ Vector store search test skipped: {e}")
+    # Check result structure
+    first = results[0]
+    assert "content" in first, "Results should have 'content'"
+    assert "rank" in first, "Results should have 'rank'"
+    assert first["rank"] == 1, "First result should have rank 1"
+
+    print("✓ Vector store search test passed")
 
 
 def test_retriever():
     """Test the retriever module."""
-    try:
-        from src.rag.retriever import retrieve_context
+    if not _vector_store_ready():
+        pytest.skip("Vector DB not built — run vector_store.py first")
 
-        context = retrieve_context("I have chest pain and difficulty breathing")
-        assert isinstance(context, str), "Retriever should return a string"
-        assert len(context) > 0, "Context should not be empty"
+    from src.rag.retriever import retrieve_context
 
-        print("✓ Retriever test passed")
-    except Exception as e:
-        print(f"⚠ Retriever test skipped: {e}")
+    context = retrieve_context("I have chest pain and difficulty breathing")
+    assert isinstance(context, str), "Retriever should return a string"
+    assert len(context) > 0, "Context should not be empty"
+
+    print("✓ Retriever test passed")
 
 
 if __name__ == "__main__":

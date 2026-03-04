@@ -8,10 +8,15 @@ This module cleans all of that up so the AI gets clean, useful text.
 Think of it as editing a rough draft into a clean final copy.
 """
 
+import sys
 import json
 import re
+import warnings
 from pathlib import Path
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
+
+# Suppress false-positive warning when cleaning URL-like strings
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 RAW_DATA_DIR = Path("data/raw")
 PROCESSED_DATA_DIR = Path("data/processed")
@@ -86,10 +91,19 @@ def deduplicate_docs(documents):
     return unique_docs
 
 
-def run_cleaning():
-    """Main function — cleans all raw data files."""
+def run_cleaning(force=False):
+    """Main function — cleans all raw data files.
+
+    Args:
+        force: If True, re-clean and overwrite all existing cleaned files.
+               If False (default), skip any source whose cleaned file already exists.
+    """
     print("=" * 50)
     print("Starting Data Cleaning Pipeline")
+    if force:
+        print("Mode: FORCE — all files will be re-cleaned and overwritten")
+    else:
+        print("Mode: INCREMENTAL — existing cleaned files will be skipped (use --force to re-clean)")
     print("=" * 50)
 
     raw_files = list(RAW_DATA_DIR.glob("*.json"))
@@ -99,6 +113,12 @@ def run_cleaning():
         return
 
     for raw_file in raw_files:
+        output_path = PROCESSED_DATA_DIR / f"cleaned_{raw_file.name}"
+
+        if not force and output_path.exists():
+            print(f"\nSkipping: {raw_file.name} — {output_path.name} already exists. Use --force to re-clean.")
+            continue
+
         print(f"\nProcessing: {raw_file.name}")
 
         with open(raw_file, "r", encoding="utf-8") as f:
@@ -116,7 +136,6 @@ def run_cleaning():
         print(f"  Final count: {len(cleaned_docs)}")
 
         # Save cleaned data
-        output_path = PROCESSED_DATA_DIR / f"cleaned_{raw_file.name}"
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(cleaned_docs, f, indent=2)
 
@@ -126,4 +145,5 @@ def run_cleaning():
 
 
 if __name__ == "__main__":
-    run_cleaning()
+    force = "--force" in sys.argv or "-f" in sys.argv
+    run_cleaning(force=force)

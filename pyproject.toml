@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurohealth"
+version = "1.0.0"
+description = "AI-Powered Health Assistant — RAG-based symptom assessment, urgency triage, and health guidance"
+readme = "README.md"
+license = {text = "CC-BY-4.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "NeuroHealth Team (OSRE 2026)"},
+]
+keywords = ["health", "AI", "LLM", "RAG", "assistant", "triage"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/"
+Repository = "https://github.com/prthmmkhija1/NeuroHealth"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "gpu: marks tests that require GPU (deselect with '-m not gpu')",
+    "slow: marks tests that are slow to run",
+    "integration: marks integration tests requiring full pipeline",
+]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::bs4.MarkupResemblesLocatorWarning",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*", "api*", "evaluation*"]

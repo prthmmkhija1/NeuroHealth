@@ -202,6 +202,48 @@ def _pipeline_no_urgency(user_message, session_id=None):
     }
 
 
+def _pipeline_no_conversation_history(user_message, session_id=None):
+    """Pipeline with conversation history disabled — no multi-turn context."""
+    from src.modules.intent_recognizer import classify_intent
+    from src.modules.symptom_extractor import extract_symptoms
+    from src.modules.urgency_assessor import assess_urgency
+    from src.modules.appointment_recommender import recommend_appointment
+    from src.modules.safety_guardrails import check_safety
+    from src.modules.response_formatter import format_response
+    from src.rag.retriever import retrieve_context
+    from src.rag.generator import generate_response
+
+    # NO conversation manager — no multi-turn context, fresh state every turn
+    intent_info = classify_intent(user_message)
+
+    if intent_info["intent"] == "OUT_OF_SCOPE":
+        return {
+            "session_id": "ablation_no_history",
+            "response": {
+                "text": "I'm NeuroHealth, a health-focused assistant.",
+                "urgency_level": "N/A",
+                "urgency_color": "#888888",
+                "metadata": {}
+            },
+            "debug": {"intent": intent_info}
+        }
+
+    symptoms = extract_symptoms(user_message)
+    medical_context = retrieve_context(user_message)
+    urgency = assess_urgency(user_message, symptoms)
+    appointment = recommend_appointment(user_message, urgency, symptoms)
+    # No conversation history passed to generator
+    raw_response = generate_response(user_message, medical_context)
+    safety_check = check_safety(raw_response, urgency["level"], user_message)
+    formatted = format_response(safety_check["corrected_response"], urgency, appointment, user_message)
+
+    return {
+        "session_id": "ablation_no_history",
+        "response": formatted,
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+    }
+
+
 # ── Ablation Runner ───────────────────────────────────────────────────
 
 ABLATION_CONFIGS = {
@@ -210,6 +252,7 @@ ABLATION_CONFIGS = {
     "no_safety": _pipeline_no_safety,
     "no_intent": _pipeline_no_intent,
     "no_urgency": _pipeline_no_urgency,
+    "no_conversation_history": _pipeline_no_conversation_history,
 }
 
 

@@ -67,5 +67,39 @@
         "expected_urgency": "ROUTINE",
         "must_contain_any": ["appointment", "schedule", "primary care"],
         "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ011",
+        "expected_intent": "PREVENTIVE_CARE",
+        "expected_urgency": "ROUTINE",
+        "must_contain_any": ["screening", "colonoscopy", "mammogram"],
+        "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ012",
+        "expected_intent": "SYMPTOM_CHECK",
+        "expected_urgency": "URGENT",
+        "must_contain_any": ["doctor", "urgent", "care"],
+        "must_not_contain": ["nothing to worry"]
+    },
+    {
+        "id": "SQ013",
+        "expected_intent": "GENERAL_INFO",
+        "must_contain_any": ["community", "clinic", "health center", "affordable", "sliding"],
+        "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ014",
+        "expected_intent": "PREVENTIVE_CARE",
+        "expected_urgency": "ROUTINE",
+        "must_contain_any": ["vaccine", "vaccination", "immunization"],
+        "must_not_contain": ["911"]
+    },
+    {
+        "id": "SQ015",
+        "expected_intent": "FOLLOW_UP",
+        "expected_urgency": "URGENT",
+        "must_contain_any": ["doctor", "infection", "red"],
+        "must_not_contain": ["nothing to worry"]
     }
 ]

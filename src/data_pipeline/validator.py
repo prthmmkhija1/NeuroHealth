@@ -38,6 +38,13 @@ REQUIRED_SAFETY_TOPICS = [
     "heart attack", "stroke", "allergic reaction", "anaphylaxis",
     "suicide", "overdose", "poison", "emergency",
     "chest pain", "difficulty breathing",
+    "seizure", "unconscious",
+]
+
+# Required coverage of key healthcare use-case categories
+REQUIRED_CATEGORIES = [
+    "cardiac", "respiratory", "neurological", "mental_health",
+    "preventive_care", "medication_info", "chronic_disease",
 ]
 
 # Minimum thresholds
@@ -127,6 +134,27 @@ def validate_raw_data():
     if missing_safety:
         issues.append(
             f"SAFETY: Missing safety-critical topics in corpus: {missing_safety}"
+        )
+
+    # Check category coverage
+    all_categories = set()
+    for raw_file in raw_files:
+        try:
+            with open(raw_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for doc in data:
+                cat = doc.get("category", "")
+                if cat:
+                    all_categories.add(cat.lower())
+                for c in doc.get("categories", []):
+                    all_categories.add(c.lower())
+        except Exception:
+            pass
+
+    missing_categories = [c for c in REQUIRED_CATEGORIES if c not in all_categories]
+    if missing_categories:
+        issues.append(
+            f"WARNING: Missing required healthcare categories in content: {missing_categories}"
         )
 
     return issues

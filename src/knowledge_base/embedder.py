@@ -13,7 +13,6 @@ Zero API cost — runs entirely on your machine or the A100 GPU.
 
 import os
 import json
-import numpy as np
 from pathlib import Path
 from dotenv import load_dotenv
 

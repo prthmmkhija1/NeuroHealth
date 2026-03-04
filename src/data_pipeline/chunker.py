@@ -16,12 +16,19 @@ Example:
   Chunk 3:                                 [Sentence 3. Sentence 4. Sentence 5.]
 """
 
+import sys
 import json
+import hashlib
 from pathlib import Path
 
 PROCESSED_DATA_DIR = Path("data/processed")
-CHUNK_SIZE = 512         # Each chunk is roughly 512 characters (about 100 words)
-CHUNK_OVERLAP = 50       # Each chunk shares 50 characters with the previous one
+
+# OSRE spec: "overlapping windows 256–512 tokens"
+# We approximate tokens ≈ words (avg 1.3 tokens/word for English medical text).
+# 512 tokens ≈ ~400 words ≈ ~2400 characters; 256 tokens ≈ ~200 words ≈ ~1200 chars.
+# Using character-level slicing with sentence-boundary snapping:
+CHUNK_SIZE = 2400        # ~512 tokens per chunk  (spec upper bound)
+CHUNK_OVERLAP = 300      # ~50-token overlap to preserve cross-chunk context
 
 
 def split_into_chunks(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
@@ -30,8 +37,8 @@ def split_into_chunks(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
 
     Args:
         text: The long text to split
-        chunk_size: How many characters per chunk
-        overlap: How many characters to share between chunks
+        chunk_size: How many characters per chunk (~2400 chars ≈ 512 tokens)
+        overlap: How many characters to share between chunks (~300 chars ≈ 50 tokens)
 
     Returns: list of text strings
     """
@@ -55,7 +62,8 @@ def split_into_chunks(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
                 end = last_period + 1
 
         chunk = text[start:end].strip()
-        if chunk:
+        # Only keep chunk if it has meaningful content (avoids tiny overlap tails)
+        if len(chunk) >= 20:
             chunks.append(chunk)
 
         # Move forward, but back up by 'overlap' characters
@@ -75,7 +83,6 @@ def chunk_document(doc):
     chunk_docs = []
     for i, chunk in enumerate(chunks):
         # Build a unique chunk_id: title + source-hash + index
-        import hashlib
         title_slug = doc.get("title", "unknown").replace(" ", "_")[:60]
         source_hash = hashlib.md5(doc.get("source", "").encode()).hexdigest()[:6]
         chunk_id = f"{title_slug}_{source_hash}_{i}"
@@ -101,11 +108,28 @@ def chunk_document(doc):
     return chunk_docs
 
 
-def run_chunking():
-    """Main function — chunks all cleaned documents."""
+def run_chunking(force=False):
+    """Main function — chunks all cleaned documents.
+
+    Args:
+        force: If True, re-chunk and overwrite all_chunks.json even if it exists.
+               If False (default), skip chunking if all_chunks.json already exists.
+    """
     print("=" * 50)
     print("Starting Text Chunking Pipeline")
+    if force:
+        print("Mode: FORCE — all_chunks.json will be overwritten")
+    else:
+        print("Mode: INCREMENTAL — skips if all_chunks.json already exists (use --force to re-chunk)")
     print("=" * 50)
+
+    output_path = PROCESSED_DATA_DIR / "all_chunks.json"
+    if not force and output_path.exists():
+        import json as _json
+        with open(output_path, encoding="utf-8") as f:
+            existing = _json.load(f)
+        print(f"\nSkipping — all_chunks.json already exists ({len(existing)} chunks). Use --force to re-chunk.")
+        return
 
     cleaned_files = list(PROCESSED_DATA_DIR.glob("cleaned_*.json"))
 
@@ -130,7 +154,6 @@ def run_chunking():
         all_chunks.extend(file_chunks)
 
     # Save all chunks together
-    output_path = PROCESSED_DATA_DIR / "all_chunks.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_chunks, f, indent=2)
 
@@ -140,4 +163,5 @@ def run_chunking():
 
 
 if __name__ == "__main__":
-    run_chunking()
+    force = "--force" in sys.argv or "-f" in sys.argv
+    run_chunking(force=force)

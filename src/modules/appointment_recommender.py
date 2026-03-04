@@ -11,9 +11,11 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 
 import json
 from src.llm_utils import generate_response
+from src.data_pipeline.entity_schema import get_specialist_info, SPECIALIST_MAP
 
 
 # Mapping of symptoms/body systems to specialists
+# (Also enriched at runtime by entity_schema.SPECIALIST_MAP)
 SPECIALTY_MAP = {
     "cardiac": "Cardiologist (heart doctor)",
     "respiratory": "Pulmonologist (lung doctor) or Allergist",
@@ -37,6 +39,15 @@ def recommend_appointment(user_message, urgency_info, extracted_symptoms=None):
         dict with recommendation details
     """
     urgency_level = urgency_info.get("level", "ROUTINE")
+
+    # ── Enrich specialty with structured entity schema ────────
+    body_systems = extracted_symptoms.get("body_systems", []) if extracted_symptoms else []
+    schema_specialty = None
+    for system in body_systems:
+        info = get_specialist_info(system)
+        if info:
+            schema_specialty = info.get("title", info.get("name", ""))
+            break
 
     # Emergency override
     if urgency_level == "EMERGENCY":

@@ -48,5 +48,30 @@
         "id": "SQ010",
         "message": "I need to schedule a checkup with my primary care doctor",
         "category": "appointment_book"
+    },
+    {
+        "id": "SQ011",
+        "message": "What cancer screenings should a 50-year-old get?",
+        "category": "preventive_care"
+    },
+    {
+        "id": "SQ012",
+        "message": "My blood sugar has been over 300 this week, I have type 2 diabetes",
+        "category": "chronic_disease"
+    },
+    {
+        "id": "SQ013",
+        "message": "I don't have insurance. Where can I get affordable medical care?",
+        "category": "healthcare_navigation"
+    },
+    {
+        "id": "SQ014",
+        "message": "What vaccines does my 2-year-old need?",
+        "category": "preventive_care"
+    },
+    {
+        "id": "SQ015",
+        "message": "I'm following up on my knee surgery from last month. The incision is red and warm.",
+        "category": "follow_up"
     }
 ]

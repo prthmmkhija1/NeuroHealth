@@ -20,6 +20,8 @@ data/vector_db/*
 # Evaluation outputs (generated at runtime)
 evaluation/ablation_results.json
 evaluation/profiling_results.json
+evaluation/human_eval_output/
+evaluation/baseline_output/
 
 # Virtual environments
 venv/

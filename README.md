@@ -1,8 +1,13 @@
 # 🧠 NeuroHealth
 
-**AI-Powered Health Assistant** — An intelligent health chatbot that uses RAG (Retrieval-Augmented Generation) to provide safe, evidence-informed health guidance.
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![LLM: Llama 3.1-8B](https://img.shields.io/badge/LLM-Llama_3.1--8B-purple.svg)](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct)
+[![OSRE 2026](https://img.shields.io/badge/OSRE-2026-green.svg)](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/)
 
-> ⚠️ **Disclaimer:** NeuroHealth is NOT a substitute for professional medical advice. Always consult a qualified healthcare professional for medical concerns.
+**AI-Powered Health Assistant** — An intelligent health chatbot that uses RAG (Retrieval-Augmented Generation) with a locally-hosted Llama 3.1-8B model to provide safe, evidence-informed health guidance. Built as part of the [UC Santa Cruz OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/) program.
+
+> ⚠️ **Medical Disclaimer:** NeuroHealth is a research prototype and is **NOT** a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for medical concerns. In an emergency, call **911** immediately.
 
 ---
 
@@ -33,7 +38,18 @@
 | **Web UI**       | Streamlit                                       |
 | **API**          | FastAPI                                         |
 | **GPU**          | Nvidia A100 40GB (JupyterLab)                   |
-| **Data Sources** | MedlinePlus (NLM/NIH), Synthetic Medical Q&A    |
+| **Data Sources** | MedlinePlus, Mayo Clinic, Clinical Guidelines, Public Q&A, Synthetic |
+
+## Data Sources
+
+| # | Source | Type | Description |
+|---|--------|------|-------------|
+| 1 | **MedlinePlus Health Topics** | Web API (XML) | NIH/NLM curated health topic summaries |
+| 2 | **MedlinePlus Definitions** | Web API (XML) | Medical term definitions and explanations |
+| 3 | **Mayo Clinic** | Web scraping | Condition pages for 20 common conditions |
+| 4 | **Clinical Practice Guidelines** | Curated dataset | 17 guidelines from USPSTF, AHA, ADA, CDC, ACOG, AAFP, ACEP |
+| 5 | **Public Medical Q&A** | Curated dataset | 15 forum-style Q&A entries covering ambiguous, pediatric, elderly, mental health scenarios |
+| 6 | **Synthetic Q&A** | Generated | Condition-based question-answer pairs for knowledge coverage |
 
 ## Architecture
 
@@ -83,10 +99,11 @@ NeuroHealth/
 │   ├── llm_utils.py              ← Shared local Llama inference (singleton)
 │   ├── pipeline.py               ← Main pipeline (connects everything)
 │   ├── data_pipeline/
-│   │   ├── collector.py          ← Collects medical Q&A data (MedlinePlus XML + synthetic)
+│   │   ├── collector.py          ← Collects medical data (MedlinePlus, Mayo Clinic, CPGs, forums, synthetic)
 │   │   ├── cleaner.py            ← Cleans and normalizes text (preserves medical notation)
 │   │   ├── chunker.py            ← Splits text into overlapping searchable chunks
-│   │   └── validator.py          ← Validates data quality and medical accuracy
+│   │   ├── validator.py          ← Validates data quality and medical accuracy
+│   │   └── entity_schema.py      ← Structured symptom/condition/urgency/specialist schema
 │   ├── knowledge_base/
 │   │   ├── embedder.py           ← Converts text to vector embeddings
 │   │   └── vector_store.py       ← ChromaDB vector database with deduplication
@@ -101,12 +118,15 @@ NeuroHealth/
 │       ├── safety_guardrails.py  ← Multi-layer safety checks on every response
 │       ├── conversation_manager.py ← Session memory + health context tracking
 │       └── response_formatter.py ← Formats final output with urgency indicators
+│   ├── data_pipeline/
 ├── evaluation/
 │   ├── benchmarks.py             ← Automated performance tests (23+ cases)
-│   ├── safety_tests.py           ← Adversarial safety tests (20+ cases)
-│   ├── ablation_study.py         ← Component contribution analysis (ablation)
+│   ├── safety_tests.py           ← Adversarial safety tests (27+ cases)
+│   ├── ablation_study.py         ← Component contribution analysis (6 configs)
 │   ├── equity_tests.py           ← Demographic equity evaluation
 │   ├── inference_profiler.py     ← Inference latency profiling
+│   ├── human_evaluation.py       ← Human evaluation forms (7 dimensions)
+│   ├── baseline_comparison.py    ← Baseline/external system benchmarking
 │   └── test_cases/               ← JSON-based test cases (auto-loaded)
 ├── ui/
 │   └── app.py                    ← Streamlit web interface
@@ -114,6 +134,7 @@ NeuroHealth/
 │   ├── main.py                   ← FastAPI application
 │   └── routes.py                 ← API endpoints
 ├── tests/
+│   ├── conftest.py               ← Pytest configuration and shared fixtures
 │   ├── test_data_pipeline.py     ← Data pipeline unit tests
 │   ├── test_modules.py           ← Module unit tests (no GPU needed)
 │   ├── test_rag.py               ← RAG component tests
@@ -126,8 +147,10 @@ NeuroHealth/
 ├── .env.example                  ← Environment variable template
 ├── .gitignore
 ├── requirements.txt
+├── pyproject.toml                ← Project metadata and build configuration
 ├── LICENSE                       ← CC BY 4.0
 ├── GUIDE.md                      ← Complete build guide
+├── CONTRIBUTING.md               ← Contribution guidelines
 └── README.md
 ```
 
@@ -221,9 +244,11 @@ http://localhost:8000
 ### Endpoints
 
 #### `GET /`
+
 Health check / service info.
 
 **Response:**
+
 ```json
 {
   "name": "NeuroHealth API",
@@ -234,17 +259,21 @@ Health check / service info.
 ```
 
 #### `GET /health`
+
 Liveness probe.
 
 **Response:**
+
 ```json
 { "status": "healthy" }
 ```
 
 #### `POST /api/v1/chat`
+
 Send a message to NeuroHealth and receive a health assistant response.
 
 **Request Body:**
+
 ```json
 {
   "message": "I have a headache and fever for 2 days",
@@ -258,6 +287,7 @@ Send a message to NeuroHealth and receive a health assistant response.
 | `session_id` | string | No       | Session ID for multi-turn conversation continuity |
 
 **Response:**
+
 ```json
 {
   "session_id": "20250101_120000",
@@ -267,17 +297,19 @@ Send a message to NeuroHealth and receive a health assistant response.
 }
 ```
 
-| Field           | Type   | Description                               |
-| --------------- | ------ | ----------------------------------------- |
-| `session_id`    | string | Use this in subsequent requests for multi-turn |
-| `response_text` | string | Formatted response with urgency indicator |
+| Field           | Type   | Description                                         |
+| --------------- | ------ | --------------------------------------------------- |
+| `session_id`    | string | Use this in subsequent requests for multi-turn      |
+| `response_text` | string | Formatted response with urgency indicator           |
 | `urgency_level` | string | One of: EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE |
-| `urgency_color` | string | Hex color code for the urgency level      |
+| `urgency_color` | string | Hex color code for the urgency level                |
 
 #### `GET /api/v1/sessions/{session_id}`
+
 Retrieve conversation history for a session.
 
 **Response:**
+
 ```json
 {
   "session_id": "20250101_120000",
@@ -289,8 +321,56 @@ Retrieve conversation history for a session.
   ],
   "health_context": {
     "symptoms_mentioned": ["headache"],
-    "urgency_history": [{"turn": 1, "level": "ROUTINE"}]
+    "urgency_history": [{ "turn": 1, "level": "ROUTINE" }]
   }
+}
+```
+
+#### `POST /api/v1/chat/stream`
+
+SSE (Server-Sent Events) streaming version of `/chat`. Returns events progressively for real-time rendering on web/mobile clients.
+
+**Request Body:** Same as `POST /chat`.
+
+**Response:** `Content-Type: text/event-stream`
+
+Each SSE event is a JSON object:
+
+```
+data: {"type": "metadata", "session_id": "...", "urgency_level": "ROUTINE", "urgency_color": "#00CC00"}
+data: {"type": "token", "text": "Based on your "}
+data: {"type": "token", "text": "symptoms, it sounds "}
+data: {"type": "done", "session_id": "..."}
+```
+
+#### `POST /api/v1/feedback`
+
+Submit user satisfaction feedback (CSAT/MOS tracking).
+
+**Request Body:**
+
+```json
+{
+  "session_id": "20250101_120000",
+  "rating": 4,
+  "thumbs": "up",
+  "comment": "Very helpful response"
+}
+```
+
+#### `GET /api/v1/feedback/summary`
+
+Get aggregated satisfaction metrics.
+
+**Response:**
+
+```json
+{
+  "total": 42,
+  "average_rating": 4.2,
+  "thumbs_up": 35,
+  "thumbs_down": 7,
+  "csat_score": 78.6
 }
 ```
 
@@ -384,29 +464,29 @@ git pull && python src/pipeline.py
 
 ## Urgency Levels
 
-| Level          | Color  | Action                    | Response Time       |
-| -------------- | ------ | ------------------------- | ------------------- |
-| 🔴 EMERGENCY   | Red    | Call 911 immediately      | Immediate           |
-| 🟠 URGENT      | Orange | See doctor within hours   | Same day            |
-| 🟡 SOON        | Yellow | See doctor in 1-2 days    | 1-2 days            |
-| 🟢 ROUTINE     | Green  | Schedule an appointment   | This week           |
-| 🔵 SELF_CARE   | Blue   | Manage at home            | Self-guided         |
-| ⚪ NEEDS_CLARIFICATION | Gray | More info needed | Ask follow-up questions |
+| Level                  | Color  | Action                  | Response Time           |
+| ---------------------- | ------ | ----------------------- | ----------------------- |
+| 🔴 EMERGENCY           | Red    | Call 911 immediately    | Immediate               |
+| 🟠 URGENT              | Orange | See doctor within hours | Same day                |
+| 🟡 SOON                | Yellow | See doctor in 1-2 days  | 1-2 days                |
+| 🟢 ROUTINE             | Green  | Schedule an appointment | This week               |
+| 🔵 SELF_CARE           | Blue   | Manage at home          | Self-guided             |
+| ⚪ NEEDS_CLARIFICATION | Gray   | More info needed        | Ask follow-up questions |
 
 ## Intent Categories
 
-| Intent            | Description                                      |
-| ----------------- | ------------------------------------------------ |
-| EMERGENCY         | Life-threatening situation detected               |
-| SYMPTOM_CHECK     | User describing symptoms                          |
-| MEDICATION_INFO   | Asking about medications or supplements            |
-| FIND_DOCTOR       | Looking for healthcare providers                   |
-| APPOINTMENT_BOOK  | Scheduling/changing appointments                   |
-| GENERAL_INFO      | General health/medical questions                   |
-| MENTAL_HEALTH     | Emotional or mental health concerns                |
-| PREVENTIVE_CARE   | Wellness, screenings, vaccinations                 |
-| FOLLOW_UP         | Following up on previous medical encounters        |
-| OUT_OF_SCOPE      | Non-health-related messages                        |
+| Intent           | Description                                 |
+| ---------------- | ------------------------------------------- |
+| EMERGENCY        | Life-threatening situation detected         |
+| SYMPTOM_CHECK    | User describing symptoms                    |
+| MEDICATION_INFO  | Asking about medications or supplements     |
+| FIND_DOCTOR      | Looking for healthcare providers            |
+| APPOINTMENT_BOOK | Scheduling/changing appointments            |
+| GENERAL_INFO     | General health/medical questions            |
+| MENTAL_HEALTH    | Emotional or mental health concerns         |
+| PREVENTIVE_CARE  | Wellness, screenings, vaccinations          |
+| FOLLOW_UP        | Following up on previous medical encounters |
+| OUT_OF_SCOPE     | Non-health-related messages                 |
 
 ## Safety
 
@@ -441,9 +521,16 @@ python evaluation/equity_tests.py
 
 # Inference profiling — latency breakdown per component
 python evaluation/inference_profiler.py
+
+# Human evaluation — generates scoring forms for healthcare professionals
+python evaluation/human_evaluation.py
+
+# Baseline comparison — benchmark vs keyword baseline and external systems
+python evaluation/baseline_comparison.py
 ```
 
 Key metrics:
+
 - **Emergency Recall**: Must be 100% (all emergency cases correctly identified)
 - **Urgency Accuracy**: Percentage of urgency levels correctly assigned
 - **Intent Accuracy**: Percentage of intents correctly classified
@@ -451,16 +538,35 @@ Key metrics:
 - **Equity Consistency**: Urgency consistency across demographic groups
 - **Ablation Δ**: Performance change when each component is disabled
 
+### Human Evaluation
+
+Per the OSRE specification, NeuroHealth includes a **human evaluation framework** for healthcare professionals. Run `python evaluation/human_evaluation.py` to generate:
+
+- **JSON evaluation forms** with 7 scoring dimensions (clinical safety, accuracy, appropriateness, health literacy, completeness, empathy/tone, user satisfaction)
+- **CSV scoring sheets** ready for distribution to clinical reviewers
+- **8 curated test cases** spanning emergency, routine, mental health, chronic disease, pediatric, and ambiguous scenarios
+
+Each case is scored on a 1-5 scale across all dimensions by human reviewers.
+
 ## Contributing
 
-This project is part of the [OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/) program at UC Santa Cruz Open Source Program Office (OSPO).
+This project is part of the [OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/) program at UC Santa Cruz Open Source Program Office (OSPO). See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
 3. Make your changes and add tests
-4. Run tests (`python tests/test_modules.py`)
+4. Run the test suite (`pytest tests/`)
 5. Commit and push (`git push origin feature/your-feature`)
 6. Open a pull request
+
+## Acknowledgments
+
+- **[UC Santa Cruz OSPO](https://ucsc-ospo.github.io/)** — Open Source Program Office, host of the OSRE 2026 program
+- **[NELBL Lab](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/)** — Neuroscience & Biomedical Lab, project originators
+- **[MedlinePlus / NLM / NIH](https://medlineplus.gov/)** — Medical data source (public domain)
+- **[Meta AI](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct)** — Llama 3.1-8B-Instruct model
+- **[ChromaDB](https://www.trychroma.com/)** — Vector database
+- **[Sentence-Transformers](https://www.sbert.net/)** — all-MiniLM-L6-v2 embedding model
 
 ## License
 

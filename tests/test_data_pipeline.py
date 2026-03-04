@@ -30,7 +30,7 @@ def test_collector():
 
     # Check structure of collected data
     for f in files:
-        with open(f) as fh:
+        with open(f, encoding="utf-8") as fh:
             data = json.load(fh)
         assert isinstance(data, list), f"{f.name} should contain a list"
         if len(data) > 0:

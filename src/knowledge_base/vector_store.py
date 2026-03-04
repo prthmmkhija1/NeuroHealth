@@ -107,9 +107,22 @@ def get_vector_store():
     """
     Loads the existing vector store.
     Call this function whenever you need to search the knowledge base.
+
+    Raises:
+        RuntimeError: If the medical_knowledge collection has not been built yet.
     """
     client = chromadb.PersistentClient(path=VECTOR_DB_PATH)
-    collection = client.get_collection("medical_knowledge")
+    try:
+        collection = client.get_collection("medical_knowledge")
+    except Exception as e:
+        raise RuntimeError(
+            "Vector store not built yet. Run the data pipeline first:\n"
+            "  python src/data_pipeline/collector.py\n"
+            "  python src/data_pipeline/cleaner.py\n"
+            "  python src/data_pipeline/chunker.py\n"
+            "  python src/knowledge_base/embedder.py\n"
+            "  python src/knowledge_base/vector_store.py"
+        ) from e
     return collection
 
 

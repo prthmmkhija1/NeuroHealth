@@ -110,7 +110,11 @@ def process_message(user_message, session_id=None):
 
     # ── STEP 4: Retrieve Medical Context ─────────────────────
     print("\n[Step 3] Retrieving medical context...")
-    medical_context = retrieve_context(user_message)
+    try:
+        medical_context = retrieve_context(user_message)
+    except (RuntimeError, Exception) as e:
+        print(f"  ⚠️ RAG retrieval failed ({e}), continuing without context")
+        medical_context = ""
 
     # ── STEP 5: Assess Urgency ───────────────────────────────
     print("\n[Step 4] Assessing urgency...")

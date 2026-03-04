@@ -16,6 +16,7 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 
 import json
 from src.llm_utils import generate_response
+from src.data_pipeline.entity_schema import check_urgency_rules, get_red_flags_for_symptoms
 
 
 # Hard-coded emergency rules (faster and more reliable than LLM)
@@ -60,6 +61,22 @@ def assess_urgency(user_message, extracted_symptoms=None):
                     "warning_signs": [],
                     "color_code": "RED"
                 }
+
+    # ── Check structured urgency rules from entity schema ────
+    symptom_names = []
+    if extracted_symptoms and extracted_symptoms.get("symptoms"):
+        symptom_names = [s.get("name", "").lower() for s in extracted_symptoms["symptoms"]]
+    rule_hit = check_urgency_rules(symptom_names, user_message)
+    if rule_hit:
+        return {
+            "level": rule_hit["action"].split(":")[0].strip().upper() if ":" in rule_hit["action"] else "EMERGENCY",
+            "level_number": 1,
+            "recommendation": rule_hit["action"],
+            "reasoning": f"Urgency rule matched: {rule_hit['rule']}",
+            "call_to_action": rule_hit["action"],
+            "warning_signs": get_red_flags_for_symptoms(symptom_names),
+            "color_code": "RED"
+        }
 
     # Use local Llama for nuanced assessment
     symptom_context = ""

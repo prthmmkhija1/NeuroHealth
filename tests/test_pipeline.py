@@ -9,12 +9,21 @@ Best run on JLAB-GPU with A100.
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from tests.helpers import vector_store_ready, import_pipeline
+
+
+# Use shared helpers from conftest
+_vector_store_ready = vector_store_ready
+_import_pipeline = import_pipeline
 
 
 def test_emergency_detection():
     """Test that the pipeline correctly identifies emergencies."""
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
 
     result = process_message("I'm having crushing chest pain and my left arm is numb")
 
@@ -28,7 +37,7 @@ def test_emergency_detection():
 
 def test_out_of_scope():
     """Test that non-health questions are handled correctly."""
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
 
     result = process_message("What is the capital of France?")
 
@@ -42,7 +51,7 @@ def test_out_of_scope():
 
 def test_session_continuity():
     """Test that conversations maintain context across turns."""
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
 
     # First message
     result1 = process_message("I have a headache")
@@ -58,7 +67,7 @@ def test_session_continuity():
 
 def test_routine_query():
     """Test a routine health question."""
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
 
     result = process_message("I have a runny nose and mild cough since yesterday")
 

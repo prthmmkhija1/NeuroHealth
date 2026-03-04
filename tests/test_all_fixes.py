@@ -5,9 +5,17 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+import pytest
+from tests.helpers import vector_store_ready, import_pipeline
+
+
+# Use shared helpers from conftest
+_vector_store_ready = vector_store_ready
+_import_pipeline = import_pipeline
+
 
 def test_empty_input():
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
     r = process_message("")
     assert r["response"]["urgency_level"] == "N/A"
     r2 = process_message("   ")
@@ -16,7 +24,7 @@ def test_empty_input():
 
 
 def test_long_input_truncation():
-    from src.pipeline import process_message
+    process_message = _import_pipeline()
     # This should not crash even with very long input
     long_msg = "headache " * 500  # 4500+ chars
     r = process_message(long_msg)

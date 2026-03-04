@@ -64,6 +64,7 @@ User message: "{user_message}"
 Respond with ONLY a JSON object like this:
 {{"intent": "CATEGORY_NAME", "confidence": 0.95, "reasoning": "brief explanation"}}"""
 
+    result_text = ""
     try:
         result_text = generate_response(
             system_prompt="You are a medical intent classifier. Respond ONLY with valid JSON.",
