@@ -96,15 +96,18 @@ Assess the urgency level using this 5-level scale:
 
 When in doubt, err on the side of higher urgency (be conservative = safer).
 
-Respond with ONLY a JSON object:
+Valid levels (choose EXACTLY one): EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE
+Valid color_codes: RED (EMERGENCY), ORANGE (URGENT), YELLOW (SOON), GREEN (ROUTINE), BLUE (SELF_CARE)
+
+Respond with ONLY a JSON object — replace every value with the correct real value:
 {{
-  "level": "URGENCY_LEVEL",
-  "level_number": 1,
+  "level": "SOON",
+  "level_number": 3,
   "recommendation": "what they should do",
   "reasoning": "why this level",
   "call_to_action": "specific next step sentence",
   "warning_signs": ["list symptoms that would make this more urgent"],
-  "color_code": "RED/ORANGE/YELLOW/GREEN/BLUE"
+  "color_code": "YELLOW"
 }}"""
 
     try:
