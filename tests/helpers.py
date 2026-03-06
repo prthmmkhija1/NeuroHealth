@@ -4,10 +4,12 @@
 import os
 import pytest
 from pathlib import Path
+from dotenv import load_dotenv
 
 
 def hf_token_available() -> bool:
     """Return True only if a real HuggingFace token is configured in the environment."""
+    load_dotenv()
     token = os.getenv("HUGGINGFACE_TOKEN", "")
     return bool(token) and not token.startswith("hf_YOUR")
 

@@ -30,6 +30,8 @@ def vector_store_ready() -> bool:
 def hf_token_available() -> bool:
     """Return True only if a real HuggingFace token is configured in the environment."""
     import os
+    from dotenv import load_dotenv
+    load_dotenv()
     token = os.getenv("HUGGINGFACE_TOKEN", "")
     return bool(token) and not token.startswith("hf_YOUR")
 
