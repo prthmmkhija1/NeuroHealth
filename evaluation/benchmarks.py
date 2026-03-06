@@ -368,6 +368,12 @@ def run_benchmark(pipeline_fn):
     if emergency_recall < 1.0:
         print("\n🚨 CRITICAL FAILURE: Not all emergencies were detected!")
 
+    # Save results to disk
+    output_path = Path(__file__).parent / "benchmark_results.json"
+    with open(output_path, "w") as f:
+        json.dump(summary, f, indent=2, default=str)
+    print(f"\nResults saved to {output_path}")
+
     return summary
 
 

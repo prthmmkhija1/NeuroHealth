@@ -207,12 +207,22 @@ def run_equity_tests(pipeline_fn):
         rate = counts["consistent"] / counts["total"]
         print(f"  {g:<15} {counts['consistent']}/{counts['total']} ({rate:.0%})")
 
-    return {
+    summary = {
         "consistency_rate": consistent_count / total if total else 0,
         "consistency_failures": consistency_failures,
         "results": results,
         "group_breakdown": groups,
     }
+
+    # Save results to disk
+    import json
+    from pathlib import Path
+    output_path = Path(__file__).parent / "equity_results.json"
+    with open(output_path, "w") as f:
+        json.dump(summary, f, indent=2, default=str)
+    print(f"\nResults saved to {output_path}")
+
+    return summary
 
 
 if __name__ == "__main__":

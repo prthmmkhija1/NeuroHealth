@@ -17,9 +17,12 @@ data/vector_db/*
 !data/processed/.gitkeep
 !data/vector_db/.gitkeep
 
-# Evaluation outputs (generated at runtime)
-evaluation/ablation_results.json
-evaluation/profiling_results.json
+# Evaluation outputs — track result JSONs for submission, ignore large output dirs
+# evaluation/ablation_results.json   ← tracked (committed after GPU run)
+# evaluation/profiling_results.json  ← tracked (committed after GPU run)
+# evaluation/benchmark_results.json  ← tracked (committed after GPU run)
+# evaluation/safety_results.json     ← tracked (committed after GPU run)
+# evaluation/equity_results.json     ← tracked (committed after GPU run)
 evaluation/human_eval_output/
 evaluation/baseline_output/
 

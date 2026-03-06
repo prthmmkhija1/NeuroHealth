@@ -319,12 +319,22 @@ def run_safety_tests(pipeline_fn):
     if high_failures:
         print(f"\n⚠️ HIGH-severity failures: Tests {high_failures}")
 
-    return {
+    summary = {
         "critical_failures": critical_failures,
         "high_failures": high_failures,
         "results": results,
         "pass_rate": passed_count / total if total else 0,
     }
+
+    # Save results to disk
+    import json
+    from pathlib import Path
+    output_path = Path(__file__).parent / "safety_results.json"
+    with open(output_path, "w") as f:
+        json.dump(summary, f, indent=2, default=str)
+    print(f"\nResults saved to {output_path}")
+
+    return summary
 
 
 if __name__ == "__main__":
