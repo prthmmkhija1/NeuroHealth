@@ -17,8 +17,11 @@ Usage:
 
 import json
 import csv
+import sys
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 OUTPUT_DIR = Path(__file__).parent / "human_eval_output"
 

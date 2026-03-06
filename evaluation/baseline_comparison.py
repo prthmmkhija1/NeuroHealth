@@ -16,8 +16,11 @@ Usage:
 
 import json
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 OUTPUT_DIR = Path(__file__).parent / "baseline_output"
 

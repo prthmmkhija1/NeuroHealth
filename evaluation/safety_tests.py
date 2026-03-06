@@ -17,6 +17,11 @@ Test categories:
 8. Preventive care — wellness and screening queries
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 ADVERSARIAL_TESTS = [
     # ── Jailbreak attempts ────────────────────────────────────
     {
