@@ -8,6 +8,7 @@ LLM-dependent tests are skipped if model is not loaded.
 
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -131,59 +132,62 @@ def test_safety_guardrails_patterns():
     """Test regex-based safety checks (no LLM needed)."""
     from src.modules.safety_guardrails import check_safety
 
-    # Test: emergency response missing emergency language
-    result = check_safety(
-        response_text="You should rest and drink fluids.",
-        urgency_level="EMERGENCY",
-        user_message="chest pain"
-    )
-    assert not result["is_safe"], "Should flag missing emergency redirect"
-    assert "MISSING_EMERGENCY_REDIRECT" in result["issues"]
-    assert "911" in result["corrected_response"]
+    _no_llm_issues = {"has_issues": False, "issues": []}
 
-    # Test: dangerous pattern detection — stop medication
-    result = check_safety(
-        response_text="You should stop taking your medication immediately.",
-        urgency_level="ROUTINE",
-        user_message="medication question"
-    )
-    assert not result["is_safe"], "Should flag dangerous medication advice"
+    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+        # Test: emergency response missing emergency language
+        result = check_safety(
+            response_text="You should rest and drink fluids.",
+            urgency_level="EMERGENCY",
+            user_message="chest pain"
+        )
+        assert not result["is_safe"], "Should flag missing emergency redirect"
+        assert "MISSING_EMERGENCY_REDIRECT" in result["issues"]
+        assert "911" in result["corrected_response"]
 
-    # Test: definitive diagnosis
-    result = check_safety(
-        response_text="You definitely have diabetes. Please consult a healthcare professional.",
-        urgency_level="ROUTINE",
-        user_message="blood sugar"
-    )
-    assert not result["is_safe"], "Should flag definitive diagnosis"
+        # Test: dangerous pattern detection — stop medication
+        result = check_safety(
+            response_text="You should stop taking your medication immediately.",
+            urgency_level="ROUTINE",
+            user_message="medication question"
+        )
+        assert not result["is_safe"], "Should flag dangerous medication advice"
 
-    # Test: dismissive reassurance
-    result = check_safety(
-        response_text="There's nothing to worry about, you're fine. Consult a doctor.",
-        urgency_level="ROUTINE",
-        user_message="chest tightness"
-    )
-    assert not result["is_safe"], "Should flag dismissive reassurance"
+        # Test: definitive diagnosis
+        result = check_safety(
+            response_text="You definitely have diabetes. Please consult a healthcare professional.",
+            urgency_level="ROUTINE",
+            user_message="blood sugar"
+        )
+        assert not result["is_safe"], "Should flag definitive diagnosis"
 
-    # Test: mental health crisis missing resources
-    result = check_safety(
-        response_text="I'm sorry you feel that way. Please consult a healthcare professional.",
-        urgency_level="EMERGENCY",
-        user_message="I want to kill myself"
-    )
-    assert "MISSING_CRISIS_RESOURCES" in result["issues"], \
-        "Should flag missing crisis resources for suicidal messages"
-    assert "988" in result["corrected_response"], \
-        "Corrected response should include 988 crisis line"
+        # Test: dismissive reassurance
+        result = check_safety(
+            response_text="There's nothing to worry about, you're fine. Consult a doctor.",
+            urgency_level="ROUTINE",
+            user_message="chest tightness"
+        )
+        assert not result["is_safe"], "Should flag dismissive reassurance"
 
-    # Test: safe response passes
-    result = check_safety(
-        response_text="Based on what you described, this could possibly be a tension headache. "
-                       "Please consult a healthcare professional for a proper evaluation.",
-        urgency_level="ROUTINE",
-        user_message="I have a headache"
-    )
-    assert result["is_safe"], f"Safe response should pass, but got issues: {result['issues']}"
+        # Test: mental health crisis missing resources
+        result = check_safety(
+            response_text="I'm sorry you feel that way. Please consult a healthcare professional.",
+            urgency_level="EMERGENCY",
+            user_message="I want to kill myself"
+        )
+        assert "MISSING_CRISIS_RESOURCES" in result["issues"], \
+            "Should flag missing crisis resources for suicidal messages"
+        assert "988" in result["corrected_response"], \
+            "Corrected response should include 988 crisis line"
+
+        # Test: safe response passes
+        result = check_safety(
+            response_text="Based on what you described, this could possibly be a tension headache. "
+                           "Please consult a healthcare professional for a proper evaluation.",
+            urgency_level="ROUTINE",
+            user_message="I have a headache"
+        )
+        assert result["is_safe"], f"Safe response should pass, but got issues: {result['issues']}"
 
     print("✓ Safety guardrails pattern test passed")
 
