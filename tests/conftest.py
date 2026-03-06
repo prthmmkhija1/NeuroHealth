@@ -27,10 +27,19 @@ def vector_store_ready() -> bool:
         return False
 
 
+def hf_token_available() -> bool:
+    """Return True only if a real HuggingFace token is configured in the environment."""
+    import os
+    token = os.getenv("HUGGINGFACE_TOKEN", "")
+    return bool(token) and not token.startswith("hf_YOUR")
+
+
 def import_pipeline():
-    """Import process_message, skipping if vector store unavailable."""
+    """Import process_message, skipping if vector store or HF token unavailable."""
     if not vector_store_ready():
         pytest.skip("Vector DB not built — run the data pipeline first")
+    if not hf_token_available():
+        pytest.skip("HUGGINGFACE_TOKEN not set in .env — skipping LLM-dependent tests")
     try:
         from src.pipeline import process_message
         return process_message

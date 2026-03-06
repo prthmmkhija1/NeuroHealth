@@ -44,6 +44,12 @@ def _load_model():
     if _model is not None:
         return _model, _tokenizer
 
+    if not HF_TOKEN or HF_TOKEN.startswith("hf_YOUR"):
+        raise EnvironmentError(
+            "HUGGINGFACE_TOKEN is not set in .env. "
+            "Add your real token before running LLM-dependent code."
+        )
+
     print(f"Loading model: {MODEL_NAME}")
     print("This may take 1-2 minutes on first load...")
 

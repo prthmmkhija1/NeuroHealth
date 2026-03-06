@@ -1,8 +1,15 @@
 # tests/helpers.py
 """Shared test helper functions for NeuroHealth test suite."""
 
+import os
 import pytest
 from pathlib import Path
+
+
+def hf_token_available() -> bool:
+    """Return True only if a real HuggingFace token is configured in the environment."""
+    token = os.getenv("HUGGINGFACE_TOKEN", "")
+    return bool(token) and not token.startswith("hf_YOUR")
 
 
 def vector_store_ready() -> bool:
@@ -17,9 +24,11 @@ def vector_store_ready() -> bool:
 
 
 def import_pipeline():
-    """Import process_message, skipping if vector store unavailable."""
+    """Import process_message, skipping if vector store or HF token unavailable."""
     if not vector_store_ready():
         pytest.skip("Vector DB not built — run the data pipeline first")
+    if not hf_token_available():
+        pytest.skip("HUGGINGFACE_TOKEN not set in .env — skipping LLM-dependent tests")
     try:
         from src.pipeline import process_message
         return process_message
