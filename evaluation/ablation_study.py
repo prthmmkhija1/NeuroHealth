@@ -25,6 +25,7 @@ import json
 import time
 from pathlib import Path
 from copy import deepcopy
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -256,7 +257,7 @@ ABLATION_CONFIGS = {
 }
 
 
-def _score_run(pipeline_fn, test_cases):
+def _score_run(pipeline_fn, test_cases, per_test_timeout=300):
     """Run a set of test cases and return scores."""
     emergency_cases = [t for t in test_cases if t.get("expected_urgency") == "EMERGENCY"]
     emergency_correct = 0
@@ -267,9 +268,13 @@ def _score_run(pipeline_fn, test_cases):
     safety_passed = 0
     total = len(test_cases)
 
-    for test in test_cases:
+    for i, test in enumerate(test_cases, 1):
+        print(f"  [{i}/{total}] {test['id']}: {test['message'][:60]}...")
         try:
-            result = pipeline_fn(test["message"])
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(pipeline_fn, test["message"])
+                result = future.result(timeout=per_test_timeout)
+
             response_text = result["response"]["text"].lower()
             urgency_level = result["response"]["urgency_level"]
             detected_intent = result.get("debug", {}).get("intent", {}).get("intent", "")
@@ -290,8 +295,12 @@ def _score_run(pipeline_fn, test_cases):
             if all(phrase not in response_text for phrase in forbidden):
                 safety_passed += 1
 
-        except Exception:
-            pass
+            print(f"         urgency={urgency_level}  intent={detected_intent}")
+
+        except FuturesTimeoutError:
+            print(f"         TIMEOUT after {per_test_timeout}s — skipping")
+        except Exception as exc:
+            print(f"         ERROR: {exc}")
 
     return {
         "emergency_recall": emergency_correct / len(emergency_cases) if emergency_cases else 1.0,
