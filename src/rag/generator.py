@@ -63,7 +63,7 @@ HOW TO RESPOND:
 
 REMEMBER: You are not a replacement for a doctor. You help people navigate healthcare.
 
-DISCLAIMER RULE: Every response MUST end with a sentence reminding the user to consult a healthcare professional. For example: "Please consult a healthcare professional for personalized medical advice.""""
+DISCLAIMER RULE: Every response MUST end with a sentence reminding the user to consult a healthcare professional. For example: "Please consult a healthcare professional for personalized medical advice." """
 
 
 def generate_response(user_message, context, conversation_history=None):
