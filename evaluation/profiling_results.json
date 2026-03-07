@@ -1,0 +1,72 @@
+{
+  "warmup_time": 67.09983230009675,
+  "messages_profiled": 5,
+  "average_total_latency": 48.16008843705058,
+  "component_means": {
+    "intent_recognition": 2.9703,
+    "symptom_extraction": 5.9541,
+    "rag_retrieval": 1.2663,
+    "urgency_assessment": 8.2843,
+    "appointment_recommendation": 10.3352,
+    "response_generation": 16.109,
+    "safety_check": 3.2409,
+    "response_formatting": 0.0001
+  },
+  "all_timings": [
+    {
+      "intent_recognition": 2.9600861370563507,
+      "symptom_extraction": 5.967022329568863,
+      "rag_retrieval": 5.9600593857467175,
+      "urgency_assessment": 11.659995954483747,
+      "appointment_recommendation": 17.32511653751135,
+      "response_generation": 4.219248466193676,
+      "safety_check": 0.0029935911297798157,
+      "response_formatting": 5.2209943532943726e-05,
+      "total": 48.094574611634016
+    },
+    {
+      "intent_recognition": 3.3746495842933655,
+      "symptom_extraction": 9.515627976506948,
+      "rag_retrieval": 0.10551715269684792,
+      "urgency_assessment": 1.6771256923675537e-05,
+      "appointment_recommendation": 1.8693506717681885e-05,
+      "response_generation": 16.246554918587208,
+      "safety_check": 4.013555683195591,
+      "response_formatting": 4.0825456380844116e-05,
+      "total": 33.25598160549998
+    },
+    {
+      "intent_recognition": 2.6961377151310444,
+      "symptom_extraction": 3.3593636825680733,
+      "rag_retrieval": 0.0905609019100666,
+      "urgency_assessment": 11.003184881061316,
+      "appointment_recommendation": 11.213525418192148,
+      "response_generation": 22.346267201006413,
+      "safety_check": 5.410168003290892,
+      "response_formatting": 5.225837230682373e-05,
+      "total": 56.11926006153226
+    },
+    {
+      "intent_recognition": 2.6851973608136177,
+      "symptom_extraction": 9.259396519511938,
+      "rag_retrieval": 0.06377441808581352,
+      "urgency_assessment": 10.17633668705821,
+      "appointment_recommendation": 11.106024783104658,
+      "response_generation": 23.931011624634266,
+      "safety_check": 3.3989373967051506,
+      "response_formatting": 5.5383890867233276e-05,
+      "total": 60.62073417380452
+    },
+    {
+      "intent_recognition": 3.135220069438219,
+      "symptom_extraction": 1.66905253008008,
+      "rag_retrieval": 0.11160166561603546,
+      "urgency_assessment": 8.581912331283092,
+      "appointment_recommendation": 12.031427435576916,
+      "response_generation": 13.80173621699214,
+      "safety_check": 3.3788844980299473,
+      "response_formatting": 5.69857656955719e-05,
+      "total": 42.709891732782125
+    }
+  ]
+}

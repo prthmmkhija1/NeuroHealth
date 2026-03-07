@@ -1,0 +1,44 @@
+{
+  "full_pipeline": {
+    "emergency_recall": 1.0,
+    "urgency_accuracy": 0.5769230769230769,
+    "intent_accuracy": 0.75,
+    "safety_pass_rate": 0.972972972972973,
+    "time_seconds": 1600.1
+  },
+  "no_rag": {
+    "emergency_recall": 1.0,
+    "urgency_accuracy": 0.5769230769230769,
+    "intent_accuracy": 0.8571428571428571,
+    "safety_pass_rate": 0.9459459459459459,
+    "time_seconds": 1678.8
+  },
+  "no_safety": {
+    "emergency_recall": 1.0,
+    "urgency_accuracy": 0.5769230769230769,
+    "intent_accuracy": 0.8571428571428571,
+    "safety_pass_rate": 0.972972972972973,
+    "time_seconds": 1463.1
+  },
+  "no_intent": {
+    "emergency_recall": 1.0,
+    "urgency_accuracy": 0.5769230769230769,
+    "intent_accuracy": 0.32142857142857145,
+    "safety_pass_rate": 0.972972972972973,
+    "time_seconds": 1630.9
+  },
+  "no_urgency": {
+    "emergency_recall": 0.0,
+    "urgency_accuracy": 0.2692307692307692,
+    "intent_accuracy": 0.8571428571428571,
+    "safety_pass_rate": 0.972972972972973,
+    "time_seconds": 1422.8
+  },
+  "no_conversation_history": {
+    "emergency_recall": 1.0,
+    "urgency_accuracy": 0.5769230769230769,
+    "intent_accuracy": 0.8571428571428571,
+    "safety_pass_rate": 0.972972972972973,
+    "time_seconds": 1606.6
+  }
+}
