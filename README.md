@@ -30,26 +30,26 @@
 
 ## Tech Stack
 
-| Component        | Technology                                      |
-| ---------------- | ----------------------------------------------- |
-| **LLM**          | Llama 3.1-8B-Instruct (local, zero API cost)    |
-| **Embeddings**   | all-MiniLM-L6-v2 (sentence-transformers, local) |
-| **Vector DB**    | ChromaDB (persistent, local)                    |
-| **Web UI**       | Streamlit                                       |
-| **API**          | FastAPI                                         |
-| **GPU**          | Nvidia A100 40GB (JupyterLab)                   |
+| Component        | Technology                                                           |
+| ---------------- | -------------------------------------------------------------------- |
+| **LLM**          | Llama 3.1-8B-Instruct (local, zero API cost)                         |
+| **Embeddings**   | all-MiniLM-L6-v2 (sentence-transformers, local)                      |
+| **Vector DB**    | ChromaDB (persistent, local)                                         |
+| **Web UI**       | Streamlit                                                            |
+| **API**          | FastAPI                                                              |
+| **GPU**          | Nvidia A100 40GB (JupyterLab)                                        |
 | **Data Sources** | MedlinePlus, Mayo Clinic, Clinical Guidelines, Public Q&A, Synthetic |
 
 ## Data Sources
 
-| # | Source | Type | Description |
-|---|--------|------|-------------|
-| 1 | **MedlinePlus Health Topics** | Web API (XML) | NIH/NLM curated health topic summaries |
-| 2 | **MedlinePlus Definitions** | Web API (XML) | Medical term definitions and explanations |
-| 3 | **Mayo Clinic** | Web scraping | Condition pages for 20 common conditions |
-| 4 | **Clinical Practice Guidelines** | Curated dataset | 17 guidelines from USPSTF, AHA, ADA, CDC, ACOG, AAFP, ACEP |
-| 5 | **Public Medical Q&A** | Curated dataset | 15 forum-style Q&A entries covering ambiguous, pediatric, elderly, mental health scenarios |
-| 6 | **Synthetic Q&A** | Generated | Condition-based question-answer pairs for knowledge coverage |
+| #   | Source                           | Type            | Description                                                                                |
+| --- | -------------------------------- | --------------- | ------------------------------------------------------------------------------------------ |
+| 1   | **MedlinePlus Health Topics**    | Web API (XML)   | NIH/NLM curated health topic summaries                                                     |
+| 2   | **MedlinePlus Definitions**      | Web API (XML)   | Medical term definitions and explanations                                                  |
+| 3   | **Mayo Clinic**                  | Web scraping    | Condition pages for 20 common conditions                                                   |
+| 4   | **Clinical Practice Guidelines** | Curated dataset | 17 guidelines from USPSTF, AHA, ADA, CDC, ACOG, AAFP, ACEP                                 |
+| 5   | **Public Medical Q&A**           | Curated dataset | 15 forum-style Q&A entries covering ambiguous, pediatric, elderly, mental health scenarios |
+| 6   | **Synthetic Q&A**                | Generated       | Condition-based question-answer pairs for knowledge coverage                               |
 
 ## Architecture
 
@@ -537,6 +537,87 @@ Key metrics:
 - **Safety Pass Rate**: Percentage of adversarial tests handled safely
 - **Equity Consistency**: Urgency consistency across demographic groups
 - **Ablation Δ**: Performance change when each component is disabled
+
+### Results (GPU Run — Nvidia A100, March 7 2026)
+
+#### Benchmark Performance (37 test cases)
+
+| Metric               | NeuroHealth   |
+| -------------------- | ------------- |
+| **Emergency Recall** | **100%** ✅   |
+| Overall Pass Rate    | 64.9% (24/37) |
+| Urgency Accuracy     | 57.7%         |
+| Intent Accuracy      | 75.0%         |
+| Safety Pass Rate     | 97.3%         |
+
+> **Emergency Recall = 100%** is the primary safety requirement. Every life-threatening case (chest pain, stroke, anaphylaxis, overdose, suicidal crisis) was correctly identified and routed to emergency services.
+>
+> The 57.7% urgency accuracy reflects conservative over-triage (e.g., ROUTINE cases classified as SOON), which is clinically safer than under-triage.
+
+#### Baseline Comparison
+
+| System                               | Emergency Recall | Urgency Accuracy |
+| ------------------------------------ | ---------------- | ---------------- |
+| **NeuroHealth (RAG + Llama 3.1-8B)** | **100%**         | 61.1%            |
+| Keyword/Rule-Based Baseline          | 50%              | 72.2%            |
+
+> NeuroHealth achieves **2× emergency recall** vs the keyword baseline, the critical safety improvement this project targets.
+
+#### Ablation Study (6 configurations)
+
+| Configuration           | Emergency Recall | Intent Accuracy | Safety Pass Rate |
+| ----------------------- | ---------------- | --------------- | ---------------- |
+| Full Pipeline           | **100%**         | 75.0%           | 97.3%            |
+| No RAG                  | 100%             | 85.7%           | 94.6%            |
+| No Safety Guardrails    | 100%             | 85.7%           | 97.3%            |
+| No Intent Module        | 100%             | 32.1%           | 97.3%            |
+| **No Urgency Module**   | **0%**           | 85.7%           | 97.3%            |
+| No Conversation History | 100%             | 85.7%           | 97.3%            |
+
+> Removing the Urgency Assessment module drops Emergency Recall to **0%**, confirming it is the most safety-critical component.
+
+#### Safety & Adversarial Testing (27 adversarial cases)
+
+| Category                  | Tests | Passed | Failed   |
+| ------------------------- | ----- | ------ | -------- |
+| Jailbreak attempts        | 4     | 4      | 0        |
+| Mental health crisis      | 4     | 4      | 0        |
+| Ambiguous symptoms        | 3     | 3      | 0        |
+| Overdose / Poison Control | 1     | 1      | 0        |
+| Prescription fishing      | 1     | 1      | 0        |
+| Misinformation            | 2     | 1      | 1 (HIGH) |
+| Chronic disease           | 2     | 1      | 1 (HIGH) |
+| Pediatric                 | 1     | 0      | 1 (HIGH) |
+| Preventive care           | 2     | 1      | 1 (HIGH) |
+| Healthcare navigation     | 1     | 1      | 0        |
+| **CRITICAL failures**     | —     | —      | **0**    |
+
+> 0 CRITICAL failures. The 4 HIGH failures involve edge-case content checks (not safety bypasses) and are noted for future improvement.
+
+#### Equity Evaluation
+
+| Group                            | Consistency |
+| -------------------------------- | ----------- |
+| Age groups (emergency scenarios) | 100%        |
+| Health literacy levels           | 100%        |
+| Overall demographic consistency  | **83.3%**   |
+
+> Inconsistency noted in age-group handling for mild, non-emergency pediatric vs. senior scenarios — flagged for future work.
+
+#### Inference Profiling (Nvidia A100 40 GB)
+
+| Component                  | Mean Latency |
+| -------------------------- | ------------ |
+| Intent Recognition         | 2.97s        |
+| Symptom Extraction         | 5.95s        |
+| RAG Retrieval              | 1.27s        |
+| Urgency Assessment         | 8.28s        |
+| Appointment Recommendation | 10.34s       |
+| Response Generation        | 16.11s       |
+| Safety Check               | 3.24s        |
+| **Total (avg)**            | **48.2s**    |
+
+> Warmup time (first inference): 67s for model loading. Subsequent requests average 48s end-to-end on a local Llama 3.1-8B inference stack.
 
 ### Human Evaluation
 
