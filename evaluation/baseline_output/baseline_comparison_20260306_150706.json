@@ -1,0 +1,164 @@
+{
+  "timestamp": "2026-03-06T15:07:06.973106",
+  "systems": {
+    "keyword_baseline": {
+      "description": "Simple keyword/rule-based symptom checker",
+      "urgency_accuracy": 0.7222222222222222,
+      "emergency_recall": 0.5,
+      "details": [
+        {
+          "id": "BC-E001",
+          "message": "I'm having crushing chest pain and sweating, pain going down my left arm",
+          "expected": "EMERGENCY",
+          "actual": "EMERGENCY",
+          "correct": true
+        },
+        {
+          "id": "BC-E002",
+          "message": "Sudden severe headache, worst I've ever had, started 10 min ago",
+          "expected": "EMERGENCY",
+          "actual": "ROUTINE",
+          "correct": false
+        },
+        {
+          "id": "BC-E003",
+          "message": "I can't breathe at all and my throat is swelling shut after eating peanuts",
+          "expected": "EMERGENCY",
+          "actual": "EMERGENCY",
+          "correct": true
+        },
+        {
+          "id": "BC-E004",
+          "message": "My face is drooping on one side and I can't lift my left arm",
+          "expected": "EMERGENCY",
+          "actual": "ROUTINE",
+          "correct": false
+        },
+        {
+          "id": "BC-E005",
+          "message": "I've been feeling very depressed and hopeless. I want to end my life.",
+          "expected": "EMERGENCY",
+          "actual": "EMERGENCY",
+          "correct": true
+        },
+        {
+          "id": "BC-E006",
+          "message": "I took too many pills by accident",
+          "expected": "EMERGENCY",
+          "actual": "ROUTINE",
+          "correct": false
+        },
+        {
+          "id": "BC-U001",
+          "message": "I have a fever of 103\u00b0F that has lasted 3 days",
+          "expected": "URGENT",
+          "actual": "URGENT",
+          "correct": true
+        },
+        {
+          "id": "BC-U002",
+          "message": "I fell and my ankle is very swollen. I can't put any weight on it.",
+          "expected": "URGENT",
+          "actual": "ROUTINE",
+          "correct": false
+        },
+        {
+          "id": "BC-U003",
+          "message": "I have type 2 diabetes and my blood sugar has been running over 300 this week",
+          "expected": "URGENT",
+          "actual": "ROUTINE",
+          "correct": false
+        },
+        {
+          "id": "BC-U004",
+          "message": "I'm pregnant and having severe headaches with vision changes",
+          "expected": "URGENT",
+          "actual": "URGENT",
+          "correct": true
+        },
+        {
+          "id": "BC-R001",
+          "message": "I have a runny nose and mild headache since yesterday",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        },
+        {
+          "id": "BC-R002",
+          "message": "I've had mild knee pain when I go up stairs for the past month",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        },
+        {
+          "id": "BC-R003",
+          "message": "I've been sneezing a lot and have itchy eyes this spring",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        },
+        {
+          "id": "BC-SC001",
+          "message": "I have a small paper cut on my finger",
+          "expected": "SELF_CARE",
+          "actual": "SELF_CARE",
+          "correct": true
+        },
+        {
+          "id": "BC-SC002",
+          "message": "I have a minor bruise on my arm from bumping into a table",
+          "expected": "SELF_CARE",
+          "actual": "SELF_CARE",
+          "correct": true
+        },
+        {
+          "id": "BC-A001",
+          "message": "My stomach hurts and I feel weird",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        },
+        {
+          "id": "BC-A002",
+          "message": "I've been feeling off lately, tired all the time, no energy",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        },
+        {
+          "id": "BC-A003",
+          "message": "I woke up and my hand was numb but it went away after a few minutes",
+          "expected": "ROUTINE",
+          "actual": "ROUTINE",
+          "correct": true
+        }
+      ]
+    }
+  },
+  "external_references": {
+    "WebMD_Symptom_Checker": {
+      "urgency_accuracy": 0.51,
+      "triage_accuracy": 0.54,
+      "emergency_recall": 0.6,
+      "source": "Semigran et al., BMJ 2015 (estimated from vignette study)"
+    },
+    "Ada_Health": {
+      "urgency_accuracy": 0.58,
+      "triage_accuracy": 0.61,
+      "emergency_recall": 0.73,
+      "source": "Gilbert et al., BMJ Open 2020 (estimated)"
+    },
+    "Isabel_Healthcare": {
+      "urgency_accuracy": 0.64,
+      "triage_accuracy": 0.68,
+      "emergency_recall": 0.81,
+      "source": "Graber & Mathew, Diagnosis 2008 (estimated)"
+    },
+    "NHS_111_Online": {
+      "urgency_accuracy": 0.56,
+      "triage_accuracy": 0.59,
+      "emergency_recall": 0.7,
+      "source": "Estimated from NHS 111 evaluation reports"
+    }
+  }
+}
