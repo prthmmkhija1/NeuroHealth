@@ -78,7 +78,7 @@ Respond with ONLY a JSON object like this:
         result = json.loads(result_text)
         return result
 
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         # Fallback: try to extract intent from raw text
         result_text_upper = result_text.upper() if isinstance(result_text, str) else ""
         for intent in ["EMERGENCY", "SYMPTOM_CHECK", "FIND_DOCTOR", "MEDICATION_INFO",

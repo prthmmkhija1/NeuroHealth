@@ -16,7 +16,11 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 import streamlit as st
+import html as html_module
+import requests
 from src.pipeline import process_message
+
+API_BASE_URL = "http://localhost:8000/api/v1"
 
 # ── PAGE CONFIGURATION ───────────────────────────────────────
 st.set_page_config(
@@ -89,8 +93,9 @@ if "satisfaction_log" not in st.session_state:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant" and message.get("urgency_class"):
+            safe_content = html_module.escape(message["content"])
             st.markdown(
-                f'<div class="{message["urgency_class"]}">{message["content"]}</div>',
+                f'<div class="{message["urgency_class"]}">{safe_content}</div>',
                 unsafe_allow_html=True
             )
         else:
@@ -122,10 +127,13 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                 urgency_level = result["response"]["urgency_level"]
 
                 # Color-coded urgency box
-                urgency_class = f"urgency-{urgency_level.lower()}" if urgency_level != "N/A" else ""
+                VALID_URGENCY = {"emergency", "urgent", "soon", "routine", "self_care", "needs_clarification"}
+                urgency_lower = urgency_level.lower() if urgency_level != "N/A" else ""
+                urgency_class = f"urgency-{urgency_lower}" if urgency_lower in VALID_URGENCY else ""
                 if urgency_class:
+                    safe_text = html_module.escape(response_text)
                     st.markdown(
-                        f'<div class="{urgency_class}">{response_text}</div>',
+                        f'<div class="{urgency_class}">{safe_text}</div>',
                         unsafe_allow_html=True
                     )
                 else:
@@ -171,15 +179,29 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                         )
                     with sat_cols[2]:
                         if st.button("Submit", key=f"submit_{st.session_state.turn_count}"):
+                            thumbs_val = "up" if thumbs == "👍" else "down"
                             feedback = {
                                 "turn": st.session_state.turn_count,
                                 "session_id": st.session_state.session_id,
                                 "rating": rating,
-                                "thumbs": thumbs,
+                                "thumbs": thumbs_val,
                                 "user_message": user_input[:100],
                                 "urgency": urgency_level,
                             }
                             st.session_state.satisfaction_log.append(feedback)
+                            # Send feedback to API (best-effort, don't break UI on failure)
+                            try:
+                                requests.post(
+                                    f"{API_BASE_URL}/feedback",
+                                    json={
+                                        "session_id": st.session_state.session_id,
+                                        "rating": rating,
+                                        "thumbs": thumbs_val,
+                                    },
+                                    timeout=3,
+                                )
+                            except Exception:
+                                pass  # API may not be running; feedback is still logged locally
                             st.success("Thank you for your feedback!")
 
             except Exception as e:

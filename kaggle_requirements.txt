@@ -1,0 +1,45 @@
+# kaggle_requirements.txt
+#
+# Use this file instead of requirements.txt on Kaggle.
+# Kaggle already ships torch, numpy, pandas, requests, scikit-learn,
+# and matplotlib, so we skip them here to avoid version-conflict warnings
+# from Kaggle's pre-pinned google-colab / google-adk packages.
+#
+# Install with:
+#   pip install -q -r kaggle_requirements.txt
+
+# --- LLM & AI ---
+transformers>=4.40.0
+accelerate>=0.28.0
+bitsandbytes>=0.42.0
+sentence-transformers>=2.7.0
+huggingface-hub>=0.22.0
+
+# --- RAG & Vector DB ---
+langchain>=0.2.0
+langchain-community>=0.2.0
+chromadb>=0.5.0
+# faiss-cpu skipped — Kaggle GPU environment doesn't need CPU FAISS
+
+# --- NLP ---
+spacy>=3.7.0
+nltk>=3.8.1
+
+# --- Web UI / API ---
+streamlit>=1.35.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
+# --- Data Processing ---
+beautifulsoup4>=4.12.0
+lxml>=5.1.0
+tiktoken>=0.6.0
+
+# --- Utilities ---
+python-dotenv>=1.0.0
+pydantic>=2.6.0
+
+# --- Testing / Visualization ---
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+matplotlib>=3.8.0

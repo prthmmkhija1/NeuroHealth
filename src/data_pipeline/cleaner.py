@@ -52,11 +52,17 @@ def clean_text(text):
 
 
 def clean_document(doc):
-    """Cleans a single document dictionary."""
+    """Cleans a single document dictionary.
+    Only cleans content-bearing fields; preserves metadata fields like
+    source, url, data_type, category verbatim to avoid corruption.
+    """
+    METADATA_FIELDS = {"source", "url", "data_type", "category", "chunk_id", "doc_id"}
     cleaned = {}
 
     for key, value in doc.items():
-        if isinstance(value, str):
+        if key in METADATA_FIELDS:
+            cleaned[key] = value
+        elif isinstance(value, str):
             cleaned[key] = clean_text(value)
         else:
             cleaned[key] = value
@@ -76,14 +82,16 @@ def filter_low_quality_docs(documents, min_length=100):
 
 
 def deduplicate_docs(documents):
-    """Removes duplicate documents based on content similarity."""
-    seen_titles = set()
+    """Removes duplicate documents based on title + content fingerprint."""
+    seen = set()
     unique_docs = []
 
     for doc in documents:
-        title = doc.get("title", "").lower()
-        if title not in seen_titles:
-            seen_titles.add(title)
+        title = doc.get("title", "").lower().strip()
+        content_prefix = doc.get("content", "")[:200].lower().strip()
+        fingerprint = (title, content_prefix)
+        if fingerprint not in seen:
+            seen.add(fingerprint)
             unique_docs.append(doc)
 
     removed = len(documents) - len(unique_docs)

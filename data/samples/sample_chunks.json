@@ -1,0 +1,32 @@
+[
+  {
+    "chunk_id": "headache_001_chunk_0",
+    "title": "Headache",
+    "content": "A headache is pain or discomfort in the head or face area. Headaches vary in frequency and intensity. They can be caused by many conditions. Types include tension headaches (most common), migraines, and cluster headaches.",
+    "source": "MedlinePlus",
+    "data_type": "health_topic",
+    "category": "neurological",
+    "chunk_index": 0,
+    "total_chunks": 2
+  },
+  {
+    "chunk_id": "headache_001_chunk_1",
+    "title": "Headache",
+    "content": "Most headaches are not a sign of a serious medical problem. However, you should seek emergency care if you have a sudden, severe headache unlike any before, headache with fever and stiff neck, or headache after a head injury.",
+    "source": "MedlinePlus",
+    "data_type": "health_topic",
+    "category": "neurological",
+    "chunk_index": 1,
+    "total_chunks": 2
+  },
+  {
+    "chunk_id": "chest_pain_001_chunk_0",
+    "title": "Chest Pain",
+    "content": "Chest pain can be caused by many conditions, from minor issues like indigestion to serious emergencies like a heart attack. Heart-related chest pain often feels like pressure, fullness, or squeezing. It may radiate to the arm, jaw, or back. Seek emergency help immediately if chest pain lasts more than a few minutes, does not go away with rest, or is accompanied by shortness of breath, sweating, nausea, or dizziness. Call 911 if you suspect a heart attack.",
+    "source": "MedlinePlus",
+    "data_type": "health_topic",
+    "category": "cardiac",
+    "chunk_index": 0,
+    "total_chunks": 1
+  }
+]

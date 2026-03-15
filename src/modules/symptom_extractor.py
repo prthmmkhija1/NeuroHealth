@@ -62,7 +62,7 @@ If no symptoms are mentioned, return {{"symptoms": [], "body_systems": [], "vita
         result = json.loads(result_text)
         return result
 
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         return {
             "symptoms": [],
             "body_systems": [],

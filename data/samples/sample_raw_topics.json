@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Headache",
+    "content": "A headache is pain or discomfort in the head or face area. Headaches vary in frequency and intensity. They can be caused by many conditions. Types include tension headaches (most common), migraines, and cluster headaches. Most headaches are not a sign of a serious medical problem. However, you should seek emergency care if you have a sudden, severe headache unlike any before, headache with fever and stiff neck, or headache after a head injury.",
+    "source": "MedlinePlus",
+    "url": "https://medlineplus.gov/headache.html",
+    "data_type": "health_topic",
+    "category": "neurological"
+  },
+  {
+    "title": "Chest Pain",
+    "content": "Chest pain can be caused by many conditions, from minor issues like indigestion to serious emergencies like a heart attack. Heart-related chest pain often feels like pressure, fullness, or squeezing. It may radiate to the arm, jaw, or back. Seek emergency help immediately if chest pain lasts more than a few minutes, does not go away with rest, or is accompanied by shortness of breath, sweating, nausea, or dizziness. Call 911 if you suspect a heart attack.",
+    "source": "MedlinePlus",
+    "url": "https://medlineplus.gov/chestpain.html",
+    "data_type": "health_topic",
+    "category": "cardiac"
+  },
+  {
+    "title": "Common Cold",
+    "content": "The common cold is a viral infection of the upper respiratory tract. Symptoms include runny nose, sneezing, sore throat, cough, and mild body aches. Colds usually resolve on their own within 7-10 days. Treatment is aimed at relieving symptoms: rest, fluids, over-the-counter pain relievers, and decongestants. See a doctor if symptoms last more than 10 days, are unusually severe, or if you have a high fever.",
+    "source": "MedlinePlus",
+    "url": "https://medlineplus.gov/commoncold.html",
+    "data_type": "health_topic",
+    "category": "respiratory"
+  }
+]

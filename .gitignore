@@ -16,6 +16,8 @@ data/vector_db/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/vector_db/.gitkeep
+# Sample data files are tracked for reviewer reference
+!data/samples/
 
 # Evaluation outputs — track result JSONs for submission, ignore large output dirs
 # evaluation/ablation_results.json   ← tracked (committed after GPU run)
@@ -23,8 +25,9 @@ data/vector_db/*
 # evaluation/benchmark_results.json  ← tracked (committed after GPU run)
 # evaluation/safety_results.json     ← tracked (committed after GPU run)
 # evaluation/equity_results.json     ← tracked (committed after GPU run)
-evaluation/human_eval_output/
-evaluation/baseline_output/
+# Track result JSONs from baseline and human eval (committed after GPU run)
+!evaluation/human_eval_output/*.json
+!evaluation/baseline_output/*.json
 
 # Virtual environments
 venv/

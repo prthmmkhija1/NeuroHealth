@@ -629,6 +629,18 @@ Per the OSRE specification, NeuroHealth includes a **human evaluation framework*
 
 Each case is scored on a 1-5 scale across all dimensions by human reviewers.
 
+## Limitations & Known Issues
+
+- **Not a medical device** — NeuroHealth is a research prototype. It has not been validated in clinical trials and must not be used for real medical decision-making.
+- **Single-language** — Currently supports English only. Non-English queries may produce degraded responses.
+- **Latency** — End-to-end inference averages ~48 seconds on an A100 GPU due to sequential LLM calls across 7 modules. Not suitable for real-time clinical use without optimization (e.g., batching, model quantization, or switching to a faster inference framework).
+- **Urgency over-triage** — The urgency assessor intentionally errs on the side of caution (57.7% accuracy). ROUTINE cases are sometimes classified as SOON or URGENT. This is clinically safer than under-triage but could cause unnecessary alarm.
+- **RAG noise** — Ablation study shows that removing RAG improves intent accuracy (75% → 85.7%), suggesting retrieved context sometimes distracts the LLM. Relevance score filtering and re-ranking would help.
+- **Pediatric edge case** — One pediatric test case (PED001: infant fever) causes a pipeline crash due to a malformed response structure. Needs investigation on GPU.
+- **Human evaluation pending** — The human evaluation framework generates forms but the 8 test cases have not yet been scored by clinical reviewers.
+- **No persistent storage** — Conversation sessions and feedback are stored in-memory and do not survive server restarts. A production deployment would need a database backend.
+- **Small knowledge base** — The knowledge base covers ~20 common conditions from 6 sources. A production system would need broader coverage of rare conditions, drug interactions, and differential diagnoses.
+
 ## Contributing
 
 This project is part of the [OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/) program at UC Santa Cruz Open Source Program Office (OSPO). See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.

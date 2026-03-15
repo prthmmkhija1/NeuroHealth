@@ -497,7 +497,8 @@ def get_conditions_for_symptom(symptom_key):
                 "default_urgency": cond["default_urgency"],
                 "specialist": cond.get("specialist"),
             })
-    return sorted(matches, key=lambda x: x.get("default_urgency", "ROUTINE"))
+    urgency_order = {"EMERGENCY": 1, "URGENT": 2, "SOON": 3, "ROUTINE": 4, "SELF_CARE": 5}
+    return sorted(matches, key=lambda x: urgency_order.get(x.get("default_urgency", "ROUTINE"), 99))
 
 
 def get_red_flags_for_symptoms(symptom_keys):

@@ -68,14 +68,18 @@ def assess_urgency(user_message, extracted_symptoms=None):
         symptom_names = [s.get("name", "").lower() for s in extracted_symptoms["symptoms"]]
     rule_hit = check_urgency_rules(symptom_names, user_message)
     if rule_hit:
+        # rule_hit is now the escalated urgency level string (e.g. "EMERGENCY")
+        level = rule_hit if isinstance(rule_hit, str) else "EMERGENCY"
+        level_map = {"EMERGENCY": 1, "URGENT": 2, "SOON": 3, "ROUTINE": 4, "SELF_CARE": 5}
+        color_map = {"EMERGENCY": "RED", "URGENT": "ORANGE", "SOON": "YELLOW", "ROUTINE": "GREEN", "SELF_CARE": "BLUE"}
         return {
-            "level": rule_hit["action"].split(":")[0].strip().upper() if ":" in rule_hit["action"] else "EMERGENCY",
-            "level_number": 1,
-            "recommendation": rule_hit["action"],
-            "reasoning": f"Urgency rule matched: {rule_hit['rule']}",
-            "call_to_action": rule_hit["action"],
+            "level": level,
+            "level_number": level_map.get(level, 1),
+            "recommendation": f"Urgency rule triggered: {level}",
+            "reasoning": f"Urgency rule matched for symptoms: {symptom_names}",
+            "call_to_action": "Call 911 NOW" if level == "EMERGENCY" else "Seek medical attention",
             "warning_signs": get_red_flags_for_symptoms(symptom_names),
-            "color_code": "RED"
+            "color_code": color_map.get(level, "RED")
         }
 
     # Use local Llama for nuanced assessment
@@ -87,19 +91,28 @@ def assess_urgency(user_message, extracted_symptoms=None):
 
 User message: "{user_message}"{symptom_context}
 
-Assess the urgency level using this 5-level scale:
-1. EMERGENCY: Life-threatening, call 911, go to ER immediately
-2. URGENT: Could worsen significantly, go to urgent care/ER within hours
-3. SOON: Should see a doctor within 1-2 days, monitor for worsening
+Assess the urgency level using this 5-level scale with EXAMPLES:
+
+1. EMERGENCY: Life-threatening, call 911 immediately
+   Examples: chest pain with arm numbness, can't breathe, stroke signs, suicidal ideation, overdose, severe allergic reaction
+2. URGENT: Could worsen significantly, urgent care/ER within hours
+   Examples: high fever (>103F for 2+ days), severe abdominal pain, deep cuts needing stitches, diabetic blood sugar >300, broken bone
+3. SOON: Should see a doctor within 1-2 days
+   Examples: persistent fever (101-103F), ear infection symptoms, moderate back pain with numbness, UTI symptoms, worsening rash
 4. ROUTINE: Schedule a regular appointment this week
-5. SELF_CARE: Can be managed at home with guidance
+   Examples: mild persistent headaches, seasonal allergies, routine med refill, minor skin conditions, annual checkup questions
+5. SELF_CARE: Can be managed at home with OTC remedies
+   Examples: common cold with runny nose, small paper cut, mild muscle soreness, minor bug bite, mild occasional headache
 
-When in doubt, err on the side of higher urgency (be conservative = safer).
+IMPORTANT CALIBRATION RULES:
+- Common cold, runny nose, mild cough, paper cuts, minor aches = SELF_CARE (NOT ROUTINE or SOON)
+- Scheduling questions, general health info, preventive care = ROUTINE (NOT SOON)
+- Only use SOON when symptoms are actively worsening or moderately concerning
+- When in doubt between adjacent levels, err toward the MORE urgent level
 
-Valid levels (choose EXACTLY one): EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE
-Valid color_codes: RED (EMERGENCY), ORANGE (URGENT), YELLOW (SOON), GREEN (ROUTINE), BLUE (SELF_CARE)
+Valid levels: EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE
 
-Respond with ONLY a JSON object — replace every value with the correct real value:
+Respond with ONLY a JSON object:
 {{
   "level": "SOON",
   "level_number": 3,
@@ -121,7 +134,7 @@ Respond with ONLY a JSON object — replace every value with the correct real va
 
         return json.loads(result_text)
 
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         # Safe fallback
         return {
             "level": "SOON",

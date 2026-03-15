@@ -98,10 +98,21 @@ def process_message(user_message, session_id=None):
             "metadata": {}
         }
         session.add_assistant_message(response_text)
-        return {"session_id": session_id, "response": formatted, "intent": intent_info}
+        return {
+            "session_id": session_id,
+            "response": formatted,
+            "intent": intent_info,
+            "debug": {
+                "intent": intent_info,
+                "symptoms": {},
+                "urgency": {"level": "N/A"},
+                "appointment": {},
+                "safety_issues": []
+            }
+        }
 
     # ── STEP 3: Extract Symptoms ─────────────────────────────
-    print("\n[Step 2] Extracting symptoms...")
+    print("\n[Step 3] Extracting symptoms...")
     symptoms = extract_symptoms(user_message)
     print(f"  Found {len(symptoms.get('symptoms', []))} symptoms")
 
@@ -109,7 +120,7 @@ def process_message(user_message, session_id=None):
     session.update_health_context(extracted_symptoms=symptoms)
 
     # ── STEP 4: Retrieve Medical Context ─────────────────────
-    print("\n[Step 3] Retrieving medical context...")
+    print("\n[Step 4] Retrieving medical context...")
     try:
         medical_context = retrieve_context(user_message)
     except (RuntimeError, Exception) as e:
@@ -117,18 +128,18 @@ def process_message(user_message, session_id=None):
         medical_context = ""
 
     # ── STEP 5: Assess Urgency ───────────────────────────────
-    print("\n[Step 4] Assessing urgency...")
+    print("\n[Step 5] Assessing urgency...")
     urgency = assess_urgency(user_message, symptoms)
     print(f"  Urgency: {urgency['level']}")
 
     session.update_health_context(urgency_info=urgency)
 
     # ── STEP 6: Appointment Recommendation ───────────────────
-    print("\n[Step 5] Generating appointment recommendation...")
+    print("\n[Step 6] Generating appointment recommendation...")
     appointment = recommend_appointment(user_message, urgency, symptoms)
 
     # ── STEP 7: Generate AI Response ─────────────────────────
-    print("\n[Step 6] Generating AI response...")
+    print("\n[Step 7] Generating AI response...")
     conversation_history = session.get_history_as_messages()[:-1]  # Exclude current message
     health_summary = session.get_health_summary()
 
@@ -143,7 +154,7 @@ def process_message(user_message, session_id=None):
     )
 
     # ── STEP 8: Safety Guardrails ────────────────────────────
-    print("\n[Step 7] Running safety check...")
+    print("\n[Step 8] Running safety check...")
     safety_check = check_safety(raw_response, urgency["level"], user_message)
     final_response_text = safety_check["corrected_response"]
 
@@ -153,7 +164,7 @@ def process_message(user_message, session_id=None):
         print("  ✓ Response passed safety check")
 
     # ── STEP 9: Format Response ──────────────────────────────
-    print("\n[Step 8] Formatting response...")
+    print("\n[Step 9] Formatting response...")
     formatted_response = format_response(
         ai_response=final_response_text,
         urgency_info=urgency,

@@ -211,18 +211,108 @@ def test_safety_poison_control():
     """Test that overdose messages trigger Poison Control resource."""
     from src.modules.safety_guardrails import check_safety
 
-    result = check_safety(
-        response_text="You should rest and see a doctor. Please consult a healthcare professional.",
-        urgency_level="EMERGENCY",
-        user_message="I took too many pills"
-    )
-    assert "MISSING_POISON_CONTROL" in result["issues"], \
-        "Should flag missing Poison Control for overdose"
-    corrected_lower = result["corrected_response"].lower()
-    assert "poison control" in corrected_lower or "1-800-222-1222" in corrected_lower, \
-        "Corrected response should include Poison Control info"
+    _no_llm_issues = {"has_issues": False, "issues": []}
+
+    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+        result = check_safety(
+            response_text="You should rest and see a doctor. Please consult a healthcare professional.",
+            urgency_level="EMERGENCY",
+            user_message="I took too many pills"
+        )
+        assert "MISSING_POISON_CONTROL" in result["issues"], \
+            "Should flag missing Poison Control for overdose"
+        corrected_lower = result["corrected_response"].lower()
+        assert "poison control" in corrected_lower or "1-800-222-1222" in corrected_lower, \
+            "Corrected response should include Poison Control info"
 
     print("✓ Safety Poison Control test passed")
+
+
+def test_symptom_extractor_structure():
+    """Test that symptom_extractor returns correct structure on empty/simple input."""
+    from src.modules.symptom_extractor import extract_symptoms
+
+    # Test that the function returns the expected structure even on error
+    # (when LLM is unavailable, it returns fallback structure)
+    try:
+        result = extract_symptoms("")
+    except Exception:
+        import pytest
+        pytest.skip("LLM not available for symptom extractor test")
+        return
+
+    assert "symptoms" in result, "Result should have 'symptoms' key"
+    assert "body_systems" in result, "Result should have 'body_systems' key"
+    assert isinstance(result["symptoms"], list), "symptoms should be a list"
+    assert isinstance(result["body_systems"], list), "body_systems should be a list"
+
+    print("✓ Symptom extractor structure test passed")
+
+
+def test_conversation_manager_multiturn():
+    """Test multi-turn conversation context accumulation."""
+    from src.modules.conversation_manager import ConversationManager
+
+    cm = ConversationManager(session_id="multi_turn_test")
+
+    # Turn 1: user reports headache
+    cm.add_user_message("I have a bad headache")
+    cm.update_health_context(
+        extracted_symptoms={"symptoms": [{"name": "headache"}]},
+        urgency_info={"level": "ROUTINE"}
+    )
+    cm.add_assistant_message("Tell me more about your headache.")
+
+    # Turn 2: user adds fever
+    cm.add_user_message("I also have a fever of 102")
+    cm.update_health_context(
+        extracted_symptoms={"symptoms": [{"name": "fever"}]},
+        urgency_info={"level": "URGENT"}
+    )
+    cm.add_assistant_message("With fever and headache, I recommend...")
+
+    # Verify accumulated context
+    assert cm.message_count == 2
+    assert len(cm.get_history_as_messages()) == 4  # 2 user + 2 assistant
+    assert "headache" in cm.health_context["symptoms_mentioned"]
+    assert "fever" in cm.health_context["symptoms_mentioned"]
+    assert len(cm.health_context["urgency_history"]) == 2
+    assert cm.health_context["urgency_history"][0]["level"] == "ROUTINE"
+    assert cm.health_context["urgency_history"][1]["level"] == "URGENT"
+
+    # Verify summary includes both symptoms
+    summary = cm.get_health_summary()
+    assert "headache" in summary
+    assert "fever" in summary
+
+    # Verify serialization round-trip
+    d = cm.to_dict()
+    restored = ConversationManager.from_dict(d)
+    assert restored.session_id == "multi_turn_test"
+    assert restored.message_count == 2
+    assert "headache" in restored.health_context["symptoms_mentioned"]
+
+    print("✓ Multi-turn conversation manager test passed")
+
+
+def test_safety_dangerous_pattern_correction():
+    """Test that dangerous patterns are corrected in the response text."""
+    from src.modules.safety_guardrails import check_safety
+
+    _no_llm_issues = {"has_issues": False, "issues": []}
+
+    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+        result = check_safety(
+            response_text="You should stop taking your medication immediately. Please consult a healthcare professional.",
+            urgency_level="ROUTINE",
+            user_message="should I stop my meds?"
+        )
+        assert not result["is_safe"]
+        # Verify the dangerous text was removed/replaced
+        assert "stop taking your medication" not in result["corrected_response"].lower() or \
+               "[removed for safety]" in result["corrected_response"].lower()
+
+    print("✓ Safety dangerous pattern correction test passed")
 
 
 def test_pipeline_empty_input():
@@ -251,5 +341,8 @@ if __name__ == "__main__":
     test_safety_guardrails_patterns()
     test_appointment_emergency_override()
     test_safety_poison_control()
+    test_symptom_extractor_structure()
+    test_conversation_manager_multiturn()
+    test_safety_dangerous_pattern_correction()
     test_pipeline_empty_input()
     print("\n✅ All module tests passed!")

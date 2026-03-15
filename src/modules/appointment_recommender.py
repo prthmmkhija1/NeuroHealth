@@ -14,23 +14,6 @@ from src.llm_utils import generate_response
 from src.data_pipeline.entity_schema import get_specialist_info, SPECIALIST_MAP
 
 
-# Mapping of symptoms/body systems to specialists
-# (Also enriched at runtime by entity_schema.SPECIALIST_MAP)
-SPECIALTY_MAP = {
-    "cardiac": "Cardiologist (heart doctor)",
-    "respiratory": "Pulmonologist (lung doctor) or Allergist",
-    "neurological": "Neurologist (brain/nerve doctor)",
-    "gastrointestinal": "Gastroenterologist (digestive system doctor)",
-    "musculoskeletal": "Orthopedic Surgeon or Rheumatologist",
-    "dermatological": "Dermatologist (skin doctor)",
-    "mental_health": "Psychiatrist or Psychologist",
-    "endocrine": "Endocrinologist (hormones/thyroid doctor)",
-    "urological": "Urologist (urinary tract doctor)",
-    "general": "General Practitioner (GP) / Primary Care Physician",
-    "emergency": "Emergency Room (ER)"
-}
-
-
 def recommend_appointment(user_message, urgency_info, extracted_symptoms=None):
     """
     Recommends appropriate medical appointment based on assessment.
@@ -61,13 +44,15 @@ def recommend_appointment(user_message, urgency_info, extracted_symptoms=None):
             "questions_to_ask_doctor": []
         }
 
+    specialty_hint = f"\nSuggested specialist from knowledge base: {schema_specialty}" if schema_specialty else ""
+
     prompt = f"""You are a medical appointment coordinator.
 
 Based on this user's situation, recommend the most appropriate medical care.
 
 User message: "{user_message}"
 Urgency level: {urgency_level}
-Body systems affected: {extracted_symptoms.get('body_systems', []) if extracted_symptoms else []}
+Body systems affected: {extracted_symptoms.get('body_systems', []) if extracted_symptoms else []}{specialty_hint}
 
 Recommend the best appointment type.
 
@@ -93,7 +78,7 @@ Respond with ONLY a JSON object:
 
         return json.loads(result_text)
 
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         return {
             "appointment_type": "Primary Care / General Practitioner",
             "specialty": "General Practice",

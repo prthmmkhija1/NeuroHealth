@@ -94,7 +94,9 @@ async def chat_stream(request: ChatRequest):
     """
     async def _event_generator():
         try:
-            result = process_message(
+            # Run blocking LLM pipeline in a thread to avoid blocking the event loop
+            result = await asyncio.to_thread(
+                process_message,
                 user_message=request.message,
                 session_id=request.session_id,
             )

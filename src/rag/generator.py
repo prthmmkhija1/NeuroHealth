@@ -78,6 +78,12 @@ def generate_response(user_message, context, conversation_history=None):
     Returns: The AI's response as a string
     """
 
+    # Truncate context to avoid exceeding the model's context window
+    # Llama 3.1-8B supports 8192 tokens; reserve ~3000 for prompt+response
+    MAX_CONTEXT_CHARS = 5000 * 4  # ~5000 tokens worth of context
+    if context and len(context) > MAX_CONTEXT_CHARS:
+        context = context[:MAX_CONTEXT_CHARS] + "\n[...truncated for length]"
+
     # Build conversation messages
     messages = []
 

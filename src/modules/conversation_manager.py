@@ -11,6 +11,7 @@ Pure Python — no API calls needed.
 
 from datetime import datetime
 from collections import deque
+import uuid
 
 
 class ConversationManager:
@@ -29,7 +30,7 @@ class ConversationManager:
                      After this limit, oldest messages are dropped.
                      (LLMs have input limits, so we can't keep everything forever)
         """
-        self.session_id = session_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.session_id = session_id or f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
         self.max_history = max_history
 
         # Store messages as a list of dicts: {"role": "user/assistant", "content": "..."}
@@ -40,8 +41,6 @@ class ConversationManager:
             "symptoms_mentioned": [],
             "urgency_history": [],
             "conditions_mentioned": [],
-            "age_mentioned": None,
-            "gender_mentioned": None,
             "medications_mentioned": [],
             "allergies_mentioned": [],
         }
@@ -91,11 +90,20 @@ class ConversationManager:
             meds = ", ".join(self.health_context["medications_mentioned"])
             parts.append(f"Medications mentioned: {meds}")
 
+        if self.health_context["conditions_mentioned"]:
+            conds = ", ".join(self.health_context["conditions_mentioned"])
+            parts.append(f"Conditions mentioned: {conds}")
+
+        if self.health_context["allergies_mentioned"]:
+            allergies = ", ".join(self.health_context["allergies_mentioned"])
+            parts.append(f"Allergies: {allergies}")
+
         return ". ".join(parts)
 
     def should_ask_clarification(self):
         """
         Returns True if we should ask clarifying questions.
+        Used by the pipeline to decide whether to prompt the user for more detail.
         """
         if self.message_count <= 2:
             return True
@@ -112,3 +120,13 @@ class ConversationManager:
             "messages": list(self.messages),
             "health_context": self.health_context
         }
+
+    @classmethod
+    def from_dict(cls, data):
+        """Restores a session from a dictionary."""
+        cm = cls(session_id=data["session_id"])
+        cm.message_count = data.get("message_count", 0)
+        for msg in data.get("messages", []):
+            cm.messages.append(msg)
+        cm.health_context = data.get("health_context", cm.health_context)
+        return cm

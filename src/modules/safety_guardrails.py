@@ -151,10 +151,11 @@ def check_safety(response_text, urgency_level, user_message):
         issues.append("MISSING_DISCLAIMER_LANGUAGE")
 
     # ── Check 6: LLM-based safety review (catches subtle issues) ──────
-    if not issues:  # Only do expensive LLM check if basic checks pass
-        llm_check = _llm_safety_review(response_text, urgency_level, user_message)
-        if llm_check.get("has_issues"):
-            issues.extend(llm_check.get("issues", []))
+    # Run LLM check regardless of hard-check results so subtle problems
+    # are never masked by simple issues like a missing disclaimer
+    llm_check = _llm_safety_review(response_text, urgency_level, user_message)
+    if llm_check.get("has_issues"):
+        issues.extend(llm_check.get("issues", []))
 
     if not issues:
         return {
@@ -217,6 +218,17 @@ or
 def _generate_safe_correction(original_response, issues, urgency_level):
     """Generates a corrected, safer version of the response."""
     corrected = original_response
+
+    # Strip dangerous patterns from the response text
+    dangerous_issues = [i for i in issues if i.startswith("DANGEROUS_PATTERN:")]
+    if dangerous_issues:
+        for issue in dangerous_issues:
+            pattern = issue.replace("DANGEROUS_PATTERN: ", "")
+            corrected = re.sub(pattern, "[removed for safety]", corrected, flags=re.IGNORECASE)
+        corrected += (
+            "\n\n⚠️ **Safety Note:** Please do NOT change, stop, or adjust any "
+            "medication without consulting your doctor first."
+        )
 
     # Prepend emergency redirect if missing
     if "MISSING_EMERGENCY_REDIRECT" in issues:
