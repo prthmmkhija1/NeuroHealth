@@ -243,11 +243,63 @@ else:
 
 ---
 
+### Cell 4.5 — Download the Llama Model to Local Disk
+
+> **Why this step exists:** Kaggle's version of `transformers` sometimes fails to resolve
+> sharded model weight files directly from the HuggingFace Hub, giving the error:
+> `does not appear to have a file named pytorch_model.bin or model.safetensors`
+>
+> The fix: download ALL model files to a local folder first using `snapshot_download`,
+> then load from that folder. Loading from a local path always works because there
+> is no hub file-resolution step.
+>
+> **Time:** ~10–15 minutes (downloads ~16GB of model weights).
+> **Only needs to run once** — the files stay in `/kaggle/working/llama_model/`.
+
+```python
+import os
+from huggingface_hub import snapshot_download
+
+LOCAL_MODEL_PATH = "/kaggle/working/llama_model"
+
+# Check if already downloaded
+if os.path.isdir(LOCAL_MODEL_PATH) and os.listdir(LOCAL_MODEL_PATH):
+    print(f"✓ Model already downloaded at {LOCAL_MODEL_PATH}")
+    print(f"  Files: {os.listdir(LOCAL_MODEL_PATH)[:5]}...")
+else:
+    print("Downloading Llama 3.1-8B model files (~16GB)...")
+    print("This takes about 10–15 minutes. You will see a progress bar.")
+    print("Do NOT close or refresh the browser while downloading.\n")
+
+    snapshot_download(
+        repo_id="meta-llama/Llama-3.1-8B-Instruct",
+        token=os.environ["HUGGINGFACE_TOKEN"],
+        local_dir=LOCAL_MODEL_PATH,
+        ignore_patterns=["original/*"],   # skip the non-safetensors format to save space
+    )
+    print(f"\n✓ Download complete!")
+
+# Tell the pipeline to load from local path (not from the hub)
+os.environ["LOCAL_MODEL_DIR"] = LOCAL_MODEL_PATH
+print(f"\n✓ LOCAL_MODEL_DIR set to: {LOCAL_MODEL_PATH}")
+
+# Verify the key files are there
+import glob
+shard_files = glob.glob(f"{LOCAL_MODEL_PATH}/model-*.safetensors")
+print(f"  Model shards found: {len(shard_files)} files")
+if len(shard_files) == 0:
+    print("  ✗ No shard files found — download may have failed. Re-run this cell.")
+else:
+    print(f"  ✓ Ready to load!")
+```
+
+---
+
 ### Cell 5 — Warm Up the Pipeline (First Message Test)
 
 > **What this does:** Loads the Llama 3.1 model into GPU memory and sends one test
 > message to confirm everything works end-to-end. The first run is slow (~3–5 min)
-> because the model (~16GB) is being downloaded and loaded. Every run after is fast.
+> because the model (~16GB) is being loaded into GPU. Every run after is fast.
 
 ```python
 # Add project root to Python path so imports work
@@ -270,8 +322,10 @@ result = process_message("I have a headache and feel tired", session_id="warmup_
 print("\n" + "="*60)
 print("PIPELINE TEST RESULT")
 print("="*60)
-print(f"Response preview: {result['response'][:300]}...")
-print(f"Urgency level:    {result['debug']['urgency']['level']}")
+# result['response'] is a dict with 'text', 'urgency_level', etc.
+resp = result['response']
+print(f"Response preview: {resp['text'][:300]}...")
+print(f"Urgency level:    {resp['urgency_level']}")
 print(f"Intent detected:  {result['debug']['intent']['intent']}")
 print("="*60)
 print("\n✓ Pipeline is working! Ready to run evaluations.")
