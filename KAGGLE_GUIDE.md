@@ -79,12 +79,13 @@ On the **right-side panel**:
 > **Why:** Storing the token as a secret is safer than pasting it in a cell — it won't show in
 > your notebook's output.
 
-1. On the right panel → click **"Add-ons"** → **"Secrets"**
-2. Toggle **"Add a new secret"**
-3. **Name:** `HUGGINGFACE_TOKEN`
-4. **Value:** paste your `hf_xxxxxxxxx` token
-5. Click **"Save"**
-6. Make sure the toggle for that secret is **ON** (enabled for this notebook)
+1. In the **top menu bar** of the notebook → click **"Add-ons"**
+2. In the dropdown → click **"Secrets"**
+3. A panel opens on the right → click **"Add a new secret"**
+4. **Label:** `HUGGINGFACE_TOKEN`
+5. **Value:** paste your `hf_xxxxxxxxx` token
+6. Click **"Add"**
+7. Make sure the toggle next to `HUGGINGFACE_TOKEN` is **ON** (green/enabled)
 
 ---
 
@@ -148,33 +149,56 @@ print("✓ All dependencies installed!")
 
 ### Cell 3 — Set Up Environment Variables
 
-```python
-# Load your HuggingFace token from the Kaggle Secrets panel
-# (this reads the secret you added in Step 2c)
+> **IMPORTANT:** If you already ran Cell 5 (warmup) once and got a 401/403 error,
+> you MUST click **"Run" → "Restart session"** (top menu) before re-running this cell.
+> Otherwise Python keeps the old empty token in memory and the fix won't take effect.
 
+```python
 import os
 
+# Load your HuggingFace token from the Kaggle Secrets panel
 try:
     from kaggle_secrets import UserSecretsClient
     secrets = UserSecretsClient()
     hf_token = secrets.get_secret("HUGGINGFACE_TOKEN")
     print("✓ HuggingFace token loaded from Kaggle Secrets")
 except Exception as e:
-    # Fallback: paste your token directly (only do this in a private notebook)
+    # Fallback: paste your Classic token directly (only in a PRIVATE notebook)
     hf_token = "hf_PASTE_YOUR_TOKEN_HERE"
     print("⚠ Using hardcoded token — make sure this notebook is PRIVATE")
 
-# Set all environment variables the project needs
-os.environ["HUGGINGFACE_TOKEN"]  = hf_token
-os.environ["MODEL_NAME"]         = "meta-llama/Llama-3.1-8B-Instruct"
-os.environ["MAX_NEW_TOKENS"]     = "1024"
-os.environ["TEMPERATURE"]        = "0.3"
-os.environ["EMBEDDING_MODEL"]    = "all-MiniLM-L6-v2"
-os.environ["VECTOR_DB_PATH"]     = "./data/vector_db"
+# Set BOTH env var names — our code uses HUGGINGFACE_TOKEN,
+# but the transformers library internally checks HF_TOKEN too.
+os.environ["HUGGINGFACE_TOKEN"] = hf_token
+os.environ["HF_TOKEN"]          = hf_token   # ← transformers reads this one
+os.environ["MODEL_NAME"]        = "meta-llama/Llama-3.1-8B-Instruct"
+os.environ["MAX_NEW_TOKENS"]    = "1024"
+os.environ["TEMPERATURE"]       = "0.3"
+os.environ["EMBEDDING_MODEL"]   = "all-MiniLM-L6-v2"
+os.environ["VECTOR_DB_PATH"]    = "./data/vector_db"
 
-print("✓ Environment variables set!")
-print(f"  Model: {os.environ['MODEL_NAME']}")
-print(f"  Token starts with: {hf_token[:8]}...")
+# Verify the token actually works with HuggingFace right now
+from huggingface_hub import login, whoami
+try:
+    login(token=hf_token, add_to_git_credential=False)
+    user_info = whoami()
+    print(f"\n✓ Logged in to HuggingFace as: {user_info['name']}")
+    print(f"  Token starts with: {hf_token[:10]}...")
+
+    # Check Llama access
+    from huggingface_hub import model_info
+    try:
+        model_info("meta-llama/Llama-3.1-8B-Instruct", token=hf_token)
+        print("✓ Llama 3.1 access confirmed — you're ready to load the model!")
+    except Exception:
+        print("✗ No Llama 3.1 access yet.")
+        print("  → Go to: https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct")
+        print("  → Click 'Request access', fill the form, wait for approval email")
+        print("  → Then re-run this cell")
+except Exception as e:
+    print(f"\n✗ Login failed: {e}")
+    print("  Check your token at: https://huggingface.co/settings/tokens")
+    print("  Make sure it is a CLASSIC token (not Fine-grained)")
 ```
 
 ---
@@ -227,12 +251,18 @@ else:
 
 ```python
 # Add project root to Python path so imports work
-import sys
+import sys, os
 sys.path.insert(0, "/kaggle/working/NeuroHealth")
+
+# Safety check: make sure token is in environment before import
+# (if you got a 401 error before, restart the session and re-run Cell 3 first)
+if not os.environ.get("HUGGINGFACE_TOKEN"):
+    raise RuntimeError("Token not set! Run Cell 3 first, then re-run this cell.")
+print(f"✓ Token present: {os.environ['HUGGINGFACE_TOKEN'][:10]}...")
 
 from src.pipeline import process_message
 
-print("Loading model... (this takes 3–5 minutes on first run)")
+print("\nLoading model... (this takes 3–5 minutes on first run)")
 print("You'll see 'Loading checkpoint shards' — that's normal.\n")
 
 result = process_message("I have a headache and feel tired", session_id="warmup_001")
@@ -843,14 +873,37 @@ Go to your GitHub repo. You should have:
 
 ## 10. Troubleshooting
 
-### "Token authentication failed" or "Access denied to model"
+### "403 Forbidden: Please enable access to public gated repositories"
 
-Your HuggingFace token doesn't have Llama 3.1 access.
+This error means one or both of these problems:
+
+**Problem A — You're using a Fine-Grained token (most common cause)**
+
+Fine-grained tokens block gated repos by default. Fix:
+
+1. Go to https://huggingface.co/settings/tokens
+2. Click **"Create new token"** → select **"Classic"** (NOT Fine-grained) → Role: **Read**
+3. Copy the new `hf_xxx...` token
+4. In Kaggle: **Add-ons → Secrets** → edit `HUGGINGFACE_TOKEN` → paste new token
+5. **Restart the notebook session** (Runtime → Restart)
+6. Re-run from Cell 3
+
+**Problem B — Llama 3.1 access not yet approved**
+
+Even with the right token type, Meta must approve your access request:
 
 1. Go to https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
-2. Click **"Expand to review and access"** — fill in the form
-3. Wait for the email saying access approved (~10 min)
-4. Re-run Cell 3 with your working token
+2. If you see **"Request access"** → click it, fill the form, submit
+3. Wait for approval email (usually 10–30 minutes)
+4. Once you see "You have been granted access" → re-run from Cell 3
+
+**Verify your token is working** before running Cell 5:
+
+```python
+from huggingface_hub import login, whoami
+login(token=os.environ["HUGGINGFACE_TOKEN"])
+print(whoami()["name"])  # should print your HF username, not an error
+```
 
 ---
 

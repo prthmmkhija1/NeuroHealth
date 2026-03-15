@@ -24,9 +24,12 @@ load_dotenv()
 
 # ── Configuration ──────────────────────────────────────────────────────
 MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN", "")
 MAX_NEW_TOKENS = int(os.getenv("MAX_NEW_TOKENS", "1024"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.3"))
+
+# NOTE: HF_TOKEN is intentionally NOT read here at module-import time.
+# It is read inside _load_model() so that setting os.environ["HUGGINGFACE_TOKEN"]
+# in a notebook cell AFTER import still works correctly.
 
 # ── Singleton model holder ─────────────────────────────────────────────
 _model = None
@@ -44,7 +47,11 @@ def _load_model():
     if _model is not None:
         return _model, _tokenizer
 
-    if not HF_TOKEN or HF_TOKEN.startswith("hf_YOUR"):
+    # Read token at call time so notebook cells that set os.environ AFTER
+    # import still work correctly (avoids the "captured at import time" trap).
+    hf_token = os.getenv("HUGGINGFACE_TOKEN", "")
+
+    if not hf_token or hf_token.startswith("hf_YOUR"):
         raise EnvironmentError(
             "HUGGINGFACE_TOKEN is not set in .env. "
             "Add your real token before running LLM-dependent code."
@@ -58,7 +65,7 @@ def _load_model():
     # Load tokenizer
     _tokenizer = AutoTokenizer.from_pretrained(
         MODEL_NAME,
-        token=HF_TOKEN,
+        token=hf_token,
         trust_remote_code=True,
     )
     if _tokenizer.pad_token is None:
@@ -80,7 +87,7 @@ def _load_model():
 
         _model = AutoModelForCausalLM.from_pretrained(
             MODEL_NAME,
-            token=HF_TOKEN,
+            token=hf_token,
             quantization_config=quantization_config,
             device_map="auto",
             trust_remote_code=True,
@@ -89,7 +96,7 @@ def _load_model():
         print("No GPU detected. Loading on CPU (slow, for testing only)...")
         _model = AutoModelForCausalLM.from_pretrained(
             MODEL_NAME,
-            token=HF_TOKEN,
+            token=hf_token,
             torch_dtype=torch.float32,
             device_map="cpu",
             trust_remote_code=True,
