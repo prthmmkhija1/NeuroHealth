@@ -57,14 +57,21 @@ def _load_model():
             "Add your real token before running LLM-dependent code."
         )
 
-    print(f"Loading model: {MODEL_NAME}")
-    print("This may take 1-2 minutes on first load...")
+    # Support pre-downloading the model to a local directory.
+    # On Kaggle, hub file-resolution for sharded models can fail — downloading
+    # first via snapshot_download and loading from a local path is always reliable.
+    # Set LOCAL_MODEL_DIR env var to the downloaded path to use it.
+    local_dir = os.getenv("LOCAL_MODEL_DIR", "")
+    load_path = local_dir if local_dir and os.path.isdir(local_dir) else MODEL_NAME
+
+    print(f"Loading model from: {load_path}")
+    print("This may take a few minutes on first load...")
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     # Load tokenizer
     _tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_NAME,
+        load_path,
         token=hf_token,
         trust_remote_code=True,
     )
@@ -86,7 +93,7 @@ def _load_model():
         )
 
         _model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME,
+            load_path,
             token=hf_token,
             quantization_config=quantization_config,
             device_map="auto",
@@ -95,7 +102,7 @@ def _load_model():
     else:
         print("No GPU detected. Loading on CPU (slow, for testing only)...")
         _model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME,
+            load_path,
             token=hf_token,
             torch_dtype=torch.float32,
             device_map="cpu",

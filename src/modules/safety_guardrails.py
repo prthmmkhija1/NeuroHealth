@@ -219,8 +219,15 @@ def _generate_safe_correction(original_response, issues, urgency_level):
     """Generates a corrected, safer version of the response."""
     corrected = original_response
 
+    # Normalize issues: the LLM check can return dicts instead of strings.
+    # Convert everything to strings so all downstream checks work uniformly.
+    str_issues = [
+        i if isinstance(i, str) else i.get("description", str(i))
+        for i in issues
+    ]
+
     # Strip dangerous patterns from the response text
-    dangerous_issues = [i for i in issues if i.startswith("DANGEROUS_PATTERN:")]
+    dangerous_issues = [i for i in str_issues if i.startswith("DANGEROUS_PATTERN:")]
     if dangerous_issues:
         for issue in dangerous_issues:
             pattern = issue.replace("DANGEROUS_PATTERN: ", "")
@@ -231,7 +238,7 @@ def _generate_safe_correction(original_response, issues, urgency_level):
         )
 
     # Prepend emergency redirect if missing
-    if "MISSING_EMERGENCY_REDIRECT" in issues:
+    if "MISSING_EMERGENCY_REDIRECT" in str_issues:
         emergency_note = (
             "⚠️ IMPORTANT: Based on the symptoms described, please call 911 "
             "or go to the nearest Emergency Room immediately.\n\n"
@@ -239,7 +246,7 @@ def _generate_safe_correction(original_response, issues, urgency_level):
         corrected = emergency_note + corrected
 
     # Prepend crisis resources if missing
-    if "MISSING_CRISIS_RESOURCES" in issues:
+    if "MISSING_CRISIS_RESOURCES" in str_issues:
         crisis_note = (
             "💙 If you or someone you know is in crisis, please reach out now:\n"
             "• **National Suicide Prevention Lifeline:** Call or text **988**\n"
@@ -250,7 +257,7 @@ def _generate_safe_correction(original_response, issues, urgency_level):
         corrected = crisis_note + corrected
 
     # Prepend Poison Control if missing
-    if "MISSING_POISON_CONTROL" in issues:
+    if "MISSING_POISON_CONTROL" in str_issues:
         poison_note = (
             "☠️ **IMPORTANT — Possible Poisoning/Overdose:**\n"
             "• **Poison Control Center:** Call **1-800-222-1222** (US) — available 24/7\n"
@@ -260,7 +267,7 @@ def _generate_safe_correction(original_response, issues, urgency_level):
         corrected = poison_note + corrected
 
     # Append disclaimer if missing
-    if "MISSING_DISCLAIMER_LANGUAGE" in issues:
+    if "MISSING_DISCLAIMER_LANGUAGE" in str_issues:
         corrected += (
             "\n\nℹ️ This information is not a substitute for professional medical "
             "advice. Please consult a qualified healthcare professional."

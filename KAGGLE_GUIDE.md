@@ -342,6 +342,10 @@ print("\n✓ Pipeline is working! Ready to run evaluations.")
 Run these cells one after another. Each one saves a JSON result file that you'll
 use later to generate charts and update the README.
 
+> **IMPORTANT:** All evaluation cells run **inside the notebook** (not as subprocesses
+> with `!python`). This way the model stays loaded in GPU memory from Cell 5 and each
+> test case runs fast (~30–60 seconds instead of 5+ minutes).
+
 ---
 
 ### Cell 6 — Benchmark Evaluation
@@ -349,29 +353,57 @@ use later to generate charts and update the README.
 > **What it tests:** 37 health questions covering emergencies, routine symptoms, and
 > medication questions. Measures emergency recall, urgency accuracy, and intent accuracy.
 >
-> **Time:** ~55–70 minutes on T4 GPU
+> **Time:** ~30–40 minutes on T4 GPU (model already loaded)
 
 ```python
-print("="*60)
-print("RUNNING BENCHMARK EVALUATION")
-print("Tests 37 health scenarios end-to-end")
-print("="*60)
+import sys, json, pathlib
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
 
-!python evaluation/benchmarks.py
+# ── Auto-fix pipeline.py if it returns string instead of dict ──
+pp = pathlib.Path("/kaggle/working/NeuroHealth/src/pipeline.py")
+code = pp.read_text()
+if 'formatted_response["text"]' in code:
+    code = code.replace('"response": formatted_response["text"],', '"response": formatted_response,')
+    pp.write_text(code)
+    for k in list(sys.modules.keys()):
+        if any(x in k for x in ["pipeline", "formatter", "src"]):
+            del sys.modules[k]
+    print("✓ Fixed pipeline.py (response → dict)")
 
-# Show summary immediately after
-import json
-with open("evaluation/benchmark_results.json") as f:
-    b = json.load(f)
+# ── Auto-fix safety_guardrails.py if str_issues is missing ──
+sp = pathlib.Path("/kaggle/working/NeuroHealth/src/modules/safety_guardrails.py")
+sc = sp.read_text()
+if "str_issues" not in sc and 'i.startswith("DANGEROUS_PATTERN:")' in sc:
+    sc = sc.replace(
+        '    dangerous_issues = [i for i in issues if i.startswith("DANGEROUS_PATTERN:")]',
+        ('    str_issues = [\n'
+         '        i if isinstance(i, str) else i.get("description", str(i))\n'
+         '        for i in issues\n'
+         '    ]\n'
+         '    dangerous_issues = [i for i in str_issues if i.startswith("DANGEROUS_PATTERN:")]'))
+    for kw in ["MISSING_EMERGENCY_REDIRECT", "MISSING_CRISIS_RESOURCES",
+                "MISSING_POISON_CONTROL", "MISSING_DISCLAIMER_LANGUAGE"]:
+        sc = sc.replace(f'if "{kw}" in issues:', f'if "{kw}" in str_issues:')
+    sp.write_text(sc)
+    for k in list(sys.modules.keys()):
+        if "safety" in k:
+            del sys.modules[k]
+    print("✓ Fixed safety_guardrails.py (str_issues)")
 
-print("\n" + "="*60)
-print("BENCHMARK RESULTS SUMMARY")
+from src.pipeline import process_message
+from evaluation.benchmarks import run_benchmark
+
 print("="*60)
-print(f"  Overall Pass Rate:   {b['pass_rate']*100:.1f}%  ({b['passed']}/{b['total_tests']} passed)")
-print(f"  Emergency Recall:    {b['emergency_recall']*100:.1f}%  (MUST be 100%)")
-print(f"  Urgency Accuracy:    {b['urgency_accuracy']*100:.1f}%")
-print(f"  Intent Accuracy:     {b['intent_accuracy']*100:.1f}%")
-print("="*60)
+print("RUNNING BENCHMARK EVALUATION (37 test cases)")
+print("Model already loaded — reusing from Cell 5")
+print("="*60 + "\n")
+
+benchmark_results = run_benchmark(process_message)
+
+with open("evaluation/benchmark_results.json", "w") as f:
+    json.dump(benchmark_results, f, indent=2, default=str)
+
+print(f"\n✓ Saved to evaluation/benchmark_results.json")
 ```
 
 ---
@@ -379,35 +411,38 @@ print("="*60)
 ### Cell 7 — Safety Tests
 
 > **What it tests:** 26 adversarial prompts — jailbreak attempts, mental health crises,
-> overdose questions, misinformation, pediatric edge cases. Confirms the system refuses
-> harmful requests and handles sensitive situations safely.
+> overdose questions, misinformation, pediatric edge cases.
 >
-> **Time:** ~35–50 minutes on T4 GPU
+> **Time:** ~20–30 minutes on T4 GPU
 
 ```python
-print("="*60)
-print("RUNNING SAFETY & ADVERSARIAL TESTS")
-print("Tests 26 dangerous/tricky scenarios")
-print("="*60)
+import sys, json
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
 
-!python evaluation/safety_tests.py
+from src.pipeline import process_message
+from evaluation.safety_tests import run_safety_tests
 
-# Show summary
-with open("evaluation/safety_results.json") as f:
-    s = json.load(f)
-
-passed = sum(1 for r in s["results"] if r["passed"])
-total  = len(s["results"])
-
-print("\n" + "="*60)
-print("SAFETY RESULTS SUMMARY")
 print("="*60)
-print(f"  Pass Rate:          {passed/total*100:.1f}%  ({passed}/{total} passed)")
-print(f"  Critical Failures:  {len(s['critical_failures'])}  (MUST be 0)")
-print(f"  High Failures:      {len(s['high_failures'])}")
-if s["high_failures"]:
-    print(f"  Failed cases:       {', '.join(s['high_failures'])}")
+print("RUNNING SAFETY & ADVERSARIAL TESTS (26 cases)")
+print("="*60 + "\n")
+
+safety_results = run_safety_tests(process_message)
+
+with open("evaluation/safety_results.json", "w") as f:
+    json.dump(safety_results, f, indent=2, default=str)
+
+passed = sum(1 for r in safety_results["results"] if r["passed"])
+total = len(safety_results["results"])
+print(f"\n{'='*60}")
+print(f"SAFETY RESULTS SUMMARY")
+print(f"{'='*60}")
+print(f"  Pass Rate:         {passed}/{total} ({passed/total*100:.1f}%)")
+print(f"  Critical Failures: {len(safety_results['critical_failures'])} (MUST be 0)")
+print(f"  High Failures:     {len(safety_results['high_failures'])}")
+if safety_results["high_failures"]:
+    print(f"  Failed cases:      {', '.join(safety_results['high_failures'])}")
 print("="*60)
+print("\n✓ Saved to evaluation/safety_results.json")
 ```
 
 ---
@@ -416,31 +451,35 @@ print("="*60)
 
 > **What it tests:** Whether the system gives the same urgency level for the same symptom
 > regardless of the patient's age, gender, race, literacy level, or insurance status.
-> Fairness is a core GSoC requirement.
 >
-> **Time:** ~35–50 minutes on T4 GPU
+> **Time:** ~20–30 minutes on T4 GPU
 
 ```python
-print("="*60)
-print("RUNNING EQUITY / FAIRNESS TESTS")
-print("Tests 13 demographic pairs for consistent treatment")
-print("="*60)
+import sys, json
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
 
-!python evaluation/equity_tests.py
+from src.pipeline import process_message
+from evaluation.equity_tests import run_equity_tests
 
-# Show summary
-with open("evaluation/equity_results.json") as f:
-    e = json.load(f)
-
-print("\n" + "="*60)
-print("EQUITY RESULTS SUMMARY")
 print("="*60)
-print(f"  Consistency Rate:   {e['consistency_rate']*100:.1f}%")
-if e.get("consistency_failures"):
-    print(f"  Inconsistent cases: {', '.join(e['consistency_failures'])}")
+print("RUNNING EQUITY / FAIRNESS TESTS (13 pairs)")
+print("="*60 + "\n")
+
+equity_results = run_equity_tests(process_message)
+
+with open("evaluation/equity_results.json", "w") as f:
+    json.dump(equity_results, f, indent=2, default=str)
+
+print(f"\n{'='*60}")
+print(f"EQUITY RESULTS SUMMARY")
+print(f"{'='*60}")
+print(f"  Consistency Rate:   {equity_results['consistency_rate']*100:.1f}%")
+if equity_results.get("consistency_failures"):
+    print(f"  Inconsistent cases: {', '.join(equity_results['consistency_failures'])}")
 else:
     print("  Inconsistent cases: None — perfect fairness!")
 print("="*60)
+print("\n✓ Saved to evaluation/equity_results.json")
 ```
 
 ---
@@ -448,68 +487,71 @@ print("="*60)
 ### Cell 9 — Inference Profiler
 
 > **What it tests:** Measures exactly how long each step of the pipeline takes.
-> Identifies the bottleneck (usually the LLM response generation step).
 >
-> **Time:** ~15–20 minutes on T4 GPU
+> **Time:** ~10–15 minutes on T4 GPU
 
 ```python
-print("="*60)
-print("RUNNING INFERENCE PROFILER")
-print("Times each pipeline component on 5 messages")
-print("="*60)
+import sys, json
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
 
-!python evaluation/inference_profiler.py
+from evaluation.inference_profiler import run_profiling
 
-# Show summary
-with open("evaluation/profiling_results.json") as f:
-    p = json.load(f)
+print("="*60)
+print("RUNNING INFERENCE PROFILER (5 messages)")
+print("="*60 + "\n")
 
-print("\n" + "="*60)
-print("PROFILING RESULTS SUMMARY")
+profiling_results = run_profiling()
+
+with open("evaluation/profiling_results.json", "w") as f:
+    json.dump(profiling_results, f, indent=2, default=str)
+
+print(f"\n{'='*60}")
+print(f"PROFILING RESULTS SUMMARY")
+print(f"{'='*60}")
+print(f"  Average Latency: {profiling_results['average_total_latency']:.1f}s per query")
+if "component_means" in profiling_results:
+    sorted_c = sorted(profiling_results["component_means"].items(), key=lambda x: x[1], reverse=True)
+    print("  Breakdown (slowest first):")
+    for comp, t in sorted_c[:5]:
+        print(f"    {comp:<30} {t:.2f}s")
 print("="*60)
-print(f"  Average Total Latency: {p['average_total_latency']:.1f}s per query")
-print(f"  Bottleneck component:  {p.get('bottleneck_component', 'response_generation')}")
-if "component_means" in p:
-    sorted_components = sorted(p["component_means"].items(), key=lambda x: x[1], reverse=True)
-    print("  Component breakdown (slowest first):")
-    for comp, t in sorted_components[:5]:
-        print(f"    {comp:<35} {t:.2f}s")
-print("="*60)
+print("\n✓ Saved to evaluation/profiling_results.json")
 ```
 
 ---
 
 ### Cell 10 — Baseline Comparison
 
-> **What it tests:** Compares NeuroHealth against a simple keyword-match baseline (like
-> old-school symptom checkers). Shows how much the AI improves over naive approaches.
+> **What it tests:** Compares NeuroHealth against a simple keyword-match baseline.
 >
-> **Time:** ~25–35 minutes on T4 GPU
+> **Time:** ~15–25 minutes on T4 GPU
 
 ```python
+import sys, json, glob
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
+
+from src.pipeline import process_message
+from evaluation.baseline_comparison import run_baseline_comparison
+
 print("="*60)
 print("RUNNING BASELINE COMPARISON")
-print("Compares NeuroHealth vs keyword-only baseline")
-print("="*60)
+print("="*60 + "\n")
 
-!python evaluation/baseline_comparison.py
+baseline_results = run_baseline_comparison(process_message)
 
-# Show summary
-import glob
 baseline_files = sorted(glob.glob("evaluation/baseline_output/baseline_comparison_*.json"))
 if baseline_files:
     with open(baseline_files[-1]) as f:
         bl = json.load(f)
-    print("\n" + "="*60)
-    print("BASELINE COMPARISON SUMMARY")
-    print("="*60)
     nh = bl.get("neurohealth_summary", {})
     base = bl.get("baseline_summary", {})
-    print(f"  NeuroHealth emergency recall:  {nh.get('emergency_recall', 0)*100:.1f}%")
-    print(f"  Baseline emergency recall:     {base.get('emergency_recall', 0)*100:.1f}%")
-    print(f"  NeuroHealth overall accuracy:  {nh.get('pass_rate', 0)*100:.1f}%")
-    print(f"  Baseline overall accuracy:     {base.get('pass_rate', 0)*100:.1f}%")
+    print(f"\n{'='*60}")
+    print(f"BASELINE COMPARISON SUMMARY")
+    print(f"{'='*60}")
+    print(f"  NeuroHealth emergency recall: {nh.get('emergency_recall', 0)*100:.1f}%")
+    print(f"  Baseline emergency recall:    {base.get('emergency_recall', 0)*100:.1f}%")
     print("="*60)
+print("\n✓ Baseline comparison complete")
 ```
 
 ---
@@ -531,25 +573,32 @@ env vars, skip knowledge base build, warm up). Then run:
 
 ### Cell 11 — Ablation Study
 
+> **IMPORTANT:** In Session 2, repeat Cells 1–5 first, then run this.
+> Run inside the notebook (not `!python`) so the model stays loaded.
+
 ```python
+import sys, json
+sys.path.insert(0, "/kaggle/working/NeuroHealth")
+
+from evaluation.ablation_study import run_ablation_study
+
 print("="*60)
 print("RUNNING ABLATION STUDY")
 print("Runs benchmark 6x with each component disabled")
-print("Expected time: 2.5–3.5 hours on T4 GPU")
-print("="*60)
+print("Expected time: 2–3 hours on T4 GPU")
+print("="*60 + "\n")
 
-!python evaluation/ablation_study.py
+ablation_results = run_ablation_study()
 
-# Show summary
-with open("evaluation/ablation_results.json") as f:
-    ab = json.load(f)
+with open("evaluation/ablation_results.json", "w") as f:
+    json.dump(ablation_results, f, indent=2, default=str)
 
-print("\n" + "="*60)
+print(f"\n{'='*60}")
 print("ABLATION RESULTS SUMMARY")
 print("="*60)
 print(f"  {'Config':<25} {'Emerg Recall':>13} {'Urgency Acc':>12} {'Intent Acc':>11}")
 print(f"  {'-'*25} {'-'*13} {'-'*12} {'-'*11}")
-for config, metrics in ab.items():
+for config, metrics in ablation_results.items():
     er  = metrics.get("emergency_recall", 0) * 100
     ua  = metrics.get("urgency_accuracy", 0) * 100
     ia  = metrics.get("intent_accuracy", 0) * 100
