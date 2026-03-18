@@ -5,10 +5,10 @@ Tests for the baseline comparison evaluation module.
 Verifies the keyword baseline triage and scoring logic.
 """
 
+import pathlib
 import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
 from evaluation.baseline_comparison import (
     COMPARISON_CASES,

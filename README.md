@@ -22,7 +22,7 @@
 ---
 
 <p align="center">
-  <img src="evaluation/figures/benchmark_overview.png" alt="NeuroHealth System Overview" width="800"/>
+  <img src="neurohealth_site.png" alt="NeuroHealth System" width="800"/>
 </p>
 
 ---
@@ -52,43 +52,59 @@
 ### System Pipeline
 
 ```mermaid
-flowchart TD
-    A[User Input] --> B[Intent Recognizer]
-    B --> C[Symptom Extractor]
-    C --> D[Urgency Assessor]
-    D --> E[RAG Retrieval<br/>ChromaDB]
-    E --> F[LLM Generator<br/>Llama 3.1-8B]
-    F --> G[Safety Guard<br/>4 layers]
-    G --> H[Response]
+flowchart LR
+    A["<b>User Input</b>"]
+    B["<b>Intent<br/>Recognizer</b>"]
+    C["<b>Symptom<br/>Extractor</b>"]
+    D["<b>Urgency<br/>Assessor</b>"]
+    E["<b>RAG Retrieval<br/>ChromaDB</b>"]
+    F["<b>LLM Generator<br/>Llama 3.1-8B</b>"]
+    G["<b>Safety Guard<br/>4 layers</b>"]
+    H["<b>Response</b>"]
 
-    E -.->|MedlinePlus<br/>Mayo Clinic<br/>Clinical Guidelines| E
+    A --> B --> C --> D --> E --> F --> G --> H
+    E -.->|"<b>MedlinePlus<br/>Mayo Clinic<br/>Guidelines</b>"| E
 
-    style A fill:#e1f5ff
-    style H fill:#d4edda
-    style E fill:#fff3cd
-    style F fill:#f8d7da
-    style G fill:#d1ecf1
+    style A fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#f8d7da,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#d1ecf1,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#d4edda,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Data Processing Pipeline
 
 ```mermaid
 flowchart LR
-    A[MedlinePlus] --> D[Collector]
-    B[Mayo Clinic] --> D
-    C[CPG Dataset] --> D
+    A["<b>MedlinePlus</b>"]
+    B["<b>Mayo Clinic</b>"]
+    C["<b>CPG Dataset</b>"]
+    D["<b>Collector</b>"]
+    E["<b>Cleaner</b>"]
+    F["<b>Chunker</b>"]
+    G["<b>Embedder<br/>MiniLM-L6</b>"]
+    H["<b>ChromaDB<br/>Vector Store</b>"]
+    I["<b>Validator</b>"]
 
-    D --> E[Cleaner]
-    E --> F[Chunker]
-    F --> G[Embedder<br/>MiniLM-L6]
-    G --> H[ChromaDB<br/>Vector Store]
+    A --> D
+    B --> D
+    C --> D
+    D --> E --> F --> G --> H
+    F --> I
+    I -.->|"<b>Feedback</b>"| G
 
-    F --> I[Validator]
-    I -.->|Feedback| G
-
-    style D fill:#e1f5ff
-    style H fill:#d4edda
-    style G fill:#fff3cd
+    style A fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#d4edda,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#f8d7da,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ---
