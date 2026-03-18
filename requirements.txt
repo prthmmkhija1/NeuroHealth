@@ -39,6 +39,9 @@ tiktoken
 python-dotenv
 pydantic
 
+# --- Visualization ---
+matplotlib
+
 # --- Testing ---
 pytest
 pytest-asyncio

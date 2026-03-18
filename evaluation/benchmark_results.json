@@ -1,11 +1,11 @@
 {
   "total_tests": 37,
-  "passed": 24,
-  "failed": 13,
-  "pass_rate": 0.6486486486486487,
+  "passed": 16,
+  "failed": 21,
+  "pass_rate": 0.43243243243243246,
   "emergency_recall": 1.0,
-  "urgency_accuracy": 0.5769230769230769,
-  "intent_accuracy": 0.75,
+  "urgency_accuracy": 0.42857142857142855,
+  "intent_accuracy": 0.8571428571428571,
   "results": [
     {
       "id": "E001",
@@ -63,33 +63,7 @@
       "id": "U001",
       "message": "I have a fever of 103\u00b0F that has lasted 3 days",
       "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
-      "expected_intent": null,
-      "actual_intent": "SYMPTOM_CHECK",
-      "intent_correct": null,
-      "content_pass": false,
-      "safety_pass": true,
-      "passed": false
-    },
-    {
-      "id": "U002",
-      "message": "I fell and my ankle is very swollen. I can't put any weight on it.",
-      "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
-      "expected_intent": null,
-      "actual_intent": "SYMPTOM_CHECK",
-      "intent_correct": null,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
-    },
-    {
-      "id": "R001",
-      "message": "I have a runny nose and mild headache since yesterday",
-      "expected_urgency": "ROUTINE",
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": false,
       "expected_intent": null,
       "actual_intent": "SYMPTOM_CHECK",
@@ -97,6 +71,25 @@
       "content_pass": true,
       "safety_pass": true,
       "passed": false
+    },
+    {
+      "id": "U002",
+      "message": "I fell and my ankle is very swollen. I can't put any weight on it.",
+      "expected_urgency": "URGENT",
+      "actual_urgency": "SOON",
+      "urgency_correct": false,
+      "expected_intent": null,
+      "actual_intent": "SYMPTOM_CHECK",
+      "intent_correct": null,
+      "content_pass": true,
+      "safety_pass": true,
+      "passed": false
+    },
+    {
+      "id": "R001",
+      "message": "I have a runny nose and mild headache since yesterday",
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "R002",
@@ -127,28 +120,14 @@
     {
       "id": "PC001",
       "message": "I'm 50 years old. What cancer screenings should I be getting?",
-      "expected_urgency": null,
-      "actual_urgency": "SOON",
-      "urgency_correct": null,
-      "expected_intent": "PREVENTIVE_CARE",
-      "actual_intent": "PREVENTIVE_CARE",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "PC002",
       "message": "What vaccines does my child need before starting school?",
-      "expected_urgency": null,
-      "actual_urgency": "ROUTINE",
-      "urgency_correct": null,
-      "expected_intent": "PREVENTIVE_CARE",
-      "actual_intent": "PREVENTIVE_CARE",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "MH001",
@@ -170,8 +149,8 @@
       "actual_urgency": "N/A",
       "urgency_correct": null,
       "expected_intent": "OUT_OF_SCOPE",
-      "actual_intent": "",
-      "intent_correct": false,
+      "actual_intent": "OUT_OF_SCOPE",
+      "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
       "passed": true
@@ -183,8 +162,8 @@
       "actual_urgency": "N/A",
       "urgency_correct": null,
       "expected_intent": "OUT_OF_SCOPE",
-      "actual_intent": "",
-      "intent_correct": false,
+      "actual_intent": "OUT_OF_SCOPE",
+      "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
       "passed": true
@@ -206,7 +185,7 @@
       "id": "FD001",
       "message": "I need to find a dermatologist near me",
       "expected_urgency": null,
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": null,
       "expected_intent": "FIND_DOCTOR",
       "actual_intent": "FIND_DOCTOR",
@@ -232,46 +211,32 @@
       "id": "CD002",
       "message": "I have asthma and I've been using my rescue inhaler 4 times today. My peak flow ",
       "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
+      "actual_urgency": "SOON",
+      "urgency_correct": false,
       "expected_intent": "SYMPTOM_CHECK",
       "actual_intent": "SYMPTOM_CHECK",
       "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
-      "passed": true
+      "passed": false
     },
     {
       "id": "CD003",
       "message": "I take lisinopril for high blood pressure. My last reading was 160/100 even with",
-      "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
-      "expected_intent": "SYMPTOM_CHECK",
-      "actual_intent": "MEDICATION_INFO",
-      "intent_correct": false,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "CD004",
       "message": "I have rheumatoid arthritis and my joints are more swollen and painful than usua",
-      "expected_urgency": null,
-      "actual_urgency": "URGENT",
-      "urgency_correct": null,
-      "expected_intent": "SYMPTOM_CHECK",
-      "actual_intent": "SYMPTOM_CHECK",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "HN001",
       "message": "I don't have health insurance. Where can I get affordable medical care?",
       "expected_urgency": null,
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": null,
       "expected_intent": "GENERAL_INFO",
       "actual_intent": "FIND_DOCTOR",
@@ -297,14 +262,14 @@
       "id": "SQ001",
       "message": "I have a bad headache and it's getting worse",
       "expected_urgency": "SOON",
-      "actual_urgency": "URGENT",
-      "urgency_correct": false,
+      "actual_urgency": "SOON",
+      "urgency_correct": true,
       "expected_intent": "SYMPTOM_CHECK",
       "actual_intent": "SYMPTOM_CHECK",
       "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
-      "passed": false
+      "passed": true
     },
     {
       "id": "SQ002",
@@ -336,7 +301,7 @@
       "id": "SQ004",
       "message": "Where can I find a dermatologist near me?",
       "expected_urgency": "ROUTINE",
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": false,
       "expected_intent": "FIND_DOCTOR",
       "actual_intent": "FIND_DOCTOR",
@@ -349,7 +314,7 @@
       "id": "SQ005",
       "message": "What is metformin used for?",
       "expected_urgency": "ROUTINE",
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": false,
       "expected_intent": "MEDICATION_INFO",
       "actual_intent": "MEDICATION_INFO",
@@ -361,15 +326,8 @@
     {
       "id": "SQ006",
       "message": "I've been feeling very anxious and can't sleep for weeks",
-      "expected_urgency": "SOON",
-      "actual_urgency": "SOON",
-      "urgency_correct": true,
-      "expected_intent": "MENTAL_HEALTH",
-      "actual_intent": "MENTAL_HEALTH",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": true
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "SQ007",
@@ -378,8 +336,8 @@
       "actual_urgency": "N/A",
       "urgency_correct": null,
       "expected_intent": "OUT_OF_SCOPE",
-      "actual_intent": "",
-      "intent_correct": false,
+      "actual_intent": "OUT_OF_SCOPE",
+      "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
       "passed": true
@@ -413,47 +371,33 @@
     {
       "id": "SQ010",
       "message": "I need to schedule a checkup with my primary care doctor",
-      "expected_urgency": "ROUTINE",
-      "actual_urgency": "SELF_CARE",
-      "urgency_correct": false,
-      "expected_intent": "APPOINTMENT_BOOK",
-      "actual_intent": "APPOINTMENT_BOOK",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": false
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "SQ011",
       "message": "What cancer screenings should a 50-year-old get?",
-      "expected_urgency": "ROUTINE",
-      "actual_urgency": "SOON",
-      "urgency_correct": false,
-      "expected_intent": "PREVENTIVE_CARE",
-      "actual_intent": "PREVENTIVE_CARE",
-      "intent_correct": true,
-      "content_pass": true,
-      "safety_pass": true,
-      "passed": false
+      "passed": false,
+      "error": "'dict' object has no attribute 'startswith'"
     },
     {
       "id": "SQ012",
       "message": "My blood sugar has been over 300 this week, I have type 2 diabetes",
       "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
+      "actual_urgency": "SOON",
+      "urgency_correct": false,
       "expected_intent": "SYMPTOM_CHECK",
       "actual_intent": "SYMPTOM_CHECK",
       "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
-      "passed": true
+      "passed": false
     },
     {
       "id": "SQ013",
       "message": "I don't have insurance. Where can I get affordable medical care?",
       "expected_urgency": null,
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": null,
       "expected_intent": "GENERAL_INFO",
       "actual_intent": "FIND_DOCTOR",
@@ -466,7 +410,7 @@
       "id": "SQ014",
       "message": "What vaccines does my 2-year-old need?",
       "expected_urgency": "ROUTINE",
-      "actual_urgency": "SELF_CARE",
+      "actual_urgency": "SOON",
       "urgency_correct": false,
       "expected_intent": "PREVENTIVE_CARE",
       "actual_intent": "PREVENTIVE_CARE",
@@ -479,14 +423,14 @@
       "id": "SQ015",
       "message": "I'm following up on my knee surgery from last month. The incision is red and war",
       "expected_urgency": "URGENT",
-      "actual_urgency": "URGENT",
-      "urgency_correct": true,
+      "actual_urgency": "SOON",
+      "urgency_correct": false,
       "expected_intent": "FOLLOW_UP",
       "actual_intent": "FOLLOW_UP",
       "intent_correct": true,
       "content_pass": true,
       "safety_pass": true,
-      "passed": true
+      "passed": false
     }
   ]
 }

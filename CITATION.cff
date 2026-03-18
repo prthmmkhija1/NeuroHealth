@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "NeuroHealth: AI-Powered Health Assistant"
+abstract: "An LLM-based conversational health assistant using RAG architecture for symptom interpretation, urgency assessment, and appointment recommendations."
+authors:
+  - family-names: "Sharma"
+    given-names: "Prathamesh"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/prathamsharma/NeuroHealth"
+url: "https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/"
+license: CC-BY-4.0
+version: "1.0.0"
+date-released: "2026-03-18"
+keywords:
+  - healthcare
+  - llm
+  - rag
+  - medical-ai
+  - symptom-checker
+  - conversational-ai
+references:
+  - type: article
+    authors:
+      - family-names: "Singhal"
+        given-names: "Karan"
+    title: "Large Language Models in Healthcare"
+    journal: "Nature"
+    year: 2023
+  - type: article
+    authors:
+      - family-names: "Nori"
+        given-names: "Harsha"
+    title: "Capabilities of GPT-4 on Medical Challenge Problems"
+    journal: "arXiv"
+    year: 2023

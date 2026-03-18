@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v --ignore=tests/test_pipeline.py --ignore=tests/test_api.py --ignore=tests/test_rag.py -k "not integration" --tb=short
+        env:
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black isort
+
+      - name: Check formatting with Black
+        run: black --check --diff src/ tests/ api/ ui/ evaluation/
+
+      - name: Check imports with isort
+        run: isort --check-only --diff src/ tests/ api/ ui/ evaluation/
+
+      - name: Lint with Ruff
+        run: ruff check src/ tests/ api/ ui/ evaluation/
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security scanner
+        run: pip install bandit safety
+
+      - name: Run Bandit security scan
+        run: bandit -r src/ -ll --skip B101
+
+      - name: Check dependencies for vulnerabilities
+        run: safety check -r requirements.txt --ignore 70612
+        continue-on-error: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/prathamsharma/NeuroHealth#readme
+    about: Check our documentation before opening an issue
+  - name: GSOC Project Page
+    url: https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/
+    about: View the official GSOC project description
