@@ -1,11 +1,10 @@
 # tests/test_all_fixes.py
 """Quick validation of all fixes made in this session."""
 
-import sys
 import pathlib
+import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
-
 
 import tests.helpers
 

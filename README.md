@@ -21,6 +21,12 @@
 
 ---
 
+<p align="center">
+  <img src="evaluation/figures/benchmark_overview.png" alt="NeuroHealth System Overview" width="800"/>
+</p>
+
+---
+
 > ⚠️ **Medical Disclaimer:** NeuroHealth is a research prototype and is **NOT** a substitute for professional medical advice. Always consult a qualified healthcare professional. In an emergency, call **911** immediately.
 
 ---
@@ -43,95 +49,66 @@
 
 ## 🏗️ Architecture
 
-```
-┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   User      │───▶│   Intent     │───▶│   Symptom    │───▶│   Urgency    │
-│   Input     │    │  Recognizer  │    │  Extractor   │    │  Assessor    │
-└─────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-                           │                                        │
-                           ▼                                        ▼
-                   ┌─────────────────────────────────────────────────────┐
-                   │          RAG Retrieval (ChromaDB)                   │
-                   │   MedlinePlus • Mayo Clinic • Clinical Guidelines   │
-                   └──────────────────┬──────────────────────────────────┘
-                                      ▼
-                            ┌──────────────────┐
-                            │  LLM Generator   │
-                            │ (Llama 3.1-8B)   │
-                            └────────┬─────────┘
-                                      ▼
-                            ┌──────────────────┐
-                            <p align="center">
-                              <img src="evaluation/figures/benchmark_overview.png" alt="Site Screenshot" width="700"/>
-                            </p>
-                            │  Safety Guard    │
-                            │  (4 layers)      │
-                            └────────┬─────────┘
-                                      ▼
-                            ┌──────────────────┐
-                            │    Response      │
-                            └──────────────────┘
+### System Pipeline
+
+```mermaid
+flowchart TD
+    A[User Input] --> B[Intent Recognizer]
+    B --> C[Symptom Extractor]
+    C --> D[Urgency Assessor]
+    D --> E[RAG Retrieval<br/>ChromaDB]
+    E --> F[LLM Generator<br/>Llama 3.1-8B]
+    F --> G[Safety Guard<br/>4 layers]
+    G --> H[Response]
+
+    E -.->|MedlinePlus<br/>Mayo Clinic<br/>Clinical Guidelines| E
+
+    style A fill:#e1f5ff
+    style H fill:#d4edda
+    style E fill:#fff3cd
+    style F fill:#f8d7da
+    style G fill:#d1ecf1
 ```
 
-**Data Flow:**
+### Data Processing Pipeline
 
-````
-┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│ MedlinePlus  │──▶│   Collector  │──▶│   Cleaner    │──▶│   Chunker    │
-│ Mayo Clinic  │   │              │   │              │   │              │
-│ CPG Dataset  │   └──────────────┘   └──────────────┘   └──────────────┘
-└──────────────┘           │                                     │
-                           ▼                                     ▼
-                   ┌──────────────┐                    ┌──────────────┐
-                   │  Validator   │◀───────────────────│   Embedder   │
-                   └──────────────┘                    │ (MiniLM-L6)  │
-                                                       └───────┬──────┘
-                                                               ▼
-                                                       ┌──────────────┐
-                                                       │  ChromaDB    │
-                                                       │ Vector Store │
-                                                       └──────────────┘
-                            ```mermaid
-                            flowchart TD
-                                A[User Input] --> B[Intent Recognizer]
-                                B --> C[Symptom Extractor]
-                                C --> D[Urgency Assessor]
-                                D --> E[RAG Retrieval\n(ChromaDB)]
-                                E --> F[LLM Generator\n(Llama 3.1-8B)]
-                                F --> G[Safety Guard\n(4 layers)]
-                                G --> H[Response]
-                                E -.->|MedlinePlus\nMayo Clinic\nClinical Guidelines| E
-                            ```
+```mermaid
+flowchart LR
+    A[MedlinePlus] --> D[Collector]
+    B[Mayo Clinic] --> D
+    C[CPG Dataset] --> D
+
+    D --> E[Cleaner]
+    E --> F[Chunker]
+    F --> G[Embedder<br/>MiniLM-L6]
+    G --> H[ChromaDB<br/>Vector Store]
+
+    F --> I[Validator]
+    I -.->|Feedback| G
+
+    style D fill:#e1f5ff
+    style H fill:#d4edda
+    style G fill:#fff3cd
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **LLM** | Llama 3.1-8B-Instruct (local, zero API cost) |
-| **Embeddings** | all-MiniLM-L6-v2 (sentence-transformers) |
-| **Vector DB** | ChromaDB (persistent, local) |
-| **Web UI** | Streamlit |
-| **API** | FastAPI with OpenAPI docs |
-| **GPU** | Nvidia A100 40GB |
+| Component        | Technology                                          |
+| ---------------- | --------------------------------------------------- |
+| **LLM**          | Llama 3.1-8B-Instruct (local, zero API cost)        |
+| **Embeddings**   | all-MiniLM-L6-v2 (sentence-transformers)            |
+| **Vector DB**    | ChromaDB (persistent, local)                        |
+| **Web UI**       | Streamlit                                           |
+| **API**          | FastAPI with OpenAPI docs                           |
+| **GPU**          | Nvidia A100 40GB                                    |
 | **Data Sources** | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC guidelines |
 
 ---
 
 ## 🚀 Quick Start
-                            ```mermaid
-                            flowchart LR
-                                A[MedlinePlus] --> B[Collector]
-                                C[Mayo Clinic] --> B
-                                D[CPG Dataset] --> B
-                                B --> E[Cleaner]
-                                E --> F[Chunker]
-                                F --> G[Embedder\n(MiniLM-L6)]
-                                G --> H[ChromaDB\nVector Store]
-                                F --> I[Validator]
-                                I --> G
-                            ```
+
 ### Prerequisites
 
 - Python 3.10+
@@ -151,7 +128,7 @@ pip install -r requirements.txt
 
 cp .env.example .env
 # Edit .env with your HUGGINGFACE_TOKEN
-````
+```
 
 ### Build Knowledge Base
 
