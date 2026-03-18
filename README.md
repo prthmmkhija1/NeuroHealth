@@ -61,6 +61,9 @@
                             └────────┬─────────┘
                                       ▼
                             ┌──────────────────┐
+                            <p align="center">
+                              <img src="evaluation/figures/benchmark_overview.png" alt="Site Screenshot" width="700"/>
+                            </p>
                             │  Safety Guard    │
                             │  (4 layers)      │
                             └────────┬─────────┘
@@ -72,7 +75,7 @@
 
 **Data Flow:**
 
-```
+````
 ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
 │ MedlinePlus  │──▶│   Collector  │──▶│   Cleaner    │──▶│   Chunker    │
 │ Mayo Clinic  │   │              │   │              │   │              │
@@ -88,7 +91,17 @@
                                                        │  ChromaDB    │
                                                        │ Vector Store │
                                                        └──────────────┘
-```
+                            ```mermaid
+                            flowchart TD
+                                A[User Input] --> B[Intent Recognizer]
+                                B --> C[Symptom Extractor]
+                                C --> D[Urgency Assessor]
+                                D --> E[RAG Retrieval\n(ChromaDB)]
+                                E --> F[LLM Generator\n(Llama 3.1-8B)]
+                                F --> G[Safety Guard\n(4 layers)]
+                                G --> H[Response]
+                                E -.->|MedlinePlus\nMayo Clinic\nClinical Guidelines| E
+                            ```
 
 ---
 
@@ -107,7 +120,18 @@
 ---
 
 ## 🚀 Quick Start
-
+                            ```mermaid
+                            flowchart LR
+                                A[MedlinePlus] --> B[Collector]
+                                C[Mayo Clinic] --> B
+                                D[CPG Dataset] --> B
+                                B --> E[Cleaner]
+                                E --> F[Chunker]
+                                F --> G[Embedder\n(MiniLM-L6)]
+                                G --> H[ChromaDB\nVector Store]
+                                F --> I[Validator]
+                                I --> G
+                            ```
 ### Prerequisites
 
 - Python 3.10+
@@ -127,7 +151,7 @@ pip install -r requirements.txt
 
 cp .env.example .env
 # Edit .env with your HUGGINGFACE_TOKEN
-```
+````
 
 ### Build Knowledge Base
 
@@ -155,12 +179,12 @@ uvicorn api.main:app --reload
 
 ### Benchmark Performance (37 Test Cases)
 
-| Metric | Score | Target |
-|--------|-------|--------|
-| **Emergency Recall** | **100%** ✅ | 100% |
-| Intent Accuracy | 85.7% | 80%+ |
-| Safety Pass Rate | 97.3% | 95%+ |
-| Urgency Accuracy | 42.8% | 60%+ |
+| Metric               | Score       | Target |
+| -------------------- | ----------- | ------ |
+| **Emergency Recall** | **100%** ✅ | 100%   |
+| Intent Accuracy      | 85.7%       | 80%+   |
+| Safety Pass Rate     | 97.3%       | 95%+   |
+| Urgency Accuracy     | 42.8%       | 60%+   |
 
 > **Emergency Recall = 100%** means every life-threatening case (chest pain, stroke, anaphylaxis, overdose) was correctly identified and routed to emergency services.
 
@@ -172,10 +196,10 @@ uvicorn api.main:app --reload
 
 ### Baseline Comparison
 
-| System | Emergency Recall | Intent Accuracy |
-|--------|-----------------|-----------------|
-| **NeuroHealth (RAG + Llama)** | **100%** | **85.7%** |
-| Keyword/Rule-Based | 50% | 45.0% |
+| System                        | Emergency Recall | Intent Accuracy |
+| ----------------------------- | ---------------- | --------------- |
+| **NeuroHealth (RAG + Llama)** | **100%**         | **85.7%**       |
+| Keyword/Rule-Based            | 50%              | 45.0%           |
 
 > NeuroHealth achieves **2× emergency recall** vs baseline — the critical safety improvement.
 
@@ -191,12 +215,12 @@ uvicorn api.main:app --reload
 
 ### Ablation Study
 
-| Configuration | Emergency Recall | Intent Acc | Safety Pass |
-|--------------|-----------------|------------|-------------|
-| Full Pipeline | 100% | 75.0% | 97.3% |
-| No RAG | 100% | 85.7% | 94.6% |
-| No Intent | 100% | 32.1% | 97.3% |
-| **No Urgency** | **0%** ❌ | 85.7% | 97.3% |
+| Configuration  | Emergency Recall | Intent Acc | Safety Pass |
+| -------------- | ---------------- | ---------- | ----------- |
+| Full Pipeline  | 100%             | 75.0%      | 97.3%       |
+| No RAG         | 100%             | 85.7%      | 94.6%       |
+| No Intent      | 100%             | 32.1%      | 97.3%       |
+| **No Urgency** | **0%** ❌        | 85.7%      | 97.3%       |
 
 > Removing Urgency Assessment drops emergency recall to 0% — confirming it's the most critical component.
 
@@ -208,12 +232,12 @@ uvicorn api.main:app --reload
 
 ### Safety & Adversarial Testing (27 Cases)
 
-| Category | Tests | Status |
-|----------|-------|--------|
-| Jailbreak attempts | 4 | ✅ All passed |
-| Mental health crisis | 4 | ✅ All passed |
-| Overdose/Poison Control | 1 | ✅ Passed |
-| **CRITICAL failures** | — | **0** ✅ |
+| Category                | Tests | Status        |
+| ----------------------- | ----- | ------------- |
+| Jailbreak attempts      | 4     | ✅ All passed |
+| Mental health crisis    | 4     | ✅ All passed |
+| Overdose/Poison Control | 1     | ✅ Passed     |
+| **CRITICAL failures**   | —     | **0** ✅      |
 
 <p align="center">
   <img src="evaluation/figures/safety_breakdown.png" alt="Safety Breakdown" width="700"/>
@@ -223,14 +247,14 @@ uvicorn api.main:app --reload
 
 ### Demographic Equity
 
-| Group | Consistency |
-|-------|-------------|
-| Age groups | 100% |
-| Health literacy | 100% |
-| Gender | 100% |
-| Race/ethnicity | 100% |
-| Socioeconomic status | 100% |
-| **Overall** | **100%** ✅ |
+| Group                | Consistency |
+| -------------------- | ----------- |
+| Age groups           | 100%        |
+| Health literacy      | 100%        |
+| Gender               | 100%        |
+| Race/ethnicity       | 100%        |
+| Socioeconomic status | 100%        |
+| **Overall**          | **100%** ✅ |
 
 <p align="center">
   <img src="evaluation/figures/equity_consistency.png" alt="Equity Consistency" width="700"/>
@@ -240,13 +264,13 @@ uvicorn api.main:app --reload
 
 ### Inference Profiling (A100 40GB)
 
-| Component | Latency | % |
-|-----------|---------|---|
-| Response Generation | 16.11s | 33.4% |
-| Appointment Rec. | 10.34s | 21.5% |
-| Urgency Assessment | 8.28s | 17.2% |
-| Symptom Extraction | 5.95s | 12.4% |
-| **Total** | **48.16s** | **100%** |
+| Component           | Latency    | %        |
+| ------------------- | ---------- | -------- |
+| Response Generation | 16.11s     | 33.4%    |
+| Appointment Rec.    | 10.34s     | 21.5%    |
+| Urgency Assessment  | 8.28s      | 17.2%    |
+| Symptom Extraction  | 5.95s      | 12.4%    |
+| **Total**           | **48.16s** | **100%** |
 
 <p align="center">
   <img src="evaluation/figures/latency_breakdown.png" alt="Latency Breakdown" width="600"/>
@@ -265,9 +289,11 @@ uvicorn api.main:app --reload
 ### Endpoints
 
 #### `POST /api/v1/chat`
+
 Send a message to NeuroHealth.
 
 **Request:**
+
 ```json
 {
   "message": "I have chest pain and difficulty breathing",
@@ -276,6 +302,7 @@ Send a message to NeuroHealth.
 ```
 
 **Response:**
+
 ```json
 {
   "session_id": "20260318_120000",
@@ -286,6 +313,7 @@ Send a message to NeuroHealth.
 ```
 
 #### Other Endpoints
+
 - `GET /health` — Health check
 - `POST /api/v1/chat/stream` — SSE streaming
 - `GET /api/v1/sessions/{id}` — Get session history

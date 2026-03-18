@@ -2,17 +2,16 @@
 """Quick validation of all fixes made in this session."""
 
 import sys
-from pathlib import Path
+import pathlib
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
-import pytest
 
-from tests.helpers import import_pipeline, vector_store_ready
+import tests.helpers
 
 # Use shared helpers from conftest
-_vector_store_ready = vector_store_ready
-_import_pipeline = import_pipeline
+_vector_store_ready = tests.helpers.vector_store_ready
+_import_pipeline = tests.helpers.import_pipeline
 
 
 def test_empty_input():
