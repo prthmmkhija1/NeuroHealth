@@ -9,7 +9,6 @@ Best run on JLAB-GPU with A100.
 import sys
 from pathlib import Path
 
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from tests.helpers import import_pipeline, vector_store_ready
