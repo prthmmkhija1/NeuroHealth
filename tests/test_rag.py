@@ -25,7 +25,8 @@ def test_vector_store_build():
     if not embedded_path.exists():
         pytest.skip("embedded_chunks.json not found — run embedder.py first")
 
-    from src.knowledge_base.vector_store import build_vector_store, get_vector_store
+    from src.knowledge_base.vector_store import (build_vector_store,
+                                                 get_vector_store)
 
     build_vector_store()
 
