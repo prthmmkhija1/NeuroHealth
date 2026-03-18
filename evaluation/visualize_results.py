@@ -34,7 +34,6 @@ try:
     import matplotlib
 
     matplotlib.use("Agg")  # non-interactive backend (works on headless servers)
-    import matplotlib.patches as mpatches
     import matplotlib.pyplot as plt
 except ImportError:
     print("ERROR: matplotlib is required. Install with: pip install matplotlib")
@@ -107,7 +106,7 @@ def plot_urgency_confusion(data):
         return
 
     levels = ["EMERGENCY", "URGENT", "SOON", "ROUTINE", "SELF_CARE"]
-    level_idx = {l: i for i, l in enumerate(levels)}
+    level_idx = {level: i for i, level in enumerate(levels)}
     matrix = [[0] * len(levels) for _ in levels]
 
     for r in data.get("results", []):

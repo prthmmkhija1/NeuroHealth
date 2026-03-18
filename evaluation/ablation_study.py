@@ -25,7 +25,6 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
-from copy import deepcopy
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))

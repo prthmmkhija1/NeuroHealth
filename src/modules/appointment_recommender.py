@@ -11,7 +11,7 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 
 import json
 
-from src.data_pipeline.entity_schema import SPECIALIST_MAP, get_specialist_info
+from src.data_pipeline.entity_schema import get_specialist_info
 from src.llm_utils import generate_response
 
 
@@ -90,7 +90,7 @@ Respond with ONLY a JSON object:
 
         return json.loads(result_text)
 
-    except Exception as e:
+    except Exception:
         return {
             "appointment_type": "Primary Care / General Practitioner",
             "specialty": "General Practice",

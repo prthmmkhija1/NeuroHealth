@@ -104,7 +104,7 @@ def build_vector_store():
 
         print(f"Inserted {min(i + batch_size, len(chunks))}/{len(chunks)} chunks")
 
-    print(f"\nVector store built successfully!")
+    print("\nVector store built successfully!")
     print(f"Location: {VECTOR_DB_PATH}")
     print(f"Total chunks: {collection.count()}")
 

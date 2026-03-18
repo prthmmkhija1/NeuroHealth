@@ -6,7 +6,6 @@ Pytest configuration and shared fixtures for NeuroHealth tests.
 
 import json
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest

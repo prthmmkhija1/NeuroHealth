@@ -16,7 +16,6 @@ Validates collected and cleaned data for:
 """
 
 import json
-import re
 from collections import Counter
 from pathlib import Path
 

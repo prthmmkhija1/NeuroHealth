@@ -5,7 +5,6 @@ Tests for RAG components (retriever and vector store).
 Requires the data pipeline to have been run first.
 """
 
-import json
 import sys
 from pathlib import Path
 

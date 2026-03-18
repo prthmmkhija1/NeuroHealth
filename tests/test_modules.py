@@ -32,7 +32,7 @@ def test_intent_emergency_keywords():
         ), f"'{msg}' should be EMERGENCY, got {result['intent']}"
         assert (
             result["confidence"] >= 0.9
-        ), f"Emergency keyword detection should have high confidence"
+        ), "Emergency keyword detection should have high confidence"
 
     print("✓ Intent emergency keywords test passed")
 
