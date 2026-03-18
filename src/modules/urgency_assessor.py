@@ -16,8 +16,10 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 
 import json
 
-from src.data_pipeline.entity_schema import (check_urgency_rules,
-                                             get_red_flags_for_symptoms)
+from src.data_pipeline.entity_schema import (
+    check_urgency_rules,
+    get_red_flags_for_symptoms,
+)
 from src.llm_utils import generate_response
 
 # Hard-coded emergency rules (faster and more reliable than LLM)

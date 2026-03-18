@@ -11,13 +11,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.data_pipeline.entity_schema import (CONDITION_SCHEMA, SPECIALIST_MAP,
-                                             SYMPTOM_ONTOLOGY, URGENCY_RULES,
-                                             check_urgency_rules,
-                                             get_conditions_for_symptom,
-                                             get_red_flags_for_symptoms,
-                                             get_specialist_info,
-                                             lookup_condition)
+from src.data_pipeline.entity_schema import (
+    CONDITION_SCHEMA,
+    SPECIALIST_MAP,
+    SYMPTOM_ONTOLOGY,
+    URGENCY_RULES,
+    check_urgency_rules,
+    get_conditions_for_symptom,
+    get_red_flags_for_symptoms,
+    get_specialist_info,
+    lookup_condition,
+)
 
 
 def test_symptom_ontology_structure():
