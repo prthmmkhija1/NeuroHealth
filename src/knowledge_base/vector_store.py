@@ -11,10 +11,11 @@ After building the vector store, we can ask:
 And it returns the most relevant medical chunks — even if the exact words don't match.
 """
 
-import os
-import json
 import hashlib
+import json
+import os
 from pathlib import Path
+
 import chromadb
 from dotenv import load_dotenv
 
@@ -52,7 +53,9 @@ def build_vector_store():
         cid = chunk["chunk_id"]
         if cid in seen_ids:
             # Append a hash suffix to make unique
-            suffix = hashlib.md5(chunk["content"][:100].encode()).hexdigest()[:8]
+            suffix = hashlib.md5(  # nosec B324 - used for deduplication, not security
+                chunk["content"][:100].encode(), usedforsecurity=False
+            ).hexdigest()[:8]
             cid = f"{cid}_{suffix}"
             chunk["chunk_id"] = cid
         seen_ids.add(cid)
@@ -80,20 +83,23 @@ def build_vector_store():
     # Insert chunks in batches
     batch_size = 100
     for i in range(0, len(chunks), batch_size):
-        batch = chunks[i:i + batch_size]
+        batch = chunks[i : i + batch_size]
 
         collection.add(
             ids=[chunk["chunk_id"] for chunk in batch],
             embeddings=[chunk["embedding"] for chunk in batch],
             documents=[chunk["content"] for chunk in batch],
-            metadatas=[{
-                "title": chunk.get("title", ""),
-                "source": chunk.get("source", ""),
-                "topic": chunk.get("topic", ""),
-                "urgency": chunk.get("urgency", ""),
-                "category": chunk.get("category", ""),
-                "data_type": chunk.get("data_type", ""),
-            } for chunk in batch]
+            metadatas=[
+                {
+                    "title": chunk.get("title", ""),
+                    "source": chunk.get("source", ""),
+                    "topic": chunk.get("topic", ""),
+                    "urgency": chunk.get("urgency", ""),
+                    "category": chunk.get("category", ""),
+                    "data_type": chunk.get("data_type", ""),
+                }
+                for chunk in batch
+            ],
         )
 
         print(f"Inserted {min(i + batch_size, len(chunks))}/{len(chunks)} chunks")
@@ -142,6 +148,7 @@ def search_knowledge_base(query, n_results=5):
     global _search_model
     if _search_model is None:
         from sentence_transformers import SentenceTransformer
+
         _search_model = SentenceTransformer(
             os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
         )
@@ -149,24 +156,22 @@ def search_knowledge_base(query, n_results=5):
     query_embedding = _search_model.encode([query]).tolist()[0]
 
     # Search the collection
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=n_results
-    )
+    results = collection.query(query_embeddings=[query_embedding], n_results=n_results)
 
     # Format results nicely
     retrieved_docs = []
-    for i, (doc, metadata) in enumerate(zip(
-        results["documents"][0],
-        results["metadatas"][0]
-    )):
-        retrieved_docs.append({
-            "rank": i + 1,
-            "content": doc,
-            "source": metadata.get("source", ""),
-            "title": metadata.get("title", ""),
-            "category": metadata.get("category", ""),
-        })
+    for i, (doc, metadata) in enumerate(
+        zip(results["documents"][0], results["metadatas"][0])
+    ):
+        retrieved_docs.append(
+            {
+                "rank": i + 1,
+                "content": doc,
+                "source": metadata.get("source", ""),
+                "title": metadata.get("title", ""),
+                "category": metadata.get("category", ""),
+            }
+        )
 
     return retrieved_docs
 

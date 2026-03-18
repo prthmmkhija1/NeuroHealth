@@ -13,14 +13,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.data_pipeline.entity_schema import (
     CONDITION_SCHEMA,
+    SPECIALIST_MAP,
     SYMPTOM_ONTOLOGY,
     URGENCY_RULES,
-    SPECIALIST_MAP,
-    lookup_condition,
+    check_urgency_rules,
     get_conditions_for_symptom,
     get_red_flags_for_symptoms,
-    check_urgency_rules,
     get_specialist_info,
+    lookup_condition,
 )
 
 
@@ -40,9 +40,17 @@ def test_symptom_ontology_structure():
 def test_condition_schema_structure():
     """All condition entries have required keys."""
     required_keys = {
-        "display_name", "icd10", "symptoms", "key_features",
-        "default_urgency", "urgency_level", "specialist", "action",
-        "risk_factors", "red_flags", "self_care_okay",
+        "display_name",
+        "icd10",
+        "symptoms",
+        "key_features",
+        "default_urgency",
+        "urgency_level",
+        "specialist",
+        "action",
+        "risk_factors",
+        "red_flags",
+        "self_care_okay",
     }
     assert len(CONDITION_SCHEMA) >= 10, "Should have at least 10 conditions"
 
@@ -50,7 +58,11 @@ def test_condition_schema_structure():
         for key in required_keys:
             assert key in entry, f"Condition '{name}' missing key '{key}'"
         assert entry["default_urgency"] in {
-            "EMERGENCY", "URGENT", "SOON", "ROUTINE", "SELF_CARE"
+            "EMERGENCY",
+            "URGENT",
+            "SOON",
+            "ROUTINE",
+            "SELF_CARE",
         }, f"Condition '{name}' has invalid urgency: {entry['default_urgency']}"
         assert isinstance(entry["icd10"], list)
         assert isinstance(entry["symptoms"], list)
@@ -58,7 +70,13 @@ def test_condition_schema_structure():
 
 def test_urgency_rules_structure():
     """All urgency rules have required keys."""
-    required_keys = {"rule_id", "description", "trigger_symptoms", "trigger_modifiers", "escalate_to"}
+    required_keys = {
+        "rule_id",
+        "description",
+        "trigger_symptoms",
+        "trigger_modifiers",
+        "escalate_to",
+    }
     assert len(URGENCY_RULES) >= 5, "Should have at least 5 urgency rules"
 
     for rule in URGENCY_RULES:
@@ -119,7 +137,7 @@ def test_check_urgency_rules_emergency():
     """Chest pain with crushing should trigger EMERGENCY."""
     result = check_urgency_rules(
         symptom_keys=["chest_pain"],
-        user_text_lower="i have crushing chest pain radiating to my arm"
+        user_text_lower="i have crushing chest pain radiating to my arm",
     )
     assert result == "EMERGENCY"
 
@@ -127,8 +145,7 @@ def test_check_urgency_rules_emergency():
 def test_check_urgency_rules_suicidal():
     """Depressed mood with suicidal ideation should trigger EMERGENCY."""
     result = check_urgency_rules(
-        symptom_keys=["depressed_mood"],
-        user_text_lower="i feel depressed and suicidal"
+        symptom_keys=["depressed_mood"], user_text_lower="i feel depressed and suicidal"
     )
     assert result == "EMERGENCY"
 
@@ -136,8 +153,7 @@ def test_check_urgency_rules_suicidal():
 def test_check_urgency_rules_no_match():
     """Normal symptoms without red flags should return None."""
     result = check_urgency_rules(
-        symptom_keys=["cough"],
-        user_text_lower="i have a mild cough for 2 days"
+        symptom_keys=["cough"], user_text_lower="i have a mild cough for 2 days"
     )
     assert result is None
 
@@ -155,12 +171,12 @@ def test_emergency_conditions_are_emergency():
     """All conditions with urgency_level 1 should be EMERGENCY."""
     for name, cond in CONDITION_SCHEMA.items():
         if cond["urgency_level"] == 1:
-            assert cond["default_urgency"] == "EMERGENCY", (
-                f"Condition '{name}' has urgency_level=1 but default_urgency={cond['default_urgency']}"
-            )
-            assert cond["self_care_okay"] is False, (
-                f"EMERGENCY condition '{name}' should not allow self-care"
-            )
+            assert (
+                cond["default_urgency"] == "EMERGENCY"
+            ), f"Condition '{name}' has urgency_level=1 but default_urgency={cond['default_urgency']}"
+            assert (
+                cond["self_care_okay"] is False
+            ), f"EMERGENCY condition '{name}' should not allow self-care"
 
 
 if __name__ == "__main__":

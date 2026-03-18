@@ -7,13 +7,13 @@ Requires the data pipeline to have been run first.
 
 import json
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from tests.helpers import vector_store_ready
-
 
 # Use shared helper from conftest
 _vector_store_ready = vector_store_ready

@@ -17,8 +17,8 @@ Validates collected and cleaned data for:
 
 import json
 import re
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 RAW_DATA_DIR = Path("data/raw")
 PROCESSED_DATA_DIR = Path("data/processed")
@@ -27,30 +27,59 @@ PROCESSED_DATA_DIR = Path("data/processed")
 # Minimum acceptable medical vocabulary — if a corpus doesn't mention
 # at least N of these terms, it may be incomplete or corrupted
 REQUIRED_MEDICAL_TERMS = [
-    "symptom", "treatment", "diagnosis", "medication", "disease",
-    "condition", "health", "doctor", "physician", "hospital",
-    "emergency", "pain", "fever", "blood", "infection",
-    "chronic", "acute", "therapy", "prevention", "screening",
+    "symptom",
+    "treatment",
+    "diagnosis",
+    "medication",
+    "disease",
+    "condition",
+    "health",
+    "doctor",
+    "physician",
+    "hospital",
+    "emergency",
+    "pain",
+    "fever",
+    "blood",
+    "infection",
+    "chronic",
+    "acute",
+    "therapy",
+    "prevention",
+    "screening",
 ]
 
 # Safety-critical topics that MUST appear somewhere in the corpus
 REQUIRED_SAFETY_TOPICS = [
-    "heart attack", "stroke", "allergic reaction", "anaphylaxis",
-    "suicide", "overdose", "poison", "emergency",
-    "chest pain", "difficulty breathing",
-    "seizure", "unconscious",
+    "heart attack",
+    "stroke",
+    "allergic reaction",
+    "anaphylaxis",
+    "suicide",
+    "overdose",
+    "poison",
+    "emergency",
+    "chest pain",
+    "difficulty breathing",
+    "seizure",
+    "unconscious",
 ]
 
 # Required coverage of key healthcare use-case categories
 REQUIRED_CATEGORIES = [
-    "cardiac", "respiratory", "neurological", "mental_health",
-    "preventive_care", "medication_info", "chronic_disease",
+    "cardiac",
+    "respiratory",
+    "neurological",
+    "mental_health",
+    "preventive_care",
+    "medication_info",
+    "chronic_disease",
 ]
 
 # Minimum thresholds
-MIN_DOCUMENT_LENGTH = 50       # characters
-MIN_CORPUS_SIZE = 20           # total documents
-MIN_MEDICAL_TERM_COVERAGE = 10 # at least 10 of the terms above must appear
+MIN_DOCUMENT_LENGTH = 50  # characters
+MIN_CORPUS_SIZE = 20  # total documents
+MIN_MEDICAL_TERM_COVERAGE = 10  # at least 10 of the terms above must appear
 
 
 def validate_raw_data():
@@ -204,7 +233,9 @@ def validate_processed_data():
         avg_size = sum(sizes) / max(len(sizes), 1)
         empty_chunks = sum(1 for s in sizes if s < 10)
         if empty_chunks > 0:
-            issues.append(f"WARNING: {empty_chunks} chunks are nearly empty (<10 chars)")
+            issues.append(
+                f"WARNING: {empty_chunks} chunks are nearly empty (<10 chars)"
+            )
 
         print(f"  all_chunks.json: {len(chunks)} chunks, avg {avg_size:.0f} chars")
     else:
@@ -241,8 +272,10 @@ def run_validation():
         for issue in all_issues:
             print(f"  {issue}")
 
-    print(f"\nSummary: {len(critical)} critical, {len(errors)} errors, "
-          f"{len(warnings)} warnings, {len(safety)} safety flags")
+    print(
+        f"\nSummary: {len(critical)} critical, {len(errors)} errors, "
+        f"{len(warnings)} warnings, {len(safety)} safety flags"
+    )
 
     if critical:
         print("\nCRITICAL issues must be resolved before continuing.")

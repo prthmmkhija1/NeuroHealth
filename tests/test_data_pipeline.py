@@ -38,8 +38,9 @@ def test_collector(tmp_path):
         assert isinstance(data, list), f"{f.name} should contain a list"
         if len(data) > 0:
             first = data[0]
-            assert "question" in first or "title" in first or "content" in first, \
-                f"{f.name} entries should have 'question', 'title', or 'content' field"
+            assert (
+                "question" in first or "title" in first or "content" in first
+            ), f"{f.name} entries should have 'question', 'title', or 'content' field"
 
     print("✓ Collector test passed")
 
@@ -55,16 +56,26 @@ def test_cleaner(tmp_path):
 
     # Create sample raw data
     sample = [
-        {"title": "Headache", "content": "A <b>headache</b> is pain in the head region. " * 5,
-         "source": "test", "url": "https://example.com"},
-        {"title": "Fever", "content": "Fever is an elevated body temperature above 100.4°F. " * 5,
-         "source": "test", "url": "https://example.com"},
+        {
+            "title": "Headache",
+            "content": "A <b>headache</b> is pain in the head region. " * 5,
+            "source": "test",
+            "url": "https://example.com",
+        },
+        {
+            "title": "Fever",
+            "content": "Fever is an elevated body temperature above 100.4°F. " * 5,
+            "source": "test",
+            "url": "https://example.com",
+        },
     ]
     with open(raw_dir / "test_topics.json", "w", encoding="utf-8") as f:
         json.dump(sample, f)
 
-    with patch("src.data_pipeline.cleaner.RAW_DATA_DIR", raw_dir), \
-         patch("src.data_pipeline.cleaner.PROCESSED_DATA_DIR", processed_dir):
+    with (
+        patch("src.data_pipeline.cleaner.RAW_DATA_DIR", raw_dir),
+        patch("src.data_pipeline.cleaner.PROCESSED_DATA_DIR", processed_dir),
+    ):
         run_cleaning(force=True)
 
     cleaned_files = list(processed_dir.glob("cleaned_*.json"))
@@ -87,8 +98,11 @@ def test_chunker(tmp_path):
 
     # Create sample cleaned data
     sample = [
-        {"title": "Headache", "content": "A headache is pain in the head. " * 100,
-         "source": "test"},
+        {
+            "title": "Headache",
+            "content": "A headache is pain in the head. " * 100,
+            "source": "test",
+        },
     ]
     with open(processed_dir / "cleaned_test.json", "w", encoding="utf-8") as f:
         json.dump(sample, f)
@@ -151,6 +165,7 @@ def test_clean_document_preserves_metadata():
 
 if __name__ == "__main__":
     import tempfile
+
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         test_collector(tmp / "collector")

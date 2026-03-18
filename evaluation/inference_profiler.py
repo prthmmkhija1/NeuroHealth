@@ -12,9 +12,9 @@ Usage:
     python evaluation/inference_profiler.py
 """
 
+import json
 import sys
 import time
-import json
 from pathlib import Path
 from statistics import mean, stdev
 
@@ -45,14 +45,14 @@ def profile_pipeline_components(user_message):
     Profiles each component of the pipeline individually.
     Returns a dict of component → time in seconds.
     """
+    from src.modules.appointment_recommender import recommend_appointment
     from src.modules.intent_recognizer import classify_intent
+    from src.modules.response_formatter import format_response
+    from src.modules.safety_guardrails import check_safety
     from src.modules.symptom_extractor import extract_symptoms
     from src.modules.urgency_assessor import assess_urgency
-    from src.modules.appointment_recommender import recommend_appointment
-    from src.modules.safety_guardrails import check_safety
-    from src.modules.response_formatter import format_response
-    from src.rag.retriever import retrieve_context
     from src.rag.generator import generate_response
+    from src.rag.retriever import retrieve_context
 
     timings = {}
 
@@ -73,7 +73,9 @@ def profile_pipeline_components(user_message):
     timings["urgency_assessment"] = t
 
     # Appointment Recommendation
-    appointment, t = _time_component(recommend_appointment, user_message, urgency, symptoms)
+    appointment, t = _time_component(
+        recommend_appointment, user_message, urgency, symptoms
+    )
     timings["appointment_recommendation"] = t
 
     # Response Generation (LLM)
@@ -81,12 +83,18 @@ def profile_pipeline_components(user_message):
     timings["response_generation"] = t
 
     # Safety Check
-    safety, t = _time_component(check_safety, raw_response, urgency["level"], user_message)
+    safety, t = _time_component(
+        check_safety, raw_response, urgency["level"], user_message
+    )
     timings["safety_check"] = t
 
     # Response Formatting
     formatted, t = _time_component(
-        format_response, safety["corrected_response"], urgency, appointment, user_message
+        format_response,
+        safety["corrected_response"],
+        urgency,
+        appointment,
+        user_message,
     )
     timings["response_formatting"] = t
 
@@ -106,6 +114,7 @@ def run_profiling():
     # Warm-up run (first LLM call loads the model)
     print("\n[Warm-up] Loading model...")
     from src.pipeline import process_message
+
     warmup_start = time.perf_counter()
     process_message("test warm-up")
     warmup_time = time.perf_counter() - warmup_start
@@ -133,7 +142,9 @@ def run_profiling():
     print("=" * 60)
 
     components = [k for k in all_timings[0].keys() if k != "total"]
-    print(f"\n{'Component':<28} {'Mean':>7} {'StdDev':>7} {'Min':>7} {'Max':>7} {'% Total':>8}")
+    print(
+        f"\n{'Component':<28} {'Mean':>7} {'StdDev':>7} {'Min':>7} {'Max':>7} {'% Total':>8}"
+    )
     print("-" * 64)
 
     total_means = {}
@@ -166,7 +177,10 @@ def run_profiling():
     biggest_bottleneck = sorted_comps[0][0]
     print(f"\n  Biggest bottleneck: {biggest_bottleneck}")
 
-    if "generation" in biggest_bottleneck or "response_generation" == biggest_bottleneck:
+    if (
+        "generation" in biggest_bottleneck
+        or "response_generation" == biggest_bottleneck
+    ):
         print("  → Consider: smaller model, quantization, vLLM/TGI serving, KV cache")
     if "rag_retrieval" in biggest_bottleneck:
         print("  → Consider: pre-computed embeddings, HNSW index tuning, caching")
@@ -175,7 +189,9 @@ def run_profiling():
     if "symptom" in biggest_bottleneck:
         print("  → Consider: NER model (spaCy/scispaCy) instead of LLM extraction")
     if "safety" in biggest_bottleneck:
-        print("  → Consider: regex-only mode (skip LLM safety review) for low-risk queries")
+        print(
+            "  → Consider: regex-only mode (skip LLM safety review) for low-risk queries"
+        )
 
     if total_m > 10:
         print(f"\n  ⚠️ Average total latency ({total_m:.1f}s) exceeds 10s target.")
@@ -183,7 +199,9 @@ def run_profiling():
     elif total_m > 5:
         print(f"\n  ⚡ Average total latency ({total_m:.1f}s) is moderate.")
     else:
-        print(f"\n  ✅ Average total latency ({total_m:.1f}s) is within acceptable range.")
+        print(
+            f"\n  ✅ Average total latency ({total_m:.1f}s) is within acceptable range."
+        )
 
     # Save results
     output_path = Path(__file__).parent / "profiling_results.json"

@@ -4,11 +4,12 @@
 Pytest configuration and shared fixtures for NeuroHealth tests.
 """
 
-import sys
 import json
-import pytest
+import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 # Ensure the project root is on the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -16,10 +17,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # ── Shared Helpers ───────────────────────────────────────────────────
 
+
 def vector_store_ready() -> bool:
     """Return True only if the medical_knowledge collection exists in ChromaDB."""
     try:
         import chromadb
+
         client = chromadb.PersistentClient(path=str(Path("data/vector_db")))
         names = [c.name for c in client.list_collections()]
         return "medical_knowledge" in names
@@ -30,7 +33,9 @@ def vector_store_ready() -> bool:
 def hf_token_available() -> bool:
     """Return True only if a real HuggingFace token is configured in the environment."""
     import os
+
     from dotenv import load_dotenv
+
     load_dotenv()
     token = os.getenv("HUGGINGFACE_TOKEN", "")
     return bool(token) and not token.startswith("hf_YOUR")
@@ -44,12 +49,14 @@ def import_pipeline():
         pytest.skip("HUGGINGFACE_TOKEN not set in .env — skipping LLM-dependent tests")
     try:
         from src.pipeline import process_message
+
         return process_message
     except Exception as exc:
         pytest.skip(f"Cannot import src.pipeline: {exc}")
 
 
 # ── Shared Fixtures ──────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_user_messages():
@@ -75,7 +82,12 @@ def tmp_data_dir(tmp_path):
     raw.mkdir()
     processed.mkdir()
     vector_db.mkdir()
-    return {"root": tmp_path, "raw": raw, "processed": processed, "vector_db": vector_db}
+    return {
+        "root": tmp_path,
+        "raw": raw,
+        "processed": processed,
+        "vector_db": vector_db,
+    }
 
 
 @pytest.fixture
@@ -85,16 +97,16 @@ def sample_raw_documents(tmp_data_dir):
         {
             "title": "Headache",
             "content": "A headache is pain or discomfort in the head or face area. "
-                       "Headaches can be primary (tension, migraine) or secondary "
-                       "(caused by another condition). Treatment depends on the type.",
+            "Headaches can be primary (tension, migraine) or secondary "
+            "(caused by another condition). Treatment depends on the type.",
             "source": "test_source",
             "url": "https://example.com/headache",
         },
         {
             "title": "Diabetes",
             "content": "Diabetes is a chronic condition that affects how your body "
-                       "turns food into energy. Type 2 diabetes is the most common form. "
-                       "Blood sugar monitoring and lifestyle changes are key.",
+            "turns food into energy. Type 2 diabetes is the most common form. "
+            "Blood sugar monitoring and lifestyle changes are key.",
             "source": "test_source",
             "url": "https://example.com/diabetes",
         },
@@ -109,4 +121,5 @@ def sample_raw_documents(tmp_data_dir):
 def conversation_manager():
     """Provides a fresh ConversationManager instance."""
     from src.modules.conversation_manager import ConversationManager
+
     return ConversationManager()

@@ -16,16 +16,15 @@ When a user sends a message, this pipeline:
   9. Formats and returns the final response
 """
 
+from src.modules.appointment_recommender import recommend_appointment
+from src.modules.conversation_manager import ConversationManager
 from src.modules.intent_recognizer import classify_intent
+from src.modules.response_formatter import format_response
+from src.modules.safety_guardrails import check_safety
 from src.modules.symptom_extractor import extract_symptoms
 from src.modules.urgency_assessor import assess_urgency
-from src.modules.appointment_recommender import recommend_appointment
-from src.modules.safety_guardrails import check_safety
-from src.modules.conversation_manager import ConversationManager
-from src.modules.response_formatter import format_response
-from src.rag.retriever import retrieve_context
 from src.rag.generator import generate_response
-
+from src.rag.retriever import retrieve_context
 
 # Global store of active sessions (in production, use Redis or a database)
 active_sessions = {}
@@ -51,9 +50,13 @@ def process_message(user_message, session_id=None):
                 "text": "It looks like your message was empty. Could you describe your symptoms or health question?",
                 "urgency_level": "N/A",
                 "urgency_color": "#888888",
-                "metadata": {}
+                "metadata": {},
             },
-            "intent": {"intent": "INVALID_INPUT", "confidence": 1.0, "reasoning": "Empty input"}
+            "intent": {
+                "intent": "INVALID_INPUT",
+                "confidence": 1.0,
+                "reasoning": "Empty input",
+            },
         }
 
     # Truncate very long input to prevent token overflow / abuse
@@ -65,7 +68,7 @@ def process_message(user_message, session_id=None):
 
     print(f"\n{'='*50}")
     print(f"Processing: '{user_message[:80]}'")
-    print('='*50)
+    print("=" * 50)
 
     # Get or create session
     if session_id and session_id in active_sessions:
@@ -95,7 +98,7 @@ def process_message(user_message, session_id=None):
             "text": response_text,
             "urgency_level": "N/A",
             "urgency_color": "#888888",
-            "metadata": {}
+            "metadata": {},
         }
         session.add_assistant_message(response_text)
         return {
@@ -107,8 +110,8 @@ def process_message(user_message, session_id=None):
                 "symptoms": {},
                 "urgency": {"level": "N/A"},
                 "appointment": {},
-                "safety_issues": []
-            }
+                "safety_issues": [],
+            },
         }
 
     # ── STEP 3: Extract Symptoms ─────────────────────────────
@@ -140,7 +143,9 @@ def process_message(user_message, session_id=None):
 
     # ── STEP 7: Generate AI Response ─────────────────────────
     print("\n[Step 7] Generating AI response...")
-    conversation_history = session.get_history_as_messages()[:-1]  # Exclude current message
+    conversation_history = session.get_history_as_messages()[
+        :-1
+    ]  # Exclude current message
     health_summary = session.get_health_summary()
 
     contextual_message = user_message
@@ -150,7 +155,7 @@ def process_message(user_message, session_id=None):
     raw_response = generate_response(
         user_message=contextual_message,
         context=medical_context,
-        conversation_history=conversation_history
+        conversation_history=conversation_history,
     )
 
     # ── STEP 8: Safety Guardrails ────────────────────────────
@@ -169,7 +174,7 @@ def process_message(user_message, session_id=None):
         ai_response=final_response_text,
         urgency_info=urgency,
         appointment_info=appointment,
-        user_message=user_message
+        user_message=user_message,
     )
 
     # Save response to session
@@ -183,8 +188,8 @@ def process_message(user_message, session_id=None):
             "symptoms": symptoms,
             "urgency": urgency,
             "appointment": appointment,
-            "safety_issues": safety_check["issues"]
-        }
+            "safety_issues": safety_check["issues"],
+        },
     }
 
 
@@ -198,6 +203,6 @@ if __name__ == "__main__":
 
     for msg in test_messages:
         result = process_message(msg)
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("FINAL RESPONSE:")
         print(result["response"]["text"])

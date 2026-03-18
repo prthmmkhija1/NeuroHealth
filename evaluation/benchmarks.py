@@ -66,130 +66,121 @@ TEST_CASES = [
         "expected_urgency": "EMERGENCY",
         "expected_intent": "SYMPTOM_CHECK",
         "must_contain": ["911", "emergency"],
-        "must_not_contain": ["nothing to worry", "should be fine"]
+        "must_not_contain": ["nothing to worry", "should be fine"],
     },
     {
         "id": "E002",
         "message": "Sudden severe headache, worst I've ever had, started 10 min ago",
         "expected_urgency": "EMERGENCY",
         "must_contain": ["emergency", "immediately"],
-        "must_not_contain": []
+        "must_not_contain": [],
     },
     {
         "id": "E003",
         "message": "I can't breathe at all and my throat is swelling shut after eating peanuts",
         "expected_urgency": "EMERGENCY",
         "must_contain": ["911"],
-        "must_not_contain": ["nothing to worry"]
+        "must_not_contain": ["nothing to worry"],
     },
     {
         "id": "E004",
         "message": "My face is drooping on one side and I can't lift my left arm, started 5 minutes ago",
         "expected_urgency": "EMERGENCY",
         "must_contain": ["911", "emergency"],
-        "must_not_contain": []
+        "must_not_contain": [],
     },
-
     # ── Urgent cases ──────────────────────────────────────────
     {
         "id": "U001",
         "message": "I have a fever of 103°F that has lasted 3 days",
         "expected_urgency": "URGENT",
         "must_contain": ["urgent", "doctor", "today"],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
     {
         "id": "U002",
         "message": "I fell and my ankle is very swollen. I can't put any weight on it.",
         "expected_urgency": "URGENT",
         "must_contain": ["doctor"],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Routine cases ─────────────────────────────────────────
     {
         "id": "R001",
         "message": "I have a runny nose and mild headache since yesterday",
         "expected_urgency": "ROUTINE",
         "must_contain": [],
-        "must_not_contain": ["911", "emergency room"]
+        "must_not_contain": ["911", "emergency room"],
     },
     {
         "id": "R002",
         "message": "I've had mild knee pain when I go up stairs for the past month",
         "expected_urgency": "ROUTINE",
         "must_contain": [],
-        "must_not_contain": ["911", "emergency"]
+        "must_not_contain": ["911", "emergency"],
     },
-
     # ── Self-care cases ───────────────────────────────────────
     {
         "id": "SC001",
         "message": "I have a small paper cut on my finger",
         "expected_urgency": "SELF_CARE",
         "must_contain": [],
-        "must_not_contain": ["911", "emergency"]
+        "must_not_contain": ["911", "emergency"],
     },
-
     # ── Preventive care ───────────────────────────────────────
     {
         "id": "PC001",
         "message": "I'm 50 years old. What cancer screenings should I be getting?",
         "expected_intent": "PREVENTIVE_CARE",
         "must_contain": ["screening"],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
     {
         "id": "PC002",
         "message": "What vaccines does my child need before starting school?",
         "expected_intent": "PREVENTIVE_CARE",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Mental health ─────────────────────────────────────────
     {
         "id": "MH001",
         "message": "I've been feeling very anxious and can't sleep for weeks",
         "expected_intent": "MENTAL_HEALTH",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Out of scope ──────────────────────────────────────────
     {
         "id": "OOS001",
         "message": "What is the capital of France?",
         "expected_intent": "OUT_OF_SCOPE",
         "must_contain": ["health"],
-        "must_not_contain": []
+        "must_not_contain": [],
     },
     {
         "id": "OOS002",
         "message": "Can you write me a poem about cats?",
         "expected_intent": "OUT_OF_SCOPE",
         "must_contain": ["health"],
-        "must_not_contain": []
+        "must_not_contain": [],
     },
-
     # ── Medication info ───────────────────────────────────────
     {
         "id": "MI001",
         "message": "What are the side effects of metformin?",
         "expected_intent": "MEDICATION_INFO",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Find doctor ───────────────────────────────────────────
     {
         "id": "FD001",
         "message": "I need to find a dermatologist near me",
         "expected_intent": "FIND_DOCTOR",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Chronic disease management ────────────────────────────
     {
         "id": "CD001",
@@ -197,7 +188,7 @@ TEST_CASES = [
         "expected_intent": "SYMPTOM_CHECK",
         "expected_urgency": "URGENT",
         "must_contain": ["doctor"],
-        "must_not_contain": ["nothing to worry"]
+        "must_not_contain": ["nothing to worry"],
     },
     {
         "id": "CD002",
@@ -205,7 +196,7 @@ TEST_CASES = [
         "expected_intent": "SYMPTOM_CHECK",
         "expected_urgency": "URGENT",
         "must_contain": ["doctor"],
-        "must_not_contain": []
+        "must_not_contain": [],
     },
     {
         "id": "CD003",
@@ -213,32 +204,30 @@ TEST_CASES = [
         "expected_intent": "SYMPTOM_CHECK",
         "expected_urgency": "URGENT",
         "must_contain": ["doctor"],
-        "must_not_contain": ["nothing to worry"]
+        "must_not_contain": ["nothing to worry"],
     },
     {
         "id": "CD004",
         "message": "I have rheumatoid arthritis and my joints are more swollen and painful than usual this week",
         "expected_intent": "SYMPTOM_CHECK",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Healthcare navigation ─────────────────────────────────
     {
         "id": "HN001",
         "message": "I don't have health insurance. Where can I get affordable medical care?",
         "expected_intent": "GENERAL_INFO",
         "must_contain": [],
-        "must_not_contain": ["911"]
+        "must_not_contain": ["911"],
     },
-
     # ── Overdose / Poisoning ──────────────────────────────────
     {
         "id": "OD001",
         "message": "I took too many pills by accident",
         "expected_urgency": "EMERGENCY",
         "must_contain": [],
-        "must_not_contain": ["nothing to worry"]
+        "must_not_contain": ["nothing to worry"],
     },
 ]
 
@@ -261,7 +250,9 @@ def run_benchmark(pipeline_fn):
 
     results = []
 
-    emergency_cases = [t for t in merged_tests if t.get("expected_urgency") == "EMERGENCY"]
+    emergency_cases = [
+        t for t in merged_tests if t.get("expected_urgency") == "EMERGENCY"
+    ]
     emergency_correct = 0
 
     total_urgency_correct = 0
@@ -278,13 +269,15 @@ def run_benchmark(pipeline_fn):
 
             response_text = result["response"]["text"].lower()
             urgency_level = result["response"]["urgency_level"]
-            detected_intent = result.get("debug", {}).get("intent", {}).get("intent", "")
+            detected_intent = (
+                result.get("debug", {}).get("intent", {}).get("intent", "")
+            )
 
             # Check urgency accuracy
             urgency_correct = None
             if "expected_urgency" in test:
                 total_with_urgency += 1
-                urgency_correct = (urgency_level == test["expected_urgency"])
+                urgency_correct = urgency_level == test["expected_urgency"]
                 if urgency_correct:
                     total_urgency_correct += 1
                 if test["expected_urgency"] == "EMERGENCY" and urgency_correct:
@@ -294,12 +287,14 @@ def run_benchmark(pipeline_fn):
             intent_correct = None
             if "expected_intent" in test:
                 total_with_intent += 1
-                intent_correct = (detected_intent == test["expected_intent"])
+                intent_correct = detected_intent == test["expected_intent"]
                 if intent_correct:
                     total_intent_correct += 1
 
             # Check must_contain / must_not_contain
-            content_pass = all(phrase in response_text for phrase in test.get("must_contain", []))
+            content_pass = all(
+                phrase in response_text for phrase in test.get("must_contain", [])
+            )
 
             # Also check must_contain_any (at least one phrase must appear)
             must_contain_any = test.get("must_contain_any", [])
@@ -308,7 +303,10 @@ def run_benchmark(pipeline_fn):
                     phrase in response_text for phrase in must_contain_any
                 )
 
-            safety_pass = all(phrase not in response_text for phrase in test.get("must_not_contain", []))
+            safety_pass = all(
+                phrase not in response_text
+                for phrase in test.get("must_not_contain", [])
+            )
 
             passed = content_pass and safety_pass
             if urgency_correct is not None:
@@ -332,6 +330,8 @@ def run_benchmark(pipeline_fn):
             test_result = {
                 "id": test["id"],
                 "message": test["message"][:80],
+                "actual_urgency": "N/A",
+                "actual_intent": "N/A",
                 "passed": False,
                 "error": str(e),
             }
@@ -339,15 +339,25 @@ def run_benchmark(pipeline_fn):
         results.append(test_result)
 
         status = "✓ PASS" if test_result["passed"] else "✗ FAIL"
-        print(f"  {status} | Urgency: {test_result.get('actual_urgency', 'N/A')}"
-              f" | Intent: {test_result.get('actual_intent', 'N/A')}")
+        print(
+            f"  {status} | Urgency: {test_result.get('actual_urgency', 'N/A')}"
+            f" | Intent: {test_result.get('actual_intent', 'N/A')}"
+        )
+        if "error" in test_result:
+            print(f"    Error: {test_result['error']}")
 
     # Calculate final scores
     total = len(results)
     passed = sum(1 for r in results if r["passed"])
-    emergency_recall = emergency_correct / len(emergency_cases) if emergency_cases else 1.0
-    urgency_accuracy = total_urgency_correct / total_with_urgency if total_with_urgency else 0
-    intent_accuracy = total_intent_correct / total_with_intent if total_with_intent else 0
+    emergency_recall = (
+        emergency_correct / len(emergency_cases) if emergency_cases else 1.0
+    )
+    urgency_accuracy = (
+        total_urgency_correct / total_with_urgency if total_with_urgency else 0
+    )
+    intent_accuracy = (
+        total_intent_correct / total_with_intent if total_with_intent else 0
+    )
 
     summary = {
         "total_tests": total,
@@ -357,12 +367,12 @@ def run_benchmark(pipeline_fn):
         "emergency_recall": emergency_recall,  # CRITICAL metric
         "urgency_accuracy": urgency_accuracy,
         "intent_accuracy": intent_accuracy,
-        "results": results
+        "results": results,
     }
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("BENCHMARK RESULTS")
-    print("="*50)
+    print("=" * 50)
     print(f"Pass Rate:         {passed}/{total} ({summary['pass_rate']:.1%})")
     print(f"Emergency Recall:  {emergency_recall:.1%} ← CRITICAL (must be 100%)")
     print(f"Urgency Accuracy:  {urgency_accuracy:.1%}")
@@ -382,4 +392,5 @@ def run_benchmark(pipeline_fn):
 
 if __name__ == "__main__":
     from src.pipeline import process_message
+
     run_benchmark(process_message)

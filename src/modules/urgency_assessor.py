@@ -15,23 +15,48 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 """
 
 import json
-from src.llm_utils import generate_response
-from src.data_pipeline.entity_schema import check_urgency_rules, get_red_flags_for_symptoms
 
+from src.data_pipeline.entity_schema import (
+    check_urgency_rules,
+    get_red_flags_for_symptoms,
+)
+from src.llm_utils import generate_response
 
 # Hard-coded emergency rules (faster and more reliable than LLM)
 IMMEDIATE_EMERGENCY_PATTERNS = {
-    "cardiac": ["chest pain", "chest pressure", "chest crushing", "heart attack",
-                "left arm pain with chest", "jaw pain with chest"],
-    "respiratory": ["can't breathe", "cannot breathe", "stopped breathing",
-                    "throat closing", "anaphylaxis"],
-    "neurological": ["stroke symptoms", "face drooping", "sudden severe headache",
-                    "worst headache of my life", "sudden vision loss", "seizure"],
+    "cardiac": [
+        "chest pain",
+        "chest pressure",
+        "chest crushing",
+        "heart attack",
+        "left arm pain with chest",
+        "jaw pain with chest",
+    ],
+    "respiratory": [
+        "can't breathe",
+        "cannot breathe",
+        "stopped breathing",
+        "throat closing",
+        "anaphylaxis",
+    ],
+    "neurological": [
+        "stroke symptoms",
+        "face drooping",
+        "sudden severe headache",
+        "worst headache of my life",
+        "sudden vision loss",
+        "seizure",
+    ],
     "trauma": ["uncontrolled bleeding", "major injury", "unconscious"],
-    "mental_health_crisis": ["suicide", "kill myself", "want to die",
-                              "hurting myself"],
-    "overdose_poisoning": ["overdose", "took too many pills", "swallowed poison",
-                            "drank bleach", "ingested chemicals", "poisoning"],
+    "mental_health_crisis": ["suicide", "kill myself", "want to die", "hurting myself"],
+    "overdose_poisoning": [
+        "overdose",
+        "took too many pills",
+        "swallowed poison",
+        "drank bleach",
+        "ingested chemicals",
+        "poisoning",
+    ],
 }
 
 
@@ -59,33 +84,51 @@ def assess_urgency(user_message, extracted_symptoms=None):
                     "reasoning": f"Potential emergency detected: {category}",
                     "call_to_action": "CALL 911 NOW. Do not wait.",
                     "warning_signs": [],
-                    "color_code": "RED"
+                    "color_code": "RED",
                 }
 
     # ── Check structured urgency rules from entity schema ────
     symptom_names = []
     if extracted_symptoms and extracted_symptoms.get("symptoms"):
-        symptom_names = [s.get("name", "").lower() for s in extracted_symptoms["symptoms"]]
+        symptom_names = [
+            s.get("name", "").lower() for s in extracted_symptoms["symptoms"]
+        ]
     rule_hit = check_urgency_rules(symptom_names, user_message)
     if rule_hit:
         # rule_hit is now the escalated urgency level string (e.g. "EMERGENCY")
         level = rule_hit if isinstance(rule_hit, str) else "EMERGENCY"
-        level_map = {"EMERGENCY": 1, "URGENT": 2, "SOON": 3, "ROUTINE": 4, "SELF_CARE": 5}
-        color_map = {"EMERGENCY": "RED", "URGENT": "ORANGE", "SOON": "YELLOW", "ROUTINE": "GREEN", "SELF_CARE": "BLUE"}
+        level_map = {
+            "EMERGENCY": 1,
+            "URGENT": 2,
+            "SOON": 3,
+            "ROUTINE": 4,
+            "SELF_CARE": 5,
+        }
+        color_map = {
+            "EMERGENCY": "RED",
+            "URGENT": "ORANGE",
+            "SOON": "YELLOW",
+            "ROUTINE": "GREEN",
+            "SELF_CARE": "BLUE",
+        }
         return {
             "level": level,
             "level_number": level_map.get(level, 1),
             "recommendation": f"Urgency rule triggered: {level}",
             "reasoning": f"Urgency rule matched for symptoms: {symptom_names}",
-            "call_to_action": "Call 911 NOW" if level == "EMERGENCY" else "Seek medical attention",
+            "call_to_action": (
+                "Call 911 NOW" if level == "EMERGENCY" else "Seek medical attention"
+            ),
             "warning_signs": get_red_flags_for_symptoms(symptom_names),
-            "color_code": color_map.get(level, "RED")
+            "color_code": color_map.get(level, "RED"),
         }
 
     # Use local Llama for nuanced assessment
     symptom_context = ""
     if extracted_symptoms and extracted_symptoms.get("symptoms"):
-        symptom_context = f"\nExtracted symptoms: {json.dumps(extracted_symptoms['symptoms'])}"
+        symptom_context = (
+            f"\nExtracted symptoms: {json.dumps(extracted_symptoms['symptoms'])}"
+        )
 
     prompt = f"""You are an experienced ER triage nurse assessing urgency.
 
@@ -143,7 +186,7 @@ Respond with ONLY a JSON object:
             "reasoning": f"Could not assess (error: {e})",
             "call_to_action": "Please see a doctor to be safe.",
             "warning_signs": [],
-            "color_code": "YELLOW"
+            "color_code": "YELLOW",
         }
 
 

@@ -18,6 +18,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from api.routes import router
 
 app = FastAPI(
@@ -29,7 +30,10 @@ app = FastAPI(
         "**Disclaimer:** NeuroHealth is NOT a substitute for professional medical advice."
     ),
     version="1.0.0",
-    license_info={"name": "CC BY 4.0", "url": "https://creativecommons.org/licenses/by/4.0/"},
+    license_info={
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+    },
     contact={
         "name": "NeuroHealth (OSRE 2026)",
         "url": "https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/",

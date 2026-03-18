@@ -20,8 +20,8 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 
 import json
 import re
-from src.llm_utils import generate_response
 
+from src.llm_utils import generate_response
 
 # ── Hard-coded pattern checks (fast, before LLM) ──────────────────────
 
@@ -59,31 +59,52 @@ DANGEROUS_PATTERNS = [
 ]
 
 REQUIRED_EMERGENCY_PHRASES = [
-    "call 911", "go to the emergency room", "call emergency services",
-    "go to the er", "seek immediate medical attention", "emergency"
+    "call 911",
+    "go to the emergency room",
+    "call emergency services",
+    "go to the er",
+    "seek immediate medical attention",
+    "emergency",
 ]
 
 # Mental-health crisis keywords in user input that require crisis resources
 MENTAL_HEALTH_CRISIS_KEYWORDS = [
-    "kill myself", "want to die", "end my life", "suicide",
-    "self-harm", "hurt myself", "don't want to be here",
-    "ending things", "no reason to live", "better off dead",
+    "kill myself",
+    "want to die",
+    "end my life",
+    "suicide",
+    "self-harm",
+    "hurt myself",
+    "don't want to be here",
+    "ending things",
+    "no reason to live",
+    "better off dead",
 ]
 
 # Overdose / poisoning keywords that require Poison Control resources
 OVERDOSE_KEYWORDS = [
-    "took too many pills", "overdose", "overdosed", "swallowed poison",
-    "drank bleach", "ingested chemicals", "took too much medication",
-    "accidental ingestion", "poison", "poisoning",
+    "took too many pills",
+    "overdose",
+    "overdosed",
+    "swallowed poison",
+    "drank bleach",
+    "ingested chemicals",
+    "took too much medication",
+    "accidental ingestion",
+    "poison",
+    "poisoning",
 ]
 
-REQUIRED_POISON_PHRASES = [
-    "poison control", "1-800-222-1222", "911", "emergency"
-]
+REQUIRED_POISON_PHRASES = ["poison control", "1-800-222-1222", "911", "emergency"]
 
 REQUIRED_CRISIS_PHRASES = [
-    "988", "crisis", "suicide prevention", "crisis hotline",
-    "crisis line", "lifeline", "text home to 741741"
+    "988",
+    "crisis",
+    "suicide prevention",
+    "crisis hotline",
+    "crisis line",
+    "lifeline",
+    "text home to 741741",
 ]
 
 
@@ -141,10 +162,16 @@ def check_safety(response_text, urgency_level, user_message):
 
     # ── Check 5: Response must contain disclaimer language ─────────────
     has_disclaimer = any(
-        phrase in response_lower for phrase in [
-            "not a substitute", "consult a", "healthcare professional",
-            "see a doctor", "medical professional", "disclaimer",
-            "not medical advice", "seek professional",
+        phrase in response_lower
+        for phrase in [
+            "not a substitute",
+            "consult a",
+            "healthcare professional",
+            "see a doctor",
+            "medical professional",
+            "disclaimer",
+            "not medical advice",
+            "seek professional",
         ]
     )
     if not has_disclaimer and urgency_level not in ("N/A",):
@@ -158,20 +185,12 @@ def check_safety(response_text, urgency_level, user_message):
         issues.extend(llm_check.get("issues", []))
 
     if not issues:
-        return {
-            "is_safe": True,
-            "issues": [],
-            "corrected_response": response_text
-        }
+        return {"is_safe": True, "issues": [], "corrected_response": response_text}
 
     # Generate a safer corrected response
     corrected = _generate_safe_correction(response_text, issues, urgency_level)
 
-    return {
-        "is_safe": False,
-        "issues": issues,
-        "corrected_response": corrected
-    }
+    return {"is_safe": False, "issues": issues, "corrected_response": corrected}
 
 
 def _llm_safety_review(response_text, urgency_level, user_message):
@@ -222,8 +241,7 @@ def _generate_safe_correction(original_response, issues, urgency_level):
     # Normalize issues: the LLM check can return dicts instead of strings.
     # Convert everything to strings so all downstream checks work uniformly.
     str_issues = [
-        i if isinstance(i, str) else i.get("description", str(i))
-        for i in issues
+        i if isinstance(i, str) else i.get("description", str(i)) for i in issues
     ]
 
     # Strip dangerous patterns from the response text
@@ -231,7 +249,9 @@ def _generate_safe_correction(original_response, issues, urgency_level):
     if dangerous_issues:
         for issue in dangerous_issues:
             pattern = issue.replace("DANGEROUS_PATTERN: ", "")
-            corrected = re.sub(pattern, "[removed for safety]", corrected, flags=re.IGNORECASE)
+            corrected = re.sub(
+                pattern, "[removed for safety]", corrected, flags=re.IGNORECASE
+            )
         corrected += (
             "\n\n⚠️ **Safety Note:** Please do NOT change, stop, or adjust any "
             "medication without consulting your doctor first."

@@ -15,11 +15,11 @@ Usage:
     python evaluation/human_evaluation.py
 """
 
-import json
 import csv
+import json
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -197,7 +197,9 @@ def generate_evaluation_forms(pipeline_fn=None):
         forms.append(form)
 
     # Save as JSON
-    json_path = OUTPUT_DIR / f"eval_forms_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    json_path = (
+        OUTPUT_DIR / f"eval_forms_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    )
     with open(json_path, "w") as f:
         json.dump({"rubric": EVALUATION_RUBRIC, "forms": forms}, f, indent=2)
     print(f"Saved evaluation forms to {json_path}")
@@ -207,7 +209,10 @@ def generate_evaluation_forms(pipeline_fn=None):
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         header = [
-            "case_id", "category", "user_message", "neurohealth_response",
+            "case_id",
+            "category",
+            "user_message",
+            "neurohealth_response",
             "urgency_assigned",
         ]
         for dim_name in EVALUATION_RUBRIC:
@@ -248,6 +253,7 @@ def generate_evaluation_forms(pipeline_fn=None):
 if __name__ == "__main__":
     try:
         from src.pipeline import process_message
+
         generate_evaluation_forms(pipeline_fn=process_message)
     except Exception:
         print("Pipeline not available — generating blank forms")

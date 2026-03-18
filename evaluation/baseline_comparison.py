@@ -17,8 +17,8 @@ Usage:
 import json
 import re
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -29,32 +29,78 @@ OUTPUT_DIR = Path(__file__).parent / "baseline_output"
 # A simple rule-based system that mimics traditional symptom checkers.
 
 EMERGENCY_KEYWORDS = [
-    "chest pain", "crushing", "can't breathe", "cannot breathe",
-    "throat swelling", "face drooping", "arm weakness", "speech difficulty",
-    "worst headache", "thunderclap", "unresponsive", "seizure",
-    "suicidal", "want to die", "end my life", "overdose",
-    "severe bleeding", "coughing blood", "vomiting blood",
-    "stroke", "heart attack", "anaphylaxis",
+    "chest pain",
+    "crushing",
+    "can't breathe",
+    "cannot breathe",
+    "throat swelling",
+    "face drooping",
+    "arm weakness",
+    "speech difficulty",
+    "worst headache",
+    "thunderclap",
+    "unresponsive",
+    "seizure",
+    "suicidal",
+    "want to die",
+    "end my life",
+    "overdose",
+    "severe bleeding",
+    "coughing blood",
+    "vomiting blood",
+    "stroke",
+    "heart attack",
+    "anaphylaxis",
 ]
 
 URGENT_KEYWORDS = [
-    "high fever", "103", "104", "swollen ankle", "can't walk",
-    "blood sugar over 300", "blood sugar 300", "insulin",
-    "peak flow dropping", "rescue inhaler", "blood pressure 160",
-    "swollen joints", "severe pain", "worsening", "getting worse",
-    "2-month-old", "infant fever", "baby fever", "pregnant",
-    "vomiting for days", "dehydrated", "unable to eat",
+    "high fever",
+    "103",
+    "104",
+    "swollen ankle",
+    "can't walk",
+    "blood sugar over 300",
+    "blood sugar 300",
+    "insulin",
+    "peak flow dropping",
+    "rescue inhaler",
+    "blood pressure 160",
+    "swollen joints",
+    "severe pain",
+    "worsening",
+    "getting worse",
+    "2-month-old",
+    "infant fever",
+    "baby fever",
+    "pregnant",
+    "vomiting for days",
+    "dehydrated",
+    "unable to eat",
 ]
 
 ROUTINE_KEYWORDS = [
-    "mild headache", "runny nose", "knee pain", "sore throat",
-    "mild cough", "acid reflux", "heartburn", "skin rash",
-    "sneezing", "itchy eyes", "back ache", "muscle soreness",
+    "mild headache",
+    "runny nose",
+    "knee pain",
+    "sore throat",
+    "mild cough",
+    "acid reflux",
+    "heartburn",
+    "skin rash",
+    "sneezing",
+    "itchy eyes",
+    "back ache",
+    "muscle soreness",
 ]
 
 SELF_CARE_KEYWORDS = [
-    "paper cut", "minor bruise", "common cold", "stuffy nose",
-    "insect bite", "small scratch", "mild sunburn",
+    "paper cut",
+    "minor bruise",
+    "common cold",
+    "stuffy nose",
+    "insect bite",
+    "small scratch",
+    "mild sunburn",
 ]
 
 
@@ -163,7 +209,7 @@ EXTERNAL_BASELINES = {
     },
     "Keyword_Baseline": {
         "description": "Our simple keyword/rule-based baseline (this module)",
-        "urgency_accuracy": None,   # Will be measured
+        "urgency_accuracy": None,  # Will be measured
         "triage_accuracy": None,
         "emergency_recall": None,
         "source": "Measured in this evaluation",
@@ -176,32 +222,100 @@ EXTERNAL_BASELINES = {
 
 COMPARISON_CASES = [
     # Emergency
-    {"id": "BC-E001", "message": "I'm having crushing chest pain and sweating, pain going down my left arm", "expected_urgency": "EMERGENCY"},
-    {"id": "BC-E002", "message": "Sudden severe headache, worst I've ever had, started 10 min ago", "expected_urgency": "EMERGENCY"},
-    {"id": "BC-E003", "message": "I can't breathe at all and my throat is swelling shut after eating peanuts", "expected_urgency": "EMERGENCY"},
-    {"id": "BC-E004", "message": "My face is drooping on one side and I can't lift my left arm", "expected_urgency": "EMERGENCY"},
-    {"id": "BC-E005", "message": "I've been feeling very depressed and hopeless. I want to end my life.", "expected_urgency": "EMERGENCY"},
-    {"id": "BC-E006", "message": "I took too many pills by accident", "expected_urgency": "EMERGENCY"},
-
+    {
+        "id": "BC-E001",
+        "message": "I'm having crushing chest pain and sweating, pain going down my left arm",
+        "expected_urgency": "EMERGENCY",
+    },
+    {
+        "id": "BC-E002",
+        "message": "Sudden severe headache, worst I've ever had, started 10 min ago",
+        "expected_urgency": "EMERGENCY",
+    },
+    {
+        "id": "BC-E003",
+        "message": "I can't breathe at all and my throat is swelling shut after eating peanuts",
+        "expected_urgency": "EMERGENCY",
+    },
+    {
+        "id": "BC-E004",
+        "message": "My face is drooping on one side and I can't lift my left arm",
+        "expected_urgency": "EMERGENCY",
+    },
+    {
+        "id": "BC-E005",
+        "message": "I've been feeling very depressed and hopeless. I want to end my life.",
+        "expected_urgency": "EMERGENCY",
+    },
+    {
+        "id": "BC-E006",
+        "message": "I took too many pills by accident",
+        "expected_urgency": "EMERGENCY",
+    },
     # Urgent
-    {"id": "BC-U001", "message": "I have a fever of 103°F that has lasted 3 days", "expected_urgency": "URGENT"},
-    {"id": "BC-U002", "message": "I fell and my ankle is very swollen. I can't put any weight on it.", "expected_urgency": "URGENT"},
-    {"id": "BC-U003", "message": "I have type 2 diabetes and my blood sugar has been running over 300 this week", "expected_urgency": "URGENT"},
-    {"id": "BC-U004", "message": "I'm pregnant and having severe headaches with vision changes", "expected_urgency": "URGENT"},
-
+    {
+        "id": "BC-U001",
+        "message": "I have a fever of 103°F that has lasted 3 days",
+        "expected_urgency": "URGENT",
+    },
+    {
+        "id": "BC-U002",
+        "message": "I fell and my ankle is very swollen. I can't put any weight on it.",
+        "expected_urgency": "URGENT",
+    },
+    {
+        "id": "BC-U003",
+        "message": "I have type 2 diabetes and my blood sugar has been running over 300 this week",
+        "expected_urgency": "URGENT",
+    },
+    {
+        "id": "BC-U004",
+        "message": "I'm pregnant and having severe headaches with vision changes",
+        "expected_urgency": "URGENT",
+    },
     # Routine
-    {"id": "BC-R001", "message": "I have a runny nose and mild headache since yesterday", "expected_urgency": "ROUTINE"},
-    {"id": "BC-R002", "message": "I've had mild knee pain when I go up stairs for the past month", "expected_urgency": "ROUTINE"},
-    {"id": "BC-R003", "message": "I've been sneezing a lot and have itchy eyes this spring", "expected_urgency": "ROUTINE"},
-
+    {
+        "id": "BC-R001",
+        "message": "I have a runny nose and mild headache since yesterday",
+        "expected_urgency": "ROUTINE",
+    },
+    {
+        "id": "BC-R002",
+        "message": "I've had mild knee pain when I go up stairs for the past month",
+        "expected_urgency": "ROUTINE",
+    },
+    {
+        "id": "BC-R003",
+        "message": "I've been sneezing a lot and have itchy eyes this spring",
+        "expected_urgency": "ROUTINE",
+    },
     # Self-care
-    {"id": "BC-SC001", "message": "I have a small paper cut on my finger", "expected_urgency": "SELF_CARE"},
-    {"id": "BC-SC002", "message": "I have a minor bruise on my arm from bumping into a table", "expected_urgency": "SELF_CARE"},
-
+    {
+        "id": "BC-SC001",
+        "message": "I have a small paper cut on my finger",
+        "expected_urgency": "SELF_CARE",
+    },
+    {
+        "id": "BC-SC002",
+        "message": "I have a minor bruise on my arm from bumping into a table",
+        "expected_urgency": "SELF_CARE",
+    },
     # Ambiguous (harder for keyword systems)
-    {"id": "BC-A001", "message": "My stomach hurts and I feel weird", "expected_urgency": "ROUTINE"},
-    {"id": "BC-A002", "message": "I've been feeling off lately, tired all the time, no energy", "expected_urgency": "ROUTINE"},
-    {"id": "BC-A003", "message": "I woke up and my hand was numb but it went away after a few minutes", "expected_urgency": "ROUTINE"},
+    {
+        "id": "BC-A001",
+        "message": "My stomach hurts and I feel weird",
+        "expected_urgency": "ROUTINE",
+    },
+    {
+        "id": "BC-A002",
+        "message": "I've been feeling off lately, tired all the time, no energy",
+        "expected_urgency": "ROUTINE",
+    },
+    {
+        "id": "BC-A003",
+        "message": "I woke up and my hand was numb but it went away after a few minutes",
+        "expected_urgency": "ROUTINE",
+    },
 ]
 
 
@@ -227,17 +341,21 @@ def _score_system(system_fn, cases):
         if case["expected_urgency"] == "EMERGENCY" and actual == "EMERGENCY":
             emergency_correct += 1
 
-        results.append({
-            "id": case["id"],
-            "message": case["message"][:80],
-            "expected": case["expected_urgency"],
-            "actual": actual,
-            "correct": is_correct,
-        })
+        results.append(
+            {
+                "id": case["id"],
+                "message": case["message"][:80],
+                "expected": case["expected_urgency"],
+                "actual": actual,
+                "correct": is_correct,
+            }
+        )
 
     return {
         "urgency_accuracy": correct / total if total else 0,
-        "emergency_recall": emergency_correct / len(emergency_cases) if emergency_cases else 1.0,
+        "emergency_recall": (
+            emergency_correct / len(emergency_cases) if emergency_cases else 1.0
+        ),
         "total": total,
         "correct": correct,
         "results": results,
@@ -246,12 +364,14 @@ def _score_system(system_fn, cases):
 
 def _neurohealth_adapter(pipeline_fn):
     """Wraps the NeuroHealth pipeline to return the same dict shape."""
+
     def _fn(message):
         result = pipeline_fn(message)
         return {
             "urgency": result["response"]["urgency_level"],
             "response": result["response"]["text"],
         }
+
     return _fn
 
 
@@ -289,9 +409,7 @@ def run_baseline_comparison(pipeline_fn=None):
     # ── 2. Score NeuroHealth (if pipeline available) ───────────
     if pipeline_fn:
         print("\n[2/2] Scoring NeuroHealth pipeline...")
-        nh_scores = _score_system(
-            _neurohealth_adapter(pipeline_fn), COMPARISON_CASES
-        )
+        nh_scores = _score_system(_neurohealth_adapter(pipeline_fn), COMPARISON_CASES)
         comparison["systems"]["neurohealth"] = {
             "description": "NeuroHealth RAG-powered health assistant (Llama 3.1-8B)",
             "urgency_accuracy": nh_scores["urgency_accuracy"],
@@ -319,12 +437,16 @@ def run_baseline_comparison(pipeline_fn=None):
 
     # Keyword baseline
     bl = comparison["systems"]["keyword_baseline"]
-    print(f"{'Keyword Baseline':<30} {bl['urgency_accuracy']:>11.1%} {bl['emergency_recall']:>12.1%}")
+    print(
+        f"{'Keyword Baseline':<30} {bl['urgency_accuracy']:>11.1%} {bl['emergency_recall']:>12.1%}"
+    )
 
     # NeuroHealth
     if "neurohealth" in comparison["systems"]:
         nh = comparison["systems"]["neurohealth"]
-        print(f"{'NeuroHealth (ours)':<30} {nh['urgency_accuracy']:>11.1%} {nh['emergency_recall']:>12.1%}")
+        print(
+            f"{'NeuroHealth (ours)':<30} {nh['urgency_accuracy']:>11.1%} {nh['emergency_recall']:>12.1%}"
+        )
 
     # External references
     print("-" * 60)
@@ -338,7 +460,10 @@ def run_baseline_comparison(pipeline_fn=None):
             print(f"  {name:<28} {ua:>11.1%} {er:>12.1%}")
 
     # ── 5. Save results ───────────────────────────────────────
-    out_path = OUTPUT_DIR / f"baseline_comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    out_path = (
+        OUTPUT_DIR
+        / f"baseline_comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    )
     with open(out_path, "w") as f:
         json.dump(comparison, f, indent=2)
     print(f"\nResults saved to {out_path}")
@@ -349,6 +474,7 @@ def run_baseline_comparison(pipeline_fn=None):
 if __name__ == "__main__":
     try:
         from src.pipeline import process_message
+
         run_baseline_comparison(pipeline_fn=process_message)
     except Exception:
         print("Pipeline not available — running baseline-only comparison")

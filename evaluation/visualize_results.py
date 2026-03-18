@@ -32,9 +32,10 @@ FIGURES_DIR = EVAL_DIR / "figures"
 
 try:
     import matplotlib
+
     matplotlib.use("Agg")  # non-interactive backend (works on headless servers)
-    import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
 except ImportError:
     print("ERROR: matplotlib is required. Install with: pip install matplotlib")
     sys.exit(1)
@@ -52,6 +53,7 @@ def load_json(filename):
 
 # ── 1. Benchmark Overview Bar Chart ──────────────────────────────────
 
+
 def plot_benchmark_overview(data):
     """Bar chart of key benchmark metrics."""
     if data is None:
@@ -67,12 +69,21 @@ def plot_benchmark_overview(data):
     colors = ["#FF4444", "#4A90D9", "#FFB347", "#77DD77"]
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(metrics.keys(), metrics.values(), color=colors, edgecolor="white", linewidth=1.5)
+    bars = ax.bar(
+        metrics.keys(), metrics.values(), color=colors, edgecolor="white", linewidth=1.5
+    )
 
     # Add value labels on bars
     for bar, val in zip(bars, metrics.values()):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
-                f"{val:.1f}%", ha="center", va="bottom", fontweight="bold", fontsize=12)
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 1.5,
+            f"{val:.1f}%",
+            ha="center",
+            va="bottom",
+            fontweight="bold",
+            fontsize=12,
+        )
 
     ax.set_ylim(0, 115)
     ax.set_ylabel("Percentage (%)", fontsize=12)
@@ -88,6 +99,7 @@ def plot_benchmark_overview(data):
 
 
 # ── 2. Urgency Confusion Matrix ─────────────────────────────────────
+
 
 def plot_urgency_confusion(data):
     """Heatmap showing expected vs actual urgency levels."""
@@ -113,15 +125,28 @@ def plot_urgency_confusion(data):
     ax.set_yticklabels(levels, fontsize=9)
     ax.set_xlabel("Predicted Urgency", fontsize=11)
     ax.set_ylabel("Expected Urgency", fontsize=11)
-    ax.set_title("Urgency Classification Confusion Matrix", fontsize=13, fontweight="bold")
+    ax.set_title(
+        "Urgency Classification Confusion Matrix", fontsize=13, fontweight="bold"
+    )
 
     # Annotate cells
     for i in range(len(levels)):
         for j in range(len(levels)):
             val = matrix[i][j]
             if val > 0:
-                color = "white" if val > max(max(row) for row in matrix) * 0.6 else "black"
-                ax.text(j, i, str(val), ha="center", va="center", fontsize=12, color=color, fontweight="bold")
+                color = (
+                    "white" if val > max(max(row) for row in matrix) * 0.6 else "black"
+                )
+                ax.text(
+                    j,
+                    i,
+                    str(val),
+                    ha="center",
+                    va="center",
+                    fontsize=12,
+                    color=color,
+                    fontweight="bold",
+                )
 
     fig.colorbar(im, ax=ax, shrink=0.8, label="Count")
     fig.tight_layout()
@@ -131,6 +156,7 @@ def plot_urgency_confusion(data):
 
 
 # ── 3. Ablation Study Comparison ────────────────────────────────────
+
 
 def plot_ablation(data):
     """Grouped bar chart comparing ablation configurations."""
@@ -159,13 +185,22 @@ def plot_ablation(data):
     for i, (metric, label, color) in enumerate(zip(metrics, metric_labels, colors)):
         values = [configs[c].get(metric, 0) * 100 for c in x_labels]
         offset = (i - 1) * width
-        ax.bar([xi + offset for xi in x], values, width, label=label, color=color, edgecolor="white")
+        ax.bar(
+            [xi + offset for xi in x],
+            values,
+            width,
+            label=label,
+            color=color,
+            edgecolor="white",
+        )
 
     ax.set_xticks(x)
     ax.set_xticklabels(x_labels, rotation=30, ha="right", fontsize=10)
     ax.set_ylabel("Percentage (%)", fontsize=11)
     ax.set_ylim(0, 115)
-    ax.set_title("Ablation Study: Component Contribution", fontsize=14, fontweight="bold")
+    ax.set_title(
+        "Ablation Study: Component Contribution", fontsize=14, fontweight="bold"
+    )
     ax.legend(loc="upper right", fontsize=10)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -178,6 +213,7 @@ def plot_ablation(data):
 
 
 # ── 4. Latency Breakdown Pie Chart ──────────────────────────────────
+
 
 def plot_latency_breakdown(data):
     """Pie chart of average component latencies."""
@@ -197,14 +233,22 @@ def plot_latency_breakdown(data):
             labels.append(pretty)
             values.append(val)
 
-    colors = ["#FF6B6B", "#FFA07A", "#FFD93D", "#6BCB77", "#4D96FF", "#9B59B6", "#1ABC9C"]
+    colors = [
+        "#FF6B6B",
+        "#FFA07A",
+        "#FFD93D",
+        "#6BCB77",
+        "#4D96FF",
+        "#9B59B6",
+        "#1ABC9C",
+    ]
 
     fig, ax = plt.subplots(figsize=(8, 6))
     wedges, texts, autotexts = ax.pie(
         values,
         labels=labels,
         autopct=lambda pct: f"{pct:.1f}%\n({pct / 100 * sum(values):.1f}s)",
-        colors=colors[:len(values)],
+        colors=colors[: len(values)],
         startangle=90,
         pctdistance=0.75,
         textprops={"fontsize": 9},
@@ -214,7 +258,8 @@ def plot_latency_breakdown(data):
 
     ax.set_title(
         f"Inference Latency Breakdown (avg {data.get('average_total_latency', 0):.1f}s total)",
-        fontsize=13, fontweight="bold"
+        fontsize=13,
+        fontweight="bold",
     )
 
     fig.tight_layout()
@@ -224,6 +269,7 @@ def plot_latency_breakdown(data):
 
 
 # ── 5. Equity Consistency Chart ─────────────────────────────────────
+
 
 def plot_equity(data):
     """Grouped bar chart of equity consistency by category."""
@@ -245,12 +291,23 @@ def plot_equity(data):
     bars = ax.bar(categories, rates, color=colors, edgecolor="white", linewidth=1.5)
 
     for bar, rate, c, t in zip(bars, rates, consistent, total):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
-                f"{rate:.0f}%\n({c}/{t})", ha="center", va="bottom", fontsize=10, fontweight="bold")
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 1.5,
+            f"{rate:.0f}%\n({c}/{t})",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+        )
 
     ax.set_ylim(0, 120)
     ax.set_ylabel("Consistency Rate (%)", fontsize=11)
-    ax.set_title("Demographic Equity: Urgency Consistency by Group", fontsize=13, fontweight="bold")
+    ax.set_title(
+        "Demographic Equity: Urgency Consistency by Group",
+        fontsize=13,
+        fontweight="bold",
+    )
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.axhline(y=100, color="green", linestyle="--", alpha=0.4, label="Target: 100%")
@@ -263,6 +320,7 @@ def plot_equity(data):
 
 
 # ── 6. Safety Test Category Breakdown ───────────────────────────────
+
 
 def plot_safety(data):
     """Horizontal bar chart of safety test results by category."""
@@ -297,7 +355,9 @@ def plot_safety(data):
     ax.set_yticks(y)
     ax.set_yticklabels([c.replace("_", " ").title() for c in cat_names], fontsize=10)
     ax.set_xlabel("Number of Tests", fontsize=11)
-    ax.set_title("Safety & Adversarial Tests by Category", fontsize=13, fontweight="bold")
+    ax.set_title(
+        "Safety & Adversarial Tests by Category", fontsize=13, fontweight="bold"
+    )
     ax.legend(loc="lower right")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -309,6 +369,7 @@ def plot_safety(data):
 
 
 # ── Main ─────────────────────────────────────────────────────────────
+
 
 def main():
     print("=" * 50)

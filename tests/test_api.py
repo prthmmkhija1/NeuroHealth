@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 # ── Local mirror models (identical schemas, no chromadb dependency) ──────
 
+
 class _ChatRequest(BaseModel):
     message: str = Field(..., min_length=1)
     session_id: Optional[str] = None
@@ -46,6 +47,7 @@ class _SessionInfo(BaseModel):
 
 
 # ── Tests using local models (always runnable) ──────────────────────────
+
 
 def test_chat_request_validation():
     """ChatRequest model validates correctly."""
@@ -108,10 +110,12 @@ def test_session_info_model():
 
 # ── Tests requiring the real api package (skipped when chromadb fails) ──
 
+
 def _try_import_routes():
     """Attempt to import api.routes; skip test on chromadb failure."""
     try:
         import api.routes  # noqa: F401
+
         return api.routes
     except Exception as exc:
         pytest.skip(f"Cannot import api.routes (chromadb issue): {exc}")
@@ -122,8 +126,24 @@ def test_feedback_store_operations():
     routes = _try_import_routes()
 
     routes._feedback_store.clear()
-    routes._feedback_store.append({"rating": 5, "thumbs": "up", "session_id": "s1", "comment": "", "timestamp": "now"})
-    routes._feedback_store.append({"rating": 3, "thumbs": "down", "session_id": "s2", "comment": "", "timestamp": "now"})
+    routes._feedback_store.append(
+        {
+            "rating": 5,
+            "thumbs": "up",
+            "session_id": "s1",
+            "comment": "",
+            "timestamp": "now",
+        }
+    )
+    routes._feedback_store.append(
+        {
+            "rating": 3,
+            "thumbs": "down",
+            "session_id": "s2",
+            "comment": "",
+            "timestamp": "now",
+        }
+    )
 
     assert len(routes._feedback_store) == 2
 

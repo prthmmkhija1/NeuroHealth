@@ -10,6 +10,7 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 """
 
 import json
+
 from src.llm_utils import generate_response
 
 
@@ -67,7 +68,7 @@ If no symptoms are mentioned, return {{"symptoms": [], "body_systems": [], "vita
             "symptoms": [],
             "body_systems": [],
             "vital_signs_mentioned": {},
-            "error": str(e)
+            "error": str(e),
         }
 
 

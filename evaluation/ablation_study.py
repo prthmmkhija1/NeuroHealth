@@ -20,29 +20,30 @@ Usage:
     python evaluation/ablation_study.py
 """
 
-import sys
 import json
+import sys
 import time
-from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from copy import deepcopy
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from evaluation.benchmarks import TEST_CASES, _load_json_test_cases
 
-
 # ── Ablated Pipeline Functions ─────────────────────────────────────────
+
 
 def _pipeline_no_rag(user_message, session_id=None):
     """Pipeline with RAG retrieval disabled — LLM uses only parametric knowledge."""
+    from src.modules.appointment_recommender import recommend_appointment
+    from src.modules.conversation_manager import ConversationManager
     from src.modules.intent_recognizer import classify_intent
+    from src.modules.response_formatter import format_response
+    from src.modules.safety_guardrails import check_safety
     from src.modules.symptom_extractor import extract_symptoms
     from src.modules.urgency_assessor import assess_urgency
-    from src.modules.appointment_recommender import recommend_appointment
-    from src.modules.safety_guardrails import check_safety
-    from src.modules.conversation_manager import ConversationManager
-    from src.modules.response_formatter import format_response
     from src.rag.generator import generate_response
 
     session = ConversationManager()
@@ -57,9 +58,9 @@ def _pipeline_no_rag(user_message, session_id=None):
                 "text": "I'm NeuroHealth, a health-focused assistant.",
                 "urgency_level": "N/A",
                 "urgency_color": "#888888",
-                "metadata": {}
+                "metadata": {},
             },
-            "debug": {"intent": intent_info}
+            "debug": {"intent": intent_info},
         }
 
     symptoms = extract_symptoms(user_message)
@@ -69,25 +70,27 @@ def _pipeline_no_rag(user_message, session_id=None):
     appointment = recommend_appointment(user_message, urgency, symptoms)
     raw_response = generate_response(user_message, medical_context)
     safety_check = check_safety(raw_response, urgency["level"], user_message)
-    formatted = format_response(safety_check["corrected_response"], urgency, appointment, user_message)
+    formatted = format_response(
+        safety_check["corrected_response"], urgency, appointment, user_message
+    )
 
     return {
         "session_id": session.session_id,
         "response": formatted,
-        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency},
     }
 
 
 def _pipeline_no_safety(user_message, session_id=None):
     """Pipeline with safety guardrails disabled."""
-    from src.modules.intent_recognizer import classify_intent
-    from src.modules.symptom_extractor import extract_symptoms
-    from src.modules.urgency_assessor import assess_urgency
     from src.modules.appointment_recommender import recommend_appointment
     from src.modules.conversation_manager import ConversationManager
+    from src.modules.intent_recognizer import classify_intent
     from src.modules.response_formatter import format_response
-    from src.rag.retriever import retrieve_context
+    from src.modules.symptom_extractor import extract_symptoms
+    from src.modules.urgency_assessor import assess_urgency
     from src.rag.generator import generate_response
+    from src.rag.retriever import retrieve_context
 
     session = ConversationManager()
     session.add_user_message(user_message)
@@ -101,9 +104,9 @@ def _pipeline_no_safety(user_message, session_id=None):
                 "text": "I'm NeuroHealth, a health-focused assistant.",
                 "urgency_level": "N/A",
                 "urgency_color": "#888888",
-                "metadata": {}
+                "metadata": {},
             },
-            "debug": {"intent": intent_info}
+            "debug": {"intent": intent_info},
         }
 
     symptoms = extract_symptoms(user_message)
@@ -117,26 +120,30 @@ def _pipeline_no_safety(user_message, session_id=None):
     return {
         "session_id": session.session_id,
         "response": formatted,
-        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency},
     }
 
 
 def _pipeline_no_intent(user_message, session_id=None):
     """Pipeline with intent recognition disabled — always assumes SYMPTOM_CHECK."""
-    from src.modules.symptom_extractor import extract_symptoms
-    from src.modules.urgency_assessor import assess_urgency
     from src.modules.appointment_recommender import recommend_appointment
-    from src.modules.safety_guardrails import check_safety
     from src.modules.conversation_manager import ConversationManager
     from src.modules.response_formatter import format_response
-    from src.rag.retriever import retrieve_context
+    from src.modules.safety_guardrails import check_safety
+    from src.modules.symptom_extractor import extract_symptoms
+    from src.modules.urgency_assessor import assess_urgency
     from src.rag.generator import generate_response
+    from src.rag.retriever import retrieve_context
 
     session = ConversationManager()
     session.add_user_message(user_message)
 
     # NO intent recognition — always SYMPTOM_CHECK
-    intent_info = {"intent": "SYMPTOM_CHECK", "confidence": 1.0, "reasoning": "ablation"}
+    intent_info = {
+        "intent": "SYMPTOM_CHECK",
+        "confidence": 1.0,
+        "reasoning": "ablation",
+    }
 
     symptoms = extract_symptoms(user_message)
     medical_context = retrieve_context(user_message)
@@ -144,25 +151,27 @@ def _pipeline_no_intent(user_message, session_id=None):
     appointment = recommend_appointment(user_message, urgency, symptoms)
     raw_response = generate_response(user_message, medical_context)
     safety_check = check_safety(raw_response, urgency["level"], user_message)
-    formatted = format_response(safety_check["corrected_response"], urgency, appointment, user_message)
+    formatted = format_response(
+        safety_check["corrected_response"], urgency, appointment, user_message
+    )
 
     return {
         "session_id": session.session_id,
         "response": formatted,
-        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency},
     }
 
 
 def _pipeline_no_urgency(user_message, session_id=None):
     """Pipeline with urgency assessment disabled — always returns ROUTINE."""
-    from src.modules.intent_recognizer import classify_intent
-    from src.modules.symptom_extractor import extract_symptoms
     from src.modules.appointment_recommender import recommend_appointment
-    from src.modules.safety_guardrails import check_safety
     from src.modules.conversation_manager import ConversationManager
+    from src.modules.intent_recognizer import classify_intent
     from src.modules.response_formatter import format_response
-    from src.rag.retriever import retrieve_context
+    from src.modules.safety_guardrails import check_safety
+    from src.modules.symptom_extractor import extract_symptoms
     from src.rag.generator import generate_response
+    from src.rag.retriever import retrieve_context
 
     session = ConversationManager()
     session.add_user_message(user_message)
@@ -176,43 +185,47 @@ def _pipeline_no_urgency(user_message, session_id=None):
                 "text": "I'm NeuroHealth, a health-focused assistant.",
                 "urgency_level": "N/A",
                 "urgency_color": "#888888",
-                "metadata": {}
+                "metadata": {},
             },
-            "debug": {"intent": intent_info}
+            "debug": {"intent": intent_info},
         }
 
     symptoms = extract_symptoms(user_message)
     medical_context = retrieve_context(user_message)
     # NO urgency assessment — always ROUTINE
     urgency = {
-        "level": "ROUTINE", "level_number": 4,
+        "level": "ROUTINE",
+        "level_number": 4,
         "recommendation": "Schedule a regular appointment",
         "reasoning": "ablation: urgency disabled",
         "call_to_action": "Schedule an appointment.",
-        "warning_signs": [], "color_code": "GREEN"
+        "warning_signs": [],
+        "color_code": "GREEN",
     }
     appointment = recommend_appointment(user_message, urgency, symptoms)
     raw_response = generate_response(user_message, medical_context)
     safety_check = check_safety(raw_response, urgency["level"], user_message)
-    formatted = format_response(safety_check["corrected_response"], urgency, appointment, user_message)
+    formatted = format_response(
+        safety_check["corrected_response"], urgency, appointment, user_message
+    )
 
     return {
         "session_id": session.session_id,
         "response": formatted,
-        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency},
     }
 
 
 def _pipeline_no_conversation_history(user_message, session_id=None):
     """Pipeline with conversation history disabled — no multi-turn context."""
+    from src.modules.appointment_recommender import recommend_appointment
     from src.modules.intent_recognizer import classify_intent
+    from src.modules.response_formatter import format_response
+    from src.modules.safety_guardrails import check_safety
     from src.modules.symptom_extractor import extract_symptoms
     from src.modules.urgency_assessor import assess_urgency
-    from src.modules.appointment_recommender import recommend_appointment
-    from src.modules.safety_guardrails import check_safety
-    from src.modules.response_formatter import format_response
-    from src.rag.retriever import retrieve_context
     from src.rag.generator import generate_response
+    from src.rag.retriever import retrieve_context
 
     # NO conversation manager — no multi-turn context, fresh state every turn
     intent_info = classify_intent(user_message)
@@ -224,9 +237,9 @@ def _pipeline_no_conversation_history(user_message, session_id=None):
                 "text": "I'm NeuroHealth, a health-focused assistant.",
                 "urgency_level": "N/A",
                 "urgency_color": "#888888",
-                "metadata": {}
+                "metadata": {},
             },
-            "debug": {"intent": intent_info}
+            "debug": {"intent": intent_info},
         }
 
     symptoms = extract_symptoms(user_message)
@@ -236,12 +249,14 @@ def _pipeline_no_conversation_history(user_message, session_id=None):
     # No conversation history passed to generator
     raw_response = generate_response(user_message, medical_context)
     safety_check = check_safety(raw_response, urgency["level"], user_message)
-    formatted = format_response(safety_check["corrected_response"], urgency, appointment, user_message)
+    formatted = format_response(
+        safety_check["corrected_response"], urgency, appointment, user_message
+    )
 
     return {
         "session_id": "ablation_no_history",
         "response": formatted,
-        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency}
+        "debug": {"intent": intent_info, "symptoms": symptoms, "urgency": urgency},
     }
 
 
@@ -259,7 +274,9 @@ ABLATION_CONFIGS = {
 
 def _score_run(pipeline_fn, test_cases, per_test_timeout=300):
     """Run a set of test cases and return scores."""
-    emergency_cases = [t for t in test_cases if t.get("expected_urgency") == "EMERGENCY"]
+    emergency_cases = [
+        t for t in test_cases if t.get("expected_urgency") == "EMERGENCY"
+    ]
     emergency_correct = 0
     total_urgency = 0
     urgency_correct = 0
@@ -277,7 +294,9 @@ def _score_run(pipeline_fn, test_cases, per_test_timeout=300):
 
             response_text = result["response"]["text"].lower()
             urgency_level = result["response"]["urgency_level"]
-            detected_intent = result.get("debug", {}).get("intent", {}).get("intent", "")
+            detected_intent = (
+                result.get("debug", {}).get("intent", {}).get("intent", "")
+            )
 
             if "expected_urgency" in test:
                 total_urgency += 1
@@ -303,7 +322,9 @@ def _score_run(pipeline_fn, test_cases, per_test_timeout=300):
             print(f"         ERROR: {exc}")
 
     return {
-        "emergency_recall": emergency_correct / len(emergency_cases) if emergency_cases else 1.0,
+        "emergency_recall": (
+            emergency_correct / len(emergency_cases) if emergency_cases else 1.0
+        ),
         "urgency_accuracy": urgency_correct / total_urgency if total_urgency else 0,
         "intent_accuracy": intent_correct / total_intent if total_intent else 0,
         "safety_pass_rate": safety_passed / total if total else 0,
@@ -325,7 +346,9 @@ def run_ablation_study():
     print("=" * 70)
     print("ABLATION STUDY — Component Contribution Analysis")
     print("=" * 70)
-    print(f"Running {len(all_tests)} test cases across {len(ABLATION_CONFIGS)} configurations\n")
+    print(
+        f"Running {len(all_tests)} test cases across {len(ABLATION_CONFIGS)} configurations\n"
+    )
 
     results = {}
 
@@ -369,7 +392,9 @@ def run_ablation_study():
 
     # ── Delta from baseline ─────────────────────────────────────────
     if baseline:
-        print(f"\n{'Configuration':<20} {'ΔEmerg':>8} {'ΔUrgency':>10} {'ΔIntent':>9} {'ΔSafety':>9}")
+        print(
+            f"\n{'Configuration':<20} {'ΔEmerg':>8} {'ΔUrgency':>10} {'ΔIntent':>9} {'ΔSafety':>9}"
+        )
         print("-" * 56)
         for config_name, scores in results.items():
             if config_name == "full_pipeline":

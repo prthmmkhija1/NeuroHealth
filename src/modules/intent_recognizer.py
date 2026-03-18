@@ -10,17 +10,33 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI API.
 """
 
 import json
-from src.llm_utils import generate_response
 
+from src.llm_utils import generate_response
 
 # Emergency keywords — trigger immediate EMERGENCY classification
 # without even calling the LLM (faster and safer)
 EMERGENCY_KEYWORDS = [
-    "heart attack", "can't breathe", "cannot breathe", "not breathing",
-    "stroke", "unconscious", "passed out", "seizure", "uncontrollable bleeding",
-    "overdose", "suicide", "kill myself", "chest crushing", "throat closing",
-    "anaphylaxis", "911", "dying", "going to die", "took too many pills",
-    "swallowed poison", "drank bleach"
+    "heart attack",
+    "can't breathe",
+    "cannot breathe",
+    "not breathing",
+    "stroke",
+    "unconscious",
+    "passed out",
+    "seizure",
+    "uncontrollable bleeding",
+    "overdose",
+    "suicide",
+    "kill myself",
+    "chest crushing",
+    "throat closing",
+    "anaphylaxis",
+    "911",
+    "dying",
+    "going to die",
+    "took too many pills",
+    "swallowed poison",
+    "drank bleach",
 ]
 
 
@@ -41,7 +57,7 @@ def classify_intent(user_message):
             return {
                 "intent": "EMERGENCY",
                 "confidence": 0.99,
-                "reasoning": f"Emergency keyword detected: '{keyword}'"
+                "reasoning": f"Emergency keyword detected: '{keyword}'",
             }
 
     # Use local Llama to classify all other intents
@@ -81,20 +97,29 @@ Respond with ONLY a JSON object like this:
     except Exception as e:
         # Fallback: try to extract intent from raw text
         result_text_upper = result_text.upper() if isinstance(result_text, str) else ""
-        for intent in ["EMERGENCY", "SYMPTOM_CHECK", "FIND_DOCTOR", "MEDICATION_INFO",
-                        "APPOINTMENT_BOOK", "GENERAL_INFO", "MENTAL_HEALTH",
-                        "PREVENTIVE_CARE", "FOLLOW_UP", "OUT_OF_SCOPE"]:
+        for intent in [
+            "EMERGENCY",
+            "SYMPTOM_CHECK",
+            "FIND_DOCTOR",
+            "MEDICATION_INFO",
+            "APPOINTMENT_BOOK",
+            "GENERAL_INFO",
+            "MENTAL_HEALTH",
+            "PREVENTIVE_CARE",
+            "FOLLOW_UP",
+            "OUT_OF_SCOPE",
+        ]:
             if intent in result_text_upper:
                 return {
                     "intent": intent,
                     "confidence": 0.7,
-                    "reasoning": f"Extracted from model output (JSON parse failed: {e})"
+                    "reasoning": f"Extracted from model output (JSON parse failed: {e})",
                 }
 
         return {
             "intent": "SYMPTOM_CHECK",  # Safe default
             "confidence": 0.5,
-            "reasoning": f"Default (error in classification: {e})"
+            "reasoning": f"Default (error in classification: {e})",
         }
 
 
@@ -105,7 +130,7 @@ if __name__ == "__main__":
         "What is metformin prescribed for?",
         "I think I'm having a heart attack",
         "I've been feeling anxious and can't sleep",
-        "What's 2+2?"
+        "What's 2+2?",
     ]
 
     for msg in test_messages:

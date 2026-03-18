@@ -17,6 +17,7 @@ USAGE:
 """
 
 import os
+
 import torch
 from dotenv import load_dotenv
 
@@ -70,10 +71,12 @@ def _load_model():
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     # Load tokenizer
-    _tokenizer = AutoTokenizer.from_pretrained(
-        load_path,
-        token=hf_token,
-        trust_remote_code=True,
+    _tokenizer = (
+        AutoTokenizer.from_pretrained(  # nosec B615 - We want latest model version
+            load_path,
+            token=hf_token,
+            trust_remote_code=True,
+        )
     )
     if _tokenizer.pad_token is None:
         _tokenizer.pad_token = _tokenizer.eos_token
@@ -92,7 +95,7 @@ def _load_model():
             bnb_4bit_quant_type="nf4",
         )
 
-        _model = AutoModelForCausalLM.from_pretrained(
+        _model = AutoModelForCausalLM.from_pretrained(  # nosec B615 - We want latest model version
             load_path,
             token=hf_token,
             quantization_config=quantization_config,
@@ -101,7 +104,7 @@ def _load_model():
         )
     else:
         print("No GPU detected. Loading on CPU (slow, for testing only)...")
-        _model = AutoModelForCausalLM.from_pretrained(
+        _model = AutoModelForCausalLM.from_pretrained(  # nosec B615 - We want latest model version
             load_path,
             token=hf_token,
             torch_dtype=torch.float32,
@@ -131,7 +134,7 @@ def generate_response(
             model="gpt-4o-mini",
             messages=[{"role": "system", "content": sys}, {"role": "user", "content": msg}]
         )
-    
+
     Just do:
         from src.llm_utils import generate_response
         response = generate_response(system_prompt=sys, user_message=msg)
@@ -156,7 +159,9 @@ def generate_response(
     # If JSON mode requested, append instruction to system prompt
     effective_system = system_prompt
     if json_mode:
-        effective_system += "\n\nIMPORTANT: You MUST respond with valid JSON only. No other text."
+        effective_system += (
+            "\n\nIMPORTANT: You MUST respond with valid JSON only. No other text."
+        )
 
     # Build messages in Llama's chat format
     messages = [
@@ -186,7 +191,7 @@ def generate_response(
         )
 
     # Decode only the NEW tokens (skip the input)
-    new_tokens = outputs[0][inputs["input_ids"].shape[1]:]
+    new_tokens = outputs[0][inputs["input_ids"].shape[1] :]
     response = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
     return response
@@ -242,7 +247,7 @@ def generate_with_history(
             pad_token_id=tokenizer.pad_token_id,
         )
 
-    new_tokens = outputs[0][inputs["input_ids"].shape[1]:]
+    new_tokens = outputs[0][inputs["input_ids"].shape[1] :]
     response = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
     return response

@@ -8,11 +8,12 @@ This module cleans all of that up so the AI gets clean, useful text.
 Think of it as editing a rough draft into a clean final copy.
 """
 
-import sys
 import json
 import re
+import sys
 import warnings
 from pathlib import Path
+
 from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 
 # Suppress false-positive warning when cleaning URL-like strings
@@ -38,12 +39,12 @@ def clean_text(text):
     text = soup.get_text()
 
     # Replace multiple spaces/newlines with single space
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     # Remove characters that aren't normal text, BUT preserve medical chars
     # Keep: ° (degrees, e.g. 103°F), % (e.g. 95% saturation), / (e.g. 120/80),
     #       " (inches), + (e.g. COVID+), # (e.g. #1), @ ≥ ≤ < > —
-    text = re.sub(r'[^\w\s.,;:?!()\-\'°%/"#+<>≥≤—&@]', ' ', text)
+    text = re.sub(r'[^\w\s.,;:?!()\-\'°%/"#+<>≥≤—&@]', " ", text)
 
     # Final cleanup
     text = text.strip()
@@ -111,7 +112,9 @@ def run_cleaning(force=False):
     if force:
         print("Mode: FORCE — all files will be re-cleaned and overwritten")
     else:
-        print("Mode: INCREMENTAL — existing cleaned files will be skipped (use --force to re-clean)")
+        print(
+            "Mode: INCREMENTAL — existing cleaned files will be skipped (use --force to re-clean)"
+        )
     print("=" * 50)
 
     raw_files = list(RAW_DATA_DIR.glob("*.json"))
@@ -124,7 +127,9 @@ def run_cleaning(force=False):
         output_path = PROCESSED_DATA_DIR / f"cleaned_{raw_file.name}"
 
         if not force and output_path.exists():
-            print(f"\nSkipping: {raw_file.name} — {output_path.name} already exists. Use --force to re-clean.")
+            print(
+                f"\nSkipping: {raw_file.name} — {output_path.name} already exists. Use --force to re-clean."
+            )
             continue
 
         print(f"\nProcessing: {raw_file.name}")

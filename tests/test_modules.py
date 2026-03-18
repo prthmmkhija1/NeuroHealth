@@ -27,10 +27,12 @@ def test_intent_emergency_keywords():
 
     for msg in emergency_messages:
         result = classify_intent(msg)
-        assert result["intent"] == "EMERGENCY", \
-            f"'{msg}' should be EMERGENCY, got {result['intent']}"
-        assert result["confidence"] >= 0.9, \
-            f"Emergency keyword detection should have high confidence"
+        assert (
+            result["intent"] == "EMERGENCY"
+        ), f"'{msg}' should be EMERGENCY, got {result['intent']}"
+        assert (
+            result["confidence"] >= 0.9
+        ), f"Emergency keyword detection should have high confidence"
 
     print("✓ Intent emergency keywords test passed")
 
@@ -49,8 +51,9 @@ def test_urgency_emergency_patterns():
 
     for msg in emergency_messages:
         result = assess_urgency(msg)
-        assert result["level"] == "EMERGENCY", \
-            f"'{msg}' should be EMERGENCY, got {result['level']}"
+        assert (
+            result["level"] == "EMERGENCY"
+        ), f"'{msg}' should be EMERGENCY, got {result['level']}"
         assert result["level_number"] == 1
         assert result["color_code"] == "RED"
 
@@ -80,7 +83,7 @@ def test_conversation_manager():
     # Update health context
     cm.update_health_context(
         extracted_symptoms={"symptoms": [{"name": "headache"}]},
-        urgency_info={"level": "ROUTINE"}
+        urgency_info={"level": "ROUTINE"},
     )
     assert "headache" in cm.health_context["symptoms_mentioned"]
     assert len(cm.health_context["urgency_history"]) == 1
@@ -104,19 +107,19 @@ def test_response_formatter():
     urgency = {
         "level": "EMERGENCY",
         "call_to_action": "CALL 911 NOW",
-        "warning_signs": ["worsening pain"]
+        "warning_signs": ["worsening pain"],
     }
     appointment = {
         "specialty": "Emergency Medicine",
         "urgency": "IMMEDIATELY",
-        "what_to_bring": ["ID", "Insurance"]
+        "what_to_bring": ["ID", "Insurance"],
     }
 
     result = format_response(
         ai_response="This is a test response.",
         urgency_info=urgency,
         appointment_info=appointment,
-        user_message="test"
+        user_message="test",
     )
 
     assert result["urgency_level"] == "EMERGENCY"
@@ -134,12 +137,14 @@ def test_safety_guardrails_patterns():
 
     _no_llm_issues = {"has_issues": False, "issues": []}
 
-    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+    with patch(
+        "src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues
+    ):
         # Test: emergency response missing emergency language
         result = check_safety(
             response_text="You should rest and drink fluids.",
             urgency_level="EMERGENCY",
-            user_message="chest pain"
+            user_message="chest pain",
         )
         assert not result["is_safe"], "Should flag missing emergency redirect"
         assert "MISSING_EMERGENCY_REDIRECT" in result["issues"]
@@ -149,7 +154,7 @@ def test_safety_guardrails_patterns():
         result = check_safety(
             response_text="You should stop taking your medication immediately.",
             urgency_level="ROUTINE",
-            user_message="medication question"
+            user_message="medication question",
         )
         assert not result["is_safe"], "Should flag dangerous medication advice"
 
@@ -157,7 +162,7 @@ def test_safety_guardrails_patterns():
         result = check_safety(
             response_text="You definitely have diabetes. Please consult a healthcare professional.",
             urgency_level="ROUTINE",
-            user_message="blood sugar"
+            user_message="blood sugar",
         )
         assert not result["is_safe"], "Should flag definitive diagnosis"
 
@@ -165,7 +170,7 @@ def test_safety_guardrails_patterns():
         result = check_safety(
             response_text="There's nothing to worry about, you're fine. Consult a doctor.",
             urgency_level="ROUTINE",
-            user_message="chest tightness"
+            user_message="chest tightness",
         )
         assert not result["is_safe"], "Should flag dismissive reassurance"
 
@@ -173,21 +178,25 @@ def test_safety_guardrails_patterns():
         result = check_safety(
             response_text="I'm sorry you feel that way. Please consult a healthcare professional.",
             urgency_level="EMERGENCY",
-            user_message="I want to kill myself"
+            user_message="I want to kill myself",
         )
-        assert "MISSING_CRISIS_RESOURCES" in result["issues"], \
-            "Should flag missing crisis resources for suicidal messages"
-        assert "988" in result["corrected_response"], \
-            "Corrected response should include 988 crisis line"
+        assert (
+            "MISSING_CRISIS_RESOURCES" in result["issues"]
+        ), "Should flag missing crisis resources for suicidal messages"
+        assert (
+            "988" in result["corrected_response"]
+        ), "Corrected response should include 988 crisis line"
 
         # Test: safe response passes
         result = check_safety(
             response_text="Based on what you described, this could possibly be a tension headache. "
-                           "Please consult a healthcare professional for a proper evaluation.",
+            "Please consult a healthcare professional for a proper evaluation.",
             urgency_level="ROUTINE",
-            user_message="I have a headache"
+            user_message="I have a headache",
         )
-        assert result["is_safe"], f"Safe response should pass, but got issues: {result['issues']}"
+        assert result[
+            "is_safe"
+        ], f"Safe response should pass, but got issues: {result['issues']}"
 
     print("✓ Safety guardrails pattern test passed")
 
@@ -197,9 +206,7 @@ def test_appointment_emergency_override():
     from src.modules.appointment_recommender import recommend_appointment
 
     result = recommend_appointment(
-        "chest pain",
-        urgency_info={"level": "EMERGENCY"},
-        extracted_symptoms=None
+        "chest pain", urgency_info={"level": "EMERGENCY"}, extracted_symptoms=None
     )
     assert result["appointment_type"] == "Emergency Room (ER)"
     assert result["urgency"] == "IMMEDIATELY"
@@ -213,17 +220,21 @@ def test_safety_poison_control():
 
     _no_llm_issues = {"has_issues": False, "issues": []}
 
-    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+    with patch(
+        "src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues
+    ):
         result = check_safety(
             response_text="You should rest and see a doctor. Please consult a healthcare professional.",
             urgency_level="EMERGENCY",
-            user_message="I took too many pills"
+            user_message="I took too many pills",
         )
-        assert "MISSING_POISON_CONTROL" in result["issues"], \
-            "Should flag missing Poison Control for overdose"
+        assert (
+            "MISSING_POISON_CONTROL" in result["issues"]
+        ), "Should flag missing Poison Control for overdose"
         corrected_lower = result["corrected_response"].lower()
-        assert "poison control" in corrected_lower or "1-800-222-1222" in corrected_lower, \
-            "Corrected response should include Poison Control info"
+        assert (
+            "poison control" in corrected_lower or "1-800-222-1222" in corrected_lower
+        ), "Corrected response should include Poison Control info"
 
     print("✓ Safety Poison Control test passed")
 
@@ -238,6 +249,7 @@ def test_symptom_extractor_structure():
         result = extract_symptoms("")
     except Exception:
         import pytest
+
         pytest.skip("LLM not available for symptom extractor test")
         return
 
@@ -259,7 +271,7 @@ def test_conversation_manager_multiturn():
     cm.add_user_message("I have a bad headache")
     cm.update_health_context(
         extracted_symptoms={"symptoms": [{"name": "headache"}]},
-        urgency_info={"level": "ROUTINE"}
+        urgency_info={"level": "ROUTINE"},
     )
     cm.add_assistant_message("Tell me more about your headache.")
 
@@ -267,7 +279,7 @@ def test_conversation_manager_multiturn():
     cm.add_user_message("I also have a fever of 102")
     cm.update_health_context(
         extracted_symptoms={"symptoms": [{"name": "fever"}]},
-        urgency_info={"level": "URGENT"}
+        urgency_info={"level": "URGENT"},
     )
     cm.add_assistant_message("With fever and headache, I recommend...")
 
@@ -301,16 +313,20 @@ def test_safety_dangerous_pattern_correction():
 
     _no_llm_issues = {"has_issues": False, "issues": []}
 
-    with patch("src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues):
+    with patch(
+        "src.modules.safety_guardrails._llm_safety_review", return_value=_no_llm_issues
+    ):
         result = check_safety(
             response_text="You should stop taking your medication immediately. Please consult a healthcare professional.",
             urgency_level="ROUTINE",
-            user_message="should I stop my meds?"
+            user_message="should I stop my meds?",
         )
         assert not result["is_safe"]
         # Verify the dangerous text was removed/replaced
-        assert "stop taking your medication" not in result["corrected_response"].lower() or \
-               "[removed for safety]" in result["corrected_response"].lower()
+        assert (
+            "stop taking your medication" not in result["corrected_response"].lower()
+            or "[removed for safety]" in result["corrected_response"].lower()
+        )
 
     print("✓ Safety dangerous pattern correction test passed")
 
@@ -321,11 +337,15 @@ def test_pipeline_empty_input():
         from src.pipeline import process_message
     except Exception as exc:
         import pytest
+
         pytest.skip(f"Cannot import src.pipeline (chromadb issue): {exc}")
 
     result = process_message("")
     assert result["response"]["urgency_level"] == "N/A"
-    assert "empty" in result["response"]["text"].lower() or "describe" in result["response"]["text"].lower()
+    assert (
+        "empty" in result["response"]["text"].lower()
+        or "describe" in result["response"]["text"].lower()
+    )
 
     result2 = process_message("   ")
     assert result2["response"]["urgency_level"] == "N/A"

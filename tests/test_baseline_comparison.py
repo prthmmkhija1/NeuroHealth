@@ -11,10 +11,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from evaluation.baseline_comparison import (
-    baseline_keyword_triage,
-    EXTERNAL_BASELINES,
     COMPARISON_CASES,
+    EXTERNAL_BASELINES,
     _score_system,
+    baseline_keyword_triage,
 )
 
 
@@ -65,7 +65,12 @@ def test_comparison_cases_structure():
         assert "id" in case
         assert "message" in case
         assert "expected_urgency" in case
-        assert case["expected_urgency"] in {"EMERGENCY", "URGENT", "ROUTINE", "SELF_CARE"}
+        assert case["expected_urgency"] in {
+            "EMERGENCY",
+            "URGENT",
+            "ROUTINE",
+            "SELF_CARE",
+        }
 
 
 def test_score_system_runs():

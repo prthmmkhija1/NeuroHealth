@@ -14,7 +14,6 @@ ADAPTED: Uses local Llama via llm_utils instead of OpenAI/Anthropic APIs.
 
 from src.llm_utils import generate_with_history
 
-
 # =====================================================
 # SYSTEM PROMPT — This defines how NeuroHealth behaves
 # Think of this as the "personality and rules" of the AI

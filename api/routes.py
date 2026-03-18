@@ -15,15 +15,16 @@ Endpoints:
   GET  /feedback/summary  — Get aggregated satisfaction metrics
 """
 
+import asyncio
+import json
+from datetime import datetime
+from typing import List, Optional
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from typing import Optional, List
-from datetime import datetime
-import json
-import asyncio
 
-from src.pipeline import process_message, active_sessions
+from src.pipeline import active_sessions, process_message
 
 router = APIRouter()
 
@@ -33,9 +34,17 @@ _feedback_store: List[dict] = []
 
 # ── Request / Response Models ──────────────────────────────────────────
 
+
 class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=5000, description="The user's health question or symptom description")
-    session_id: Optional[str] = Field(None, description="Session ID for multi-turn conversation continuity")
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=5000,
+        description="The user's health question or symptom description",
+    )
+    session_id: Optional[str] = Field(
+        None, description="Session ID for multi-turn conversation continuity"
+    )
 
 
 class ChatResponse(BaseModel):
@@ -52,13 +61,18 @@ class SessionInfo(BaseModel):
 
 
 class FeedbackRequest(BaseModel):
-    session_id: Optional[str] = Field(None, description="Session ID the feedback relates to")
+    session_id: Optional[str] = Field(
+        None, description="Session ID the feedback relates to"
+    )
     rating: int = Field(..., ge=1, le=5, description="Satisfaction rating 1-5")
     thumbs: Optional[str] = Field(None, description="Quick feedback: 'up' or 'down'")
-    comment: Optional[str] = Field(None, max_length=2000, description="Optional free-text comment")
+    comment: Optional[str] = Field(
+        None, max_length=2000, description="Optional free-text comment"
+    )
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────
+
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
@@ -92,6 +106,7 @@ async def chat_stream(request: ChatRequest):
     Content-Type: text/event-stream
     Each SSE event is a JSON object with type: 'token' | 'metadata' | 'done'.
     """
+
     async def _event_generator():
         try:
             # Run blocking LLM pipeline in a thread to avoid blocking the event loop
@@ -119,7 +134,7 @@ async def chat_stream(request: ChatRequest):
             words = response_text.split(" ")
             chunk_size = 4  # words per chunk
             for i in range(0, len(words), chunk_size):
-                chunk = " ".join(words[i:i + chunk_size])
+                chunk = " ".join(words[i : i + chunk_size])
                 # Add trailing space unless last chunk
                 if i + chunk_size < len(words):
                     chunk += " "
@@ -161,11 +176,13 @@ def list_sessions():
     """List all active sessions."""
     sessions = []
     for sid, session in active_sessions.items():
-        sessions.append(SessionInfo(
-            session_id=sid,
-            created_at=str(session.created_at),
-            message_count=session.message_count,
-        ))
+        sessions.append(
+            SessionInfo(
+                session_id=sid,
+                created_at=str(session.created_at),
+                message_count=session.message_count,
+            )
+        )
     return sessions
 
 
@@ -180,6 +197,7 @@ def delete_session(session_id: str):
 
 
 # ── Feedback Endpoints ─────────────────────────────────────────────
+
 
 @router.post("/feedback")
 def submit_feedback(request: FeedbackRequest):

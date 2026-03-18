@@ -9,9 +9,9 @@ across multiple turns in a single session.
 Pure Python — no API calls needed.
 """
 
-from datetime import datetime
-from collections import deque
 import uuid
+from collections import deque
+from datetime import datetime
 
 
 class ConversationManager:
@@ -30,11 +30,16 @@ class ConversationManager:
                      After this limit, oldest messages are dropped.
                      (LLMs have input limits, so we can't keep everything forever)
         """
-        self.session_id = session_id or f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+        self.session_id = (
+            session_id
+            or f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+        )
         self.max_history = max_history
 
         # Store messages as a list of dicts: {"role": "user/assistant", "content": "..."}
-        self.messages = deque(maxlen=max_history * 2)  # *2 because user + assistant pairs
+        self.messages = deque(
+            maxlen=max_history * 2
+        )  # *2 because user + assistant pairs
 
         # Track health context across the conversation
         self.health_context = {
@@ -60,16 +65,17 @@ class ConversationManager:
     def update_health_context(self, extracted_symptoms=None, urgency_info=None):
         """Update accumulated health context from this conversation."""
         if extracted_symptoms:
-            new_symptoms = [s.get("name", "") for s in extracted_symptoms.get("symptoms", [])]
+            new_symptoms = [
+                s.get("name", "") for s in extracted_symptoms.get("symptoms", [])
+            ]
             for s in new_symptoms:
                 if s and s not in self.health_context["symptoms_mentioned"]:
                     self.health_context["symptoms_mentioned"].append(s)
 
         if urgency_info:
-            self.health_context["urgency_history"].append({
-                "turn": self.message_count,
-                "level": urgency_info.get("level")
-            })
+            self.health_context["urgency_history"].append(
+                {"turn": self.message_count, "level": urgency_info.get("level")}
+            )
 
     def get_history_as_messages(self):
         """Returns conversation history formatted for the LLM."""
@@ -118,7 +124,7 @@ class ConversationManager:
             "created_at": str(self.created_at),
             "message_count": self.message_count,
             "messages": list(self.messages),
-            "health_context": self.health_context
+            "health_context": self.health_context,
         }
 
     @classmethod

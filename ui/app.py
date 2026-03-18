@@ -15,9 +15,11 @@ from pathlib import Path
 # Add parent directory to Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
-import streamlit as st
 import html as html_module
+
 import requests
+import streamlit as st
+
 from src.pipeline import process_message
 
 API_BASE_URL = "http://localhost:8000/api/v1"
@@ -27,11 +29,12 @@ st.set_page_config(
     page_title="NeuroHealth — AI Health Assistant",
     page_icon="🧠",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # ── STYLES ───────────────────────────────────────────────────
-st.markdown("""
+st.markdown(
+    """
 <style>
 .urgency-emergency { background-color: #FFE5E5; border-left: 5px solid #FF0000; padding: 15px; border-radius: 5px; margin: 10px 0; }
 .urgency-urgent    { background-color: #FFF3E5; border-left: 5px solid #FF6600; padding: 15px; border-radius: 5px; margin: 10px 0; }
@@ -66,7 +69,9 @@ st.markdown("""
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#4A90D9">
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ── HEADER ───────────────────────────────────────────────────
 st.title("🧠 NeuroHealth")
@@ -77,7 +82,9 @@ st.markdown(
 st.divider()
 
 # Emergency banner
-st.error("🚨 If you are experiencing a life-threatening emergency, call **911** immediately.")
+st.error(
+    "🚨 If you are experiencing a life-threatening emergency, call **911** immediately."
+)
 
 # ── SESSION STATE ─────────────────────────────────────────────
 if "messages" not in st.session_state:
@@ -96,7 +103,7 @@ for message in st.session_state.messages:
             safe_content = html_module.escape(message["content"])
             st.markdown(
                 f'<div class="{message["urgency_class"]}">{safe_content}</div>',
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
         else:
             st.markdown(message["content"])
@@ -114,8 +121,7 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
         with st.spinner("NeuroHealth is analyzing your message..."):
             try:
                 result = process_message(
-                    user_input,
-                    session_id=st.session_state.session_id
+                    user_input, session_id=st.session_state.session_id
                 )
 
                 # Save session ID for continuity
@@ -127,24 +133,35 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                 urgency_level = result["response"]["urgency_level"]
 
                 # Color-coded urgency box
-                VALID_URGENCY = {"emergency", "urgent", "soon", "routine", "self_care", "needs_clarification"}
+                VALID_URGENCY = {
+                    "emergency",
+                    "urgent",
+                    "soon",
+                    "routine",
+                    "self_care",
+                    "needs_clarification",
+                }
                 urgency_lower = urgency_level.lower() if urgency_level != "N/A" else ""
-                urgency_class = f"urgency-{urgency_lower}" if urgency_lower in VALID_URGENCY else ""
+                urgency_class = (
+                    f"urgency-{urgency_lower}" if urgency_lower in VALID_URGENCY else ""
+                )
                 if urgency_class:
                     safe_text = html_module.escape(response_text)
                     st.markdown(
                         f'<div class="{urgency_class}">{safe_text}</div>',
-                        unsafe_allow_html=True
+                        unsafe_allow_html=True,
                     )
                 else:
                     st.markdown(response_text)
 
                 # Store with urgency class for history rendering
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response_text,
-                    "urgency_class": urgency_class,
-                })
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": response_text,
+                        "urgency_class": urgency_class,
+                    }
+                )
 
                 # Debug expander (for development)
                 with st.expander("🔍 Debug Info", expanded=False):
@@ -152,11 +169,17 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                     if debug:
                         col1, col2, col3 = st.columns(3)
                         with col1:
-                            st.metric("Intent", debug.get("intent", {}).get("intent", "N/A"))
+                            st.metric(
+                                "Intent", debug.get("intent", {}).get("intent", "N/A")
+                            )
                         with col2:
-                            st.metric("Urgency", debug.get("urgency", {}).get("level", "N/A"))
+                            st.metric(
+                                "Urgency", debug.get("urgency", {}).get("level", "N/A")
+                            )
                         with col3:
-                            symptom_count = len(debug.get("symptoms", {}).get("symptoms", []))
+                            symptom_count = len(
+                                debug.get("symptoms", {}).get("symptoms", [])
+                            )
                             st.metric("Symptoms", symptom_count)
                         st.json(debug)
 
@@ -166,9 +189,11 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                     with sat_cols[0]:
                         rating = st.slider(
                             "How helpful was this response?",
-                            min_value=1, max_value=5, value=3,
+                            min_value=1,
+                            max_value=5,
+                            value=3,
                             key=f"rating_{st.session_state.turn_count}",
-                            help="1 = Not helpful, 5 = Very helpful"
+                            help="1 = Not helpful, 5 = Very helpful",
                         )
                     with sat_cols[1]:
                         thumbs = st.radio(
@@ -178,7 +203,9 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                             key=f"thumbs_{st.session_state.turn_count}",
                         )
                     with sat_cols[2]:
-                        if st.button("Submit", key=f"submit_{st.session_state.turn_count}"):
+                        if st.button(
+                            "Submit", key=f"submit_{st.session_state.turn_count}"
+                        ):
                             thumbs_val = "up" if thumbs == "👍" else "down"
                             feedback = {
                                 "turn": st.session_state.turn_count,
@@ -211,10 +238,12 @@ if user_input := st.chat_input("Describe your symptoms or ask a health question.
                     f"*Technical details: {str(e)[:200]}*"
                 )
                 st.markdown(error_msg)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": error_msg,
-                })
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": error_msg,
+                    }
+                )
 
 # ── SIDEBAR ──────────────────────────────────────────────────
 with st.sidebar:
@@ -267,7 +296,7 @@ with st.sidebar:
         "professional medical advice, diagnosis, or treatment. Always seek "
         "the advice of your physician or other qualified health provider."
         "</div>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     st.markdown("---")

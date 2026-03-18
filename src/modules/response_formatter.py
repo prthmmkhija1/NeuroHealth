@@ -12,24 +12,22 @@ Formats the final response for the user:
 Pure Python — no API calls needed.
 """
 
-
 # Urgency color codes and emoji
 URGENCY_DISPLAY = {
-    "EMERGENCY":          {"emoji": "🔴", "label": "EMERGENCY",         "color": "#FF0000"},
-    "URGENT":             {"emoji": "🟠", "label": "URGENT",            "color": "#FF6600"},
-    "SOON":               {"emoji": "🟡", "label": "SEE DOCTOR SOON",   "color": "#FFCC00"},
-    "ROUTINE":            {"emoji": "🟢", "label": "ROUTINE",           "color": "#00CC00"},
-    "SELF_CARE":          {"emoji": "🔵", "label": "SELF-CARE",         "color": "#0099FF"},
-    "NEEDS_CLARIFICATION":{"emoji": "⚪", "label": "MORE INFO NEEDED",  "color": "#999999"},
+    "EMERGENCY": {"emoji": "🔴", "label": "EMERGENCY", "color": "#FF0000"},
+    "URGENT": {"emoji": "🟠", "label": "URGENT", "color": "#FF6600"},
+    "SOON": {"emoji": "🟡", "label": "SEE DOCTOR SOON", "color": "#FFCC00"},
+    "ROUTINE": {"emoji": "🟢", "label": "ROUTINE", "color": "#00CC00"},
+    "SELF_CARE": {"emoji": "🔵", "label": "SELF-CARE", "color": "#0099FF"},
+    "NEEDS_CLARIFICATION": {
+        "emoji": "⚪",
+        "label": "MORE INFO NEEDED",
+        "color": "#999999",
+    },
 }
 
 
-def format_response(
-    ai_response,
-    urgency_info,
-    appointment_info,
-    user_message
-):
+def format_response(ai_response, urgency_info, appointment_info, user_message):
     """
     Formats the final response shown to the user.
 
@@ -49,9 +47,7 @@ def format_response(
     text_parts = []
 
     # Urgency header
-    text_parts.append(
-        f"{urgency_display['emoji']} {urgency_display['label']}"
-    )
+    text_parts.append(f"{urgency_display['emoji']} {urgency_display['label']}")
     text_parts.append("")  # blank line
 
     # Main AI response
@@ -61,10 +57,14 @@ def format_response(
     # Action items section
     text_parts.append("─" * 40)
     text_parts.append("WHAT TO DO NEXT:")
-    text_parts.append(f"• {urgency_info.get('call_to_action', 'Please consult a healthcare provider')}")
+    text_parts.append(
+        f"• {urgency_info.get('call_to_action', 'Please consult a healthcare provider')}"
+    )
 
     if appointment_info and urgency_level != "EMERGENCY":
-        text_parts.append(f"• See a: {appointment_info.get('specialty', 'General Practitioner')}")
+        text_parts.append(
+            f"• See a: {appointment_info.get('specialty', 'General Practitioner')}"
+        )
         text_parts.append(f"• When: {appointment_info.get('urgency', 'Soon')}")
 
         if appointment_info.get("what_to_bring"):
@@ -97,5 +97,5 @@ def format_response(
         "metadata": {
             "urgency": urgency_info,
             "appointment": appointment_info,
-        }
+        },
     }

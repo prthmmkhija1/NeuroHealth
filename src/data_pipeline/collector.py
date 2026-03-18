@@ -19,16 +19,17 @@ Sources used (exactly as listed on the project page):
 Attribution: "Information from MedlinePlus.gov, National Library of Medicine, NIH"
 """
 
-import sys
-import requests
-import json
-import zipfile
 import io
-import time
+import json
 import re
-from pathlib import Path
-from datetime import date, timedelta
+import sys
+import time
 import xml.etree.ElementTree as ET
+import zipfile
+from datetime import date, timedelta
+from pathlib import Path
+
+import requests
 from bs4 import BeautifulSoup
 
 RAW_DATA_DIR = Path("data/raw")
@@ -41,6 +42,7 @@ RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 # with full summaries, categories, related topics.
 # Free public download — no account or API key required.
 # ──────────────────────────────────────────────────────────────
+
 
 def get_latest_medlineplus_xml_url():
     """
@@ -94,7 +96,9 @@ def fetch_medlineplus_health_topics():
 
         print(f"  Parsing XML ({len(xml_content) // 1024} KB)...")
 
-        root = ET.fromstring(xml_content)
+        root = ET.fromstring(
+            xml_content
+        )  # nosec B314 - MedlinePlus XML is a trusted source
         documents = []
 
         for topic in root.findall(".//health-topic"):
@@ -129,21 +133,25 @@ def fetch_medlineplus_health_topics():
             groups = [g.text.strip() for g in topic.findall("group") if g.text]
 
             # Get synonyms / also-called
-            also_called = [a.text.strip() for a in topic.findall("also-called") if a.text]
+            also_called = [
+                a.text.strip() for a in topic.findall("also-called") if a.text
+            ]
 
             # Get related topics
             related = [r.get("title", "") for r in topic.findall("related-topic")]
 
-            documents.append({
-                "title": title,
-                "content": clean_text,
-                "source": "MedlinePlus (NIH/NLM)",
-                "url": url_attr,
-                "categories": groups,
-                "also_called": also_called,
-                "related_topics": related[:5],
-                "data_type": "health_topic",
-            })
+            documents.append(
+                {
+                    "title": title,
+                    "content": clean_text,
+                    "source": "MedlinePlus (NIH/NLM)",
+                    "url": url_attr,
+                    "categories": groups,
+                    "also_called": also_called,
+                    "related_topics": related[:5],
+                    "data_type": "health_topic",
+                }
+            )
 
         print(f"  Extracted {len(documents)} health topics from MedlinePlus")
         return documents
@@ -161,10 +169,10 @@ def fetch_medlineplus_health_topics():
 
 DEFINITION_FILES = {
     "general_health": "https://medlineplus.gov/xml/generalhealthdefinitions.xml",
-    "fitness":        "https://medlineplus.gov/xml/fitnessdefinitions.xml",
-    "nutrition":      "https://medlineplus.gov/xml/nutritiondefinitions.xml",
-    "vitamins":       "https://medlineplus.gov/xml/vitaminsdefinitions.xml",
-    "minerals":       "https://medlineplus.gov/xml/mineralsdefinitions.xml",
+    "fitness": "https://medlineplus.gov/xml/fitnessdefinitions.xml",
+    "nutrition": "https://medlineplus.gov/xml/nutritiondefinitions.xml",
+    "vitamins": "https://medlineplus.gov/xml/vitaminsdefinitions.xml",
+    "minerals": "https://medlineplus.gov/xml/mineralsdefinitions.xml",
 }
 
 
@@ -184,7 +192,9 @@ def fetch_medlineplus_definitions():
             response = requests.get(url, timeout=30)
             response.raise_for_status()
 
-            root = ET.fromstring(response.content)
+            root = ET.fromstring(  # nosec B314 - MedlinePlus XML is a trusted source
+                response.content
+            )
 
             # Actual structure: <term-group reference="..."><term>...</term><definition>...</definition></term-group>
             for group in root.findall(".//term-group"):
@@ -204,13 +214,15 @@ def fetch_medlineplus_definitions():
                 if len(definition) < 20:
                     continue
 
-                documents.append({
-                    "title": term,
-                    "content": f"{term}: {definition}",
-                    "source": f"MedlinePlus Definitions - {source_name}",
-                    "categories": [category],
-                    "data_type": "definition",
-                })
+                documents.append(
+                    {
+                        "title": term,
+                        "content": f"{term}: {definition}",
+                        "source": f"MedlinePlus Definitions - {source_name}",
+                        "categories": [category],
+                        "data_type": "definition",
+                    }
+                )
 
             print(f"  {category}: fetched definitions")
             time.sleep(0.3)
@@ -232,26 +244,86 @@ def fetch_medlineplus_definitions():
 # Mayo Clinic public condition URLs (diseases-conditions index)
 MAYO_CLINIC_CONDITIONS = [
     # High-priority conditions that cover major body systems
-    ("diabetes", "https://www.mayoclinic.org/diseases-conditions/type-2-diabetes/symptoms-causes/syc-20351193"),
-    ("hypertension", "https://www.mayoclinic.org/diseases-conditions/high-blood-pressure/symptoms-causes/syc-20373410"),
-    ("asthma", "https://www.mayoclinic.org/diseases-conditions/asthma/symptoms-causes/syc-20369653"),
-    ("migraine", "https://www.mayoclinic.org/diseases-conditions/migraine-headache/symptoms-causes/syc-20360201"),
-    ("depression", "https://www.mayoclinic.org/diseases-conditions/depression/symptoms-causes/syc-20356007"),
-    ("anxiety", "https://www.mayoclinic.org/diseases-conditions/anxiety/symptoms-causes/syc-20350961"),
-    ("heart-attack", "https://www.mayoclinic.org/diseases-conditions/heart-attack/symptoms-causes/syc-20373106"),
-    ("stroke", "https://www.mayoclinic.org/diseases-conditions/stroke/symptoms-causes/syc-20350113"),
-    ("pneumonia", "https://www.mayoclinic.org/diseases-conditions/pneumonia/symptoms-causes/syc-20354204"),
-    ("arthritis", "https://www.mayoclinic.org/diseases-conditions/arthritis/symptoms-causes/syc-20350772"),
-    ("allergies", "https://www.mayoclinic.org/diseases-conditions/allergies/symptoms-causes/syc-20351497"),
-    ("covid-19", "https://www.mayoclinic.org/diseases-conditions/coronavirus/symptoms-causes/syc-20479963"),
-    ("copd", "https://www.mayoclinic.org/diseases-conditions/copd/symptoms-causes/syc-20353679"),
-    ("kidney-disease", "https://www.mayoclinic.org/diseases-conditions/chronic-kidney-disease/symptoms-causes/syc-20354521"),
-    ("anemia", "https://www.mayoclinic.org/diseases-conditions/anemia/symptoms-causes/syc-20351360"),
-    ("back-pain", "https://www.mayoclinic.org/diseases-conditions/back-pain/symptoms-causes/syc-20369906"),
-    ("urinary-tract-infection", "https://www.mayoclinic.org/diseases-conditions/urinary-tract-infection/symptoms-causes/syc-20353447"),
-    ("gastroesophageal-reflux", "https://www.mayoclinic.org/diseases-conditions/gerd/symptoms-causes/syc-20361940"),
-    ("influenza", "https://www.mayoclinic.org/diseases-conditions/flu/symptoms-causes/syc-20351719"),
-    ("skin-cancer", "https://www.mayoclinic.org/diseases-conditions/skin-cancer/symptoms-causes/syc-20377605"),
+    (
+        "diabetes",
+        "https://www.mayoclinic.org/diseases-conditions/type-2-diabetes/symptoms-causes/syc-20351193",
+    ),
+    (
+        "hypertension",
+        "https://www.mayoclinic.org/diseases-conditions/high-blood-pressure/symptoms-causes/syc-20373410",
+    ),
+    (
+        "asthma",
+        "https://www.mayoclinic.org/diseases-conditions/asthma/symptoms-causes/syc-20369653",
+    ),
+    (
+        "migraine",
+        "https://www.mayoclinic.org/diseases-conditions/migraine-headache/symptoms-causes/syc-20360201",
+    ),
+    (
+        "depression",
+        "https://www.mayoclinic.org/diseases-conditions/depression/symptoms-causes/syc-20356007",
+    ),
+    (
+        "anxiety",
+        "https://www.mayoclinic.org/diseases-conditions/anxiety/symptoms-causes/syc-20350961",
+    ),
+    (
+        "heart-attack",
+        "https://www.mayoclinic.org/diseases-conditions/heart-attack/symptoms-causes/syc-20373106",
+    ),
+    (
+        "stroke",
+        "https://www.mayoclinic.org/diseases-conditions/stroke/symptoms-causes/syc-20350113",
+    ),
+    (
+        "pneumonia",
+        "https://www.mayoclinic.org/diseases-conditions/pneumonia/symptoms-causes/syc-20354204",
+    ),
+    (
+        "arthritis",
+        "https://www.mayoclinic.org/diseases-conditions/arthritis/symptoms-causes/syc-20350772",
+    ),
+    (
+        "allergies",
+        "https://www.mayoclinic.org/diseases-conditions/allergies/symptoms-causes/syc-20351497",
+    ),
+    (
+        "covid-19",
+        "https://www.mayoclinic.org/diseases-conditions/coronavirus/symptoms-causes/syc-20479963",
+    ),
+    (
+        "copd",
+        "https://www.mayoclinic.org/diseases-conditions/copd/symptoms-causes/syc-20353679",
+    ),
+    (
+        "kidney-disease",
+        "https://www.mayoclinic.org/diseases-conditions/chronic-kidney-disease/symptoms-causes/syc-20354521",
+    ),
+    (
+        "anemia",
+        "https://www.mayoclinic.org/diseases-conditions/anemia/symptoms-causes/syc-20351360",
+    ),
+    (
+        "back-pain",
+        "https://www.mayoclinic.org/diseases-conditions/back-pain/symptoms-causes/syc-20369906",
+    ),
+    (
+        "urinary-tract-infection",
+        "https://www.mayoclinic.org/diseases-conditions/urinary-tract-infection/symptoms-causes/syc-20353447",
+    ),
+    (
+        "gastroesophageal-reflux",
+        "https://www.mayoclinic.org/diseases-conditions/gerd/symptoms-causes/syc-20361940",
+    ),
+    (
+        "influenza",
+        "https://www.mayoclinic.org/diseases-conditions/flu/symptoms-causes/syc-20351719",
+    ),
+    (
+        "skin-cancer",
+        "https://www.mayoclinic.org/diseases-conditions/skin-cancer/symptoms-causes/syc-20377605",
+    ),
 ]
 
 
@@ -300,14 +372,16 @@ def fetch_mayo_clinic_data():
             if len(text) > 5000:
                 text = text[:5000] + "..."
 
-            documents.append({
-                "title": f"{condition_name.replace('-', ' ').title()} — Overview",
-                "content": text,
-                "source": "Mayo Clinic",
-                "url": url,
-                "categories": [condition_name],
-                "data_type": "condition_overview",
-            })
+            documents.append(
+                {
+                    "title": f"{condition_name.replace('-', ' ').title()} — Overview",
+                    "content": text,
+                    "source": "Mayo Clinic",
+                    "url": url,
+                    "categories": [condition_name],
+                    "data_type": "condition_overview",
+                }
+            )
             print(f"  {condition_name}: collected ({len(text)} chars)")
 
             # Be respectful — rate limit
@@ -327,6 +401,7 @@ def fetch_mayo_clinic_data():
 # Curated evidence-based guidelines from USPSTF, AHA, ADA,
 # etc. (structured data since guidelines.gov is deprecated).
 # ──────────────────────────────────────────────────────────────
+
 
 def create_clinical_guidelines_data():
     """
@@ -541,7 +616,12 @@ def create_clinical_guidelines_data():
             "source": "ADA",
             "guideline_org": "American Diabetes Association",
             "year": 2024,
-            "categories": ["chronic_disease", "diabetes", "treatment", "preventive_care"],
+            "categories": [
+                "chronic_disease",
+                "diabetes",
+                "treatment",
+                "preventive_care",
+            ],
             "data_type": "clinical_guideline",
         },
         # ── CDC Guidelines ──────────────────────────────────────
@@ -674,15 +754,17 @@ def create_clinical_guidelines_data():
 
     documents = []
     for g in guidelines:
-        documents.append({
-            "title": g["title"],
-            "content": g["content"],
-            "source": g["source"],
-            "categories": g["categories"],
-            "data_type": g["data_type"],
-            "guideline_org": g.get("guideline_org", ""),
-            "year": g.get("year", ""),
-        })
+        documents.append(
+            {
+                "title": g["title"],
+                "content": g["content"],
+                "source": g["source"],
+                "categories": g["categories"],
+                "data_type": g["data_type"],
+                "guideline_org": g.get("guideline_org", ""),
+                "year": g.get("year", ""),
+            }
+        )
 
     print(f"  Compiled {len(documents)} clinical practice guidelines")
     return documents
@@ -698,6 +780,7 @@ def create_clinical_guidelines_data():
 # seen in HealthBoards, MedHelp, Reddit r/AskDocs, and
 # symptom checker interaction logs.
 # ──────────────────────────────────────────────────────────────
+
 
 def create_public_forum_qa_data():
     """
@@ -840,14 +923,18 @@ def create_public_forum_qa_data():
 
     documents = []
     for qa in forum_qa:
-        documents.append({
-            "title": f"Forum Q&A: {qa['question'][:60]}...",
-            "content": f"Question: {qa['question']}\n\nAnswer: {qa['answer']}",
-            "source": qa.get("source", "Curated from public medical forum patterns"),
-            "categories": [qa["category"]],
-            "urgency": qa["urgency"],
-            "data_type": qa["data_type"],
-        })
+        documents.append(
+            {
+                "title": f"Forum Q&A: {qa['question'][:60]}...",
+                "content": f"Question: {qa['question']}\n\nAnswer: {qa['answer']}",
+                "source": qa.get(
+                    "source", "Curated from public medical forum patterns"
+                ),
+                "categories": [qa["category"]],
+                "urgency": qa["urgency"],
+                "data_type": qa["data_type"],
+            }
+        )
 
     print(f"  Created {len(documents)} public forum Q&A entries")
     return documents
@@ -859,6 +946,7 @@ def create_public_forum_qa_data():
 # "synthetic patient inquiry scenarios based on common
 #  healthcare use cases" — OSRE project page
 # ──────────────────────────────────────────────────────────────
+
 
 def create_synthetic_qa_pairs():
     """
@@ -872,204 +960,241 @@ def create_synthetic_qa_pairs():
         {
             "question": "I have crushing chest pain that radiates to my left arm and I'm sweating",
             "answer": "EMERGENCY: These symptoms are warning signs of a heart attack. Call 911 IMMEDIATELY. Do not drive yourself. Chew an aspirin (325mg) if available and not allergic. Stay calm and sit down until help arrives.",
-            "urgency": "EMERGENCY", "category": "cardiac"
+            "urgency": "EMERGENCY",
+            "category": "cardiac",
         },
         {
             "question": "I have chest pressure and my jaw hurts and I feel nauseous",
             "answer": "EMERGENCY: Chest pressure with jaw pain and nausea can indicate a heart attack. Call 911 NOW. These symptoms require immediate emergency care. Do not ignore or wait.",
-            "urgency": "EMERGENCY", "category": "cardiac"
+            "urgency": "EMERGENCY",
+            "category": "cardiac",
         },
         # ── Emergency (neurological) ─────────────────────────────
         {
             "question": "I suddenly can't speak properly and one side of my face is drooping",
             "answer": "EMERGENCY: These are stroke symptoms. Call 911 immediately. Remember FAST: Face drooping, Arm weakness, Speech difficulty, Time to call 911. Every minute matters in a stroke.",
-            "urgency": "EMERGENCY", "category": "neurological"
+            "urgency": "EMERGENCY",
+            "category": "neurological",
         },
         {
             "question": "The worst headache of my life came on suddenly 15 minutes ago",
             "answer": "EMERGENCY: A sudden severe headache described as the 'worst of your life' can indicate a brain bleed (subarachnoid hemorrhage). This is a medical emergency. Call 911 immediately.",
-            "urgency": "EMERGENCY", "category": "neurological"
+            "urgency": "EMERGENCY",
+            "category": "neurological",
         },
         # ── Emergency (respiratory/allergic) ────────────────────
         {
             "question": "I'm having trouble breathing and my throat feels like it's closing up after eating peanuts",
             "answer": "EMERGENCY: This is anaphylaxis — a life-threatening allergic reaction. Call 911 IMMEDIATELY. Use an EpiPen if available. Do not wait to see if it improves.",
-            "urgency": "EMERGENCY", "category": "allergic"
+            "urgency": "EMERGENCY",
+            "category": "allergic",
         },
         {
             "question": "I can't breathe properly and my lips are turning blue",
             "answer": "EMERGENCY: Blue lips (cyanosis) with difficulty breathing is a life-threatening emergency. Call 911 IMMEDIATELY. This indicates dangerously low oxygen levels.",
-            "urgency": "EMERGENCY", "category": "respiratory"
+            "urgency": "EMERGENCY",
+            "category": "respiratory",
         },
         # ── Emergency (overdose/poisoning) ──────────────────────
         {
             "question": "I took too many pills and I feel very drowsy",
             "answer": "EMERGENCY: Call 911 or Poison Control (1-800-222-1222) IMMEDIATELY. Tell them exactly what medication and how much. Do not try to vomit unless directed by professionals.",
-            "urgency": "EMERGENCY", "category": "overdose"
+            "urgency": "EMERGENCY",
+            "category": "overdose",
         },
         # ── Emergency (mental health crisis) ────────────────────
         {
             "question": "I don't want to be here anymore and I'm thinking about ending things",
             "answer": "I'm deeply concerned and I want you to be safe. Please call or text 988 (Suicide and Crisis Lifeline) RIGHT NOW. You can also text HOME to 741741. Someone is available 24/7. You are not alone and help is available.",
-            "urgency": "EMERGENCY", "category": "mental_health_crisis"
+            "urgency": "EMERGENCY",
+            "category": "mental_health_crisis",
         },
         # ── Urgent ──────────────────────────────────────────────
         {
             "question": "I have a fever of 103°F that has lasted 3 days and I feel very weak",
             "answer": "This requires URGENT evaluation today. A high fever lasting 3 days needs diagnosis. Visit an urgent care clinic or ER today. Stay hydrated. Take acetaminophen or ibuprofen as directed while you seek care.",
-            "urgency": "URGENT", "category": "fever"
+            "urgency": "URGENT",
+            "category": "fever",
         },
         {
             "question": "I've been having severe lower right abdominal pain for 6 hours that keeps getting worse",
             "answer": "This urgently needs evaluation — could be appendicitis. Please go to an ER or urgent care within the next few hours. Do not eat or drink until evaluated. Worsening lower right abdominal pain should always be assessed promptly.",
-            "urgency": "URGENT", "category": "abdominal"
+            "urgency": "URGENT",
+            "category": "abdominal",
         },
         {
             "question": "My child has a fever of 104°F and is very lethargic and not responding normally",
             "answer": "URGENT: A 104°F fever with lethargy in a child needs immediate medical attention. Go to the ER or urgent care NOW. High fevers in children with altered responsiveness require prompt evaluation.",
-            "urgency": "URGENT", "category": "pediatric"
+            "urgency": "URGENT",
+            "category": "pediatric",
         },
         # ── Routine ─────────────────────────────────────────────
         {
             "question": "I have a runny nose, mild sore throat, and slight cough for 2 days",
             "answer": "This sounds like a common cold, which usually resolves in 7-10 days. Rest, drink plenty of fluids, and use over-the-counter remedies for symptom relief. See a doctor if symptoms worsen significantly or last more than 10 days.",
-            "urgency": "ROUTINE", "category": "respiratory"
+            "urgency": "ROUTINE",
+            "category": "respiratory",
         },
         {
             "question": "I have a mild headache that started this morning, about a 3 out of 10",
             "answer": "A mild headache can often be managed at home. Drink water (dehydration is common), rest in a quiet dark room, and consider over-the-counter pain relievers like acetaminophen or ibuprofen. Seek care if the headache worsens dramatically or is accompanied by fever and stiff neck.",
-            "urgency": "ROUTINE", "category": "headache"
+            "urgency": "ROUTINE",
+            "category": "headache",
         },
         {
             "question": "I've been more tired than usual for the past week",
             "answer": "Fatigue lasting a week can have many causes: poor sleep, stress, dehydration, or nutritional deficiencies. Try improving sleep, staying hydrated, and eating balanced meals. If fatigue persists beyond 2-3 weeks or is accompanied by weight loss, fever, or shortness of breath, schedule a doctor's appointment.",
-            "urgency": "ROUTINE", "category": "general"
+            "urgency": "ROUTINE",
+            "category": "general",
         },
         {
             "question": "I have a small cut on my finger from cooking that is still bleeding after 10 minutes",
             "answer": "Apply firm direct pressure with a clean cloth for 10-15 minutes without lifting. Elevate your hand above heart level. If bleeding does not stop after 20-30 minutes of direct pressure, or the wound is deep or gaping, seek urgent care.",
-            "urgency": "SELF_CARE", "category": "wound"
+            "urgency": "SELF_CARE",
+            "category": "wound",
         },
         # ── Self-care ────────────────────────────────────────────
         {
             "question": "I have mild sunburn on my arms and shoulders",
             "answer": "For mild sunburn: apply cool compresses, use aloe vera or gentle moisturizer, drink extra water, and take ibuprofen or acetaminophen for discomfort. Avoid further sun exposure until healed. See a doctor if you have blistering over large areas, fever, or severe pain.",
-            "urgency": "SELF_CARE", "category": "skin"
+            "urgency": "SELF_CARE",
+            "category": "skin",
         },
         # ── Clarification scenarios ──────────────────────────────
         {
             "question": "My stomach hurts",
             "answer": "I want to help you better. Can you tell me more? Where exactly does it hurt (upper, lower, left, right side, or all over)? How severe is the pain on a scale of 1-10? How long have you had it? Do you have any other symptoms like nausea, vomiting, fever, or diarrhea?",
-            "urgency": "NEEDS_CLARIFICATION", "category": "abdominal"
+            "urgency": "NEEDS_CLARIFICATION",
+            "category": "abdominal",
         },
         {
             "question": "I don't feel well",
             "answer": "I'm sorry you're not feeling well. To help you better, could you describe your symptoms? For example: What exactly are you experiencing? When did it start? How severe is it on a scale of 1-10? Any fever, pain, or difficulty breathing?",
-            "urgency": "NEEDS_CLARIFICATION", "category": "general"
+            "urgency": "NEEDS_CLARIFICATION",
+            "category": "general",
         },
         # ── Chronic condition management ─────────────────────────
         {
             "question": "My blood sugar has been running higher than normal this week — I have type 2 diabetes",
             "answer": "Elevated blood sugar can be caused by illness, stress, diet changes, or medication timing. Check your glucose more frequently. If blood sugar remains very high (over 300 mg/dL) or you have symptoms like extreme thirst or confusion, contact your doctor or seek urgent care.",
-            "urgency": "SOON", "category": "diabetes"
+            "urgency": "SOON",
+            "category": "diabetes",
         },
         {
             "question": "I have asthma and my inhaler isn't helping my symptoms much today",
             "answer": "If your rescue inhaler is not providing relief, this could indicate worsening asthma. If you are having significant difficulty breathing, use your rescue inhaler, sit upright, and go to the ER if breathing does not improve within 15-20 minutes. Contact your doctor today even if breathing improves.",
-            "urgency": "URGENT", "category": "asthma"
+            "urgency": "URGENT",
+            "category": "asthma",
         },
         # ── Mental health ────────────────────────────────────────
         {
             "question": "I've been feeling very depressed and hopeless and have no motivation for weeks",
             "answer": "I hear you, and I'm glad you're reaching out. Depression is a real medical condition with effective treatments available. I encourage you to speak with your doctor or a mental health professional. If you are having any thoughts of harming yourself, please call or text 988 (Suicide and Crisis Lifeline) right away.",
-            "urgency": "URGENT", "category": "mental_health"
+            "urgency": "URGENT",
+            "category": "mental_health",
         },
         {
             "question": "I've been having severe anxiety and panic attacks that wake me up at night",
             "answer": "Panic attacks are distressing but not life-threatening. During an attack: focus on slow deep breaths (breathe in for 4 counts, hold 4, out for 4). Frequent panic attacks affecting your sleep warrant evaluation by a doctor or mental health professional.",
-            "urgency": "SOON", "category": "mental_health"
+            "urgency": "SOON",
+            "category": "mental_health",
         },
         # ── Healthcare navigation ────────────────────────────────
         {
             "question": "What type of doctor should I see for recurring migraines?",
             "answer": "Start with your primary care physician (PCP) who can provide initial treatment and referrals. If migraines are frequent or severe, ask for a referral to a neurologist who specializes in headache disorders. Keep a headache diary noting frequency, triggers, and duration to bring to your appointment.",
-            "urgency": "ROUTINE", "category": "find_doctor"
+            "urgency": "ROUTINE",
+            "category": "find_doctor",
         },
         {
             "question": "My doctor prescribed metformin. What is it for?",
             "answer": "Metformin is most commonly prescribed to treat type 2 diabetes. It lowers blood sugar mainly by reducing the amount of glucose your liver releases and improving insulin sensitivity. It is usually taken with meals to reduce stomach side effects. Always follow your doctor's dosing instructions.",
-            "urgency": "ROUTINE", "category": "medication_info"
+            "urgency": "ROUTINE",
+            "category": "medication_info",
         },
         # ── Clinical practice guideline–based entries ────────────
         {
             "question": "When should adults get a colonoscopy?",
             "answer": "The U.S. Preventive Services Task Force (USPSTF) recommends screening for colorectal cancer starting at age 45 and continuing through age 75 for average-risk adults. Screening options include a colonoscopy every 10 years, or a stool-based test (FIT) annually. Talk with your doctor about which screening schedule is right for you.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         {
             "question": "How often should blood pressure be checked?",
             "answer": "Adults 18 and older should have their blood pressure checked at least once every two years if it is normal (below 120/80 mmHg). If it is elevated (120-129/<80) or if you have risk factors, check it at least annually. High blood pressure usually has no symptoms, so regular monitoring is very important.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         {
             "question": "What are the guidelines for mammogram screenings?",
             "answer": "The USPSTF recommends biennial (every 2 years) mammography screening for women starting at age 40 through age 74. Women at higher risk (family history of breast cancer, genetic mutations like BRCA1/2) may need to start earlier or get screened more frequently. Discuss your personal risk with your doctor.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         {
             "question": "Should I get a flu shot every year?",
             "answer": "Yes. The CDC recommends annual influenza vaccination for everyone 6 months of age and older. Flu viruses change each season, so a new vaccine is needed every year. The best time to get vaccinated is before flu season begins, usually by the end of October. Vaccination is especially important for people over 65, pregnant women, and those with chronic health conditions.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         {
             "question": "What is the recommended treatment for mild to moderate hypertension?",
             "answer": "According to clinical guidelines, initial treatment for mild to moderate hypertension (stage 1: 130-139/80-89 mmHg) starts with lifestyle modifications: reducing sodium intake to less than 2300 mg/day, regular aerobic exercise (150 minutes/week), maintaining a healthy weight, and limiting alcohol. If blood pressure remains elevated after 3-6 months, your doctor may prescribe medication such as an ACE inhibitor, ARB, calcium channel blocker, or thiazide diuretic.",
-            "urgency": "ROUTINE", "category": "chronic_disease"
+            "urgency": "ROUTINE",
+            "category": "chronic_disease",
         },
         {
             "question": "How should type 2 diabetes be managed day to day?",
             "answer": "Daily diabetes management includes: monitoring blood sugar levels as directed by your doctor, taking medications consistently, eating balanced meals with controlled carbohydrate portions, regular physical activity (at least 150 minutes of moderate exercise per week), and attending regular check-ups including A1C testing every 3-6 months. Target A1C is generally below 7% for most adults. Always consult your healthcare team for a personalized plan.",
-            "urgency": "ROUTINE", "category": "chronic_disease"
+            "urgency": "ROUTINE",
+            "category": "chronic_disease",
         },
         # ── Healthcare navigation ────────────────────────────────
         {
             "question": "I don't have health insurance. Where can I get medical care?",
             "answer": "If you don't have insurance, you still have options for affordable care: Federally Qualified Health Centers (FQHCs) offer sliding-scale fees based on income. Many hospitals have charity care programs. Urgent care clinics often cost less than ERs. Check Healthcare.gov for marketplace plans or Medicaid eligibility. Some pharmacies offer low-cost clinics for basic care. Prescription assistance programs like GoodRx can reduce medication costs. Community health centers are available nationwide — find one at findahealthcenter.hrsa.gov.",
-            "urgency": "ROUTINE", "category": "healthcare_navigation"
+            "urgency": "ROUTINE",
+            "category": "healthcare_navigation",
         },
         {
             "question": "How do I find a specialist without a referral?",
             "answer": "Many specialists accept patients without referrals, depending on your insurance plan. PPO plans typically allow direct specialist visits. HMO plans usually require a referral from your primary care physician. To find a specialist: check your insurance provider directory, ask your PCP for recommendations, use hospital finder tools online, or call the specialist's office to ask if they accept your insurance and whether a referral is needed.",
-            "urgency": "ROUTINE", "category": "healthcare_navigation"
+            "urgency": "ROUTINE",
+            "category": "healthcare_navigation",
         },
         # ── Pediatric care topics ────────────────────────────────
         {
             "question": "My newborn has a fever of 100.4°F (rectal). What should I do?",
             "answer": "URGENT: Any fever (100.4°F/38°C or higher) in a baby under 3 months old requires immediate medical evaluation. Go to the emergency room or call your pediatrician right away. Do NOT give fever-reducing medicine to a baby this young without medical direction. Fever in newborns can indicate a serious infection that needs prompt treatment.",
-            "urgency": "URGENT", "category": "pediatric"
+            "urgency": "URGENT",
+            "category": "pediatric",
         },
         {
             "question": "What is the childhood vaccination schedule?",
             "answer": "The CDC recommended childhood vaccination schedule includes: Birth: Hepatitis B; 2 months: DTaP, IPV, Hib, PCV13, Rotavirus, Hepatitis B; 4 months: DTaP, IPV, Hib, PCV13, Rotavirus; 6 months: DTaP, IPV, Hib, PCV13, Hepatitis B, Influenza; 12-15 months: MMR, Varicella, Hepatitis A, PCV13, Hib; 4-6 years: DTaP, IPV, MMR, Varicella. Flu vaccine annually starting at 6 months. COVID vaccine as recommended. Talk to your pediatrician for the most current schedule and any catch-up vaccinations needed.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         # ── Elderly/geriatric care ───────────────────────────────
         {
             "question": "What health screenings should adults over 65 get?",
             "answer": "Adults over 65 should discuss these screenings with their doctor: Annual wellness visit and physical exam. Blood pressure check at every visit. Cholesterol screening every 4-6 years. Diabetes screening (fasting glucose or A1C). Colonoscopy every 10 years through age 75. Annual flu and pneumonia vaccines. Shingles vaccine (Shingrix, 2 doses). Bone density scan (DEXA) for osteoporosis, especially for women. Vision and hearing tests annually. Depression screening. Cognitive assessment if concerns arise. Lung cancer screening (annual low-dose CT) if history of heavy smoking.",
-            "urgency": "ROUTINE", "category": "preventive_care"
+            "urgency": "ROUTINE",
+            "category": "preventive_care",
         },
         # ── Medication safety ────────────────────────────────────
         {
             "question": "What should I know about drug interactions?",
             "answer": "Drug interactions occur when one medication affects how another works, potentially causing side effects or reducing effectiveness. Important safety practices: Always tell your doctor and pharmacist about ALL medications you take, including over-the-counter drugs, supplements, and herbal products. Don't start or stop medications without consulting your doctor. Read medication guides and warning labels. Avoid grapefruit with certain medications (statins, blood pressure drugs). Don't mix alcohol with sedatives, painkillers, or anti-anxiety medications. Use one pharmacy so they can check for interactions automatically.",
-            "urgency": "ROUTINE", "category": "medication_info"
+            "urgency": "ROUTINE",
+            "category": "medication_info",
         },
         # ── Wellness and lifestyle ───────────────────────────────
         {
             "question": "What are evidence-based strategies for better sleep?",
             "answer": "Sleep hygiene practices recommended by sleep medicine experts: Maintain a consistent sleep schedule (same bedtime and wake time daily). Create a cool, dark, quiet sleep environment. Avoid screens for 30-60 minutes before bed. Limit caffeine after 2 PM. Exercise regularly, but not within 3 hours of bedtime. Avoid large meals close to bedtime. Use the bed only for sleep and intimacy. If you can't fall asleep within 20 minutes, get up and do something relaxing until you feel sleepy. Consider cognitive behavioral therapy for insomnia (CBT-I) if sleep problems persist. Consult a doctor if you have persistent insomnia, loud snoring, or excessive daytime sleepiness.",
-            "urgency": "ROUTINE", "category": "wellness"
+            "urgency": "ROUTINE",
+            "category": "wellness",
         },
     ]
 
@@ -1077,14 +1202,16 @@ def create_synthetic_qa_pairs():
     # filter them out — cleaner checks doc.get("content", "") for min length.
     documents = []
     for qa in qa_pairs:
-        documents.append({
-            "title": qa["question"],
-            "content": f"Q: {qa['question']}\nA: {qa['answer']}",
-            "source": "synthetic_qa",
-            "url": "",
-            "category": qa.get("category", "general"),
-            "urgency": qa.get("urgency", "ROUTINE"),
-        })
+        documents.append(
+            {
+                "title": qa["question"],
+                "content": f"Q: {qa['question']}\nA: {qa['answer']}",
+                "source": "synthetic_qa",
+                "url": "",
+                "category": qa.get("category", "general"),
+                "urgency": qa.get("urgency", "ROUTINE"),
+            }
+        )
 
     print(f"  Created {len(documents)} synthetic Q&A pairs")
     return documents
@@ -1093,6 +1220,7 @@ def create_synthetic_qa_pairs():
 # ──────────────────────────────────────────────────────────────
 # MAIN COLLECTION PIPELINE
 # ──────────────────────────────────────────────────────────────
+
 
 def save_documents(documents, filename):
     """Saves collected documents to a JSON file."""
@@ -1123,39 +1251,57 @@ def collect_data(force=False):
     if force:
         print("Mode: FORCE — all sources will be re-fetched and overwritten")
     else:
-        print("Mode: INCREMENTAL — existing files will be skipped (use --force to re-fetch)")
+        print(
+            "Mode: INCREMENTAL — existing files will be skipped (use --force to re-fetch)"
+        )
     print("=" * 60)
 
     def _maybe_fetch(filename, fetch_fn, label):
         filepath = RAW_DATA_DIR / filename
         if not force and filepath.exists():
             docs = _load_existing_raw(filename)
-            print(f"\n{label} Skipping {filename} — already exists ({len(docs)} docs). Use --force to re-fetch.")
+            print(
+                f"\n{label} Skipping {filename} — already exists ({len(docs)} docs). Use --force to re-fetch."
+            )
             return docs
         docs = fetch_fn()
         save_documents(docs, filename)
         return docs
 
     # Source 1: MedlinePlus full health topics XML
-    health_topics = _maybe_fetch("medlineplus_topics.json", fetch_medlineplus_health_topics, "[1/6]")
+    health_topics = _maybe_fetch(
+        "medlineplus_topics.json", fetch_medlineplus_health_topics, "[1/6]"
+    )
 
     # Source 2: MedlinePlus term definitions
-    definitions = _maybe_fetch("medlineplus_definitions.json", fetch_medlineplus_definitions, "[2/6]")
+    definitions = _maybe_fetch(
+        "medlineplus_definitions.json", fetch_medlineplus_definitions, "[2/6]"
+    )
 
     # Source 3: Mayo Clinic health information
     mayo_data = _maybe_fetch("mayo_clinic_data.json", fetch_mayo_clinic_data, "[3/6]")
 
     # Source 4: Clinical practice guidelines
-    guidelines = _maybe_fetch("clinical_guidelines.json", create_clinical_guidelines_data, "[4/6]")
+    guidelines = _maybe_fetch(
+        "clinical_guidelines.json", create_clinical_guidelines_data, "[4/6]"
+    )
 
     # Source 5: Public forum Q&A
-    forum_qa = _maybe_fetch("public_forum_qa.json", create_public_forum_qa_data, "[5/6]")
+    forum_qa = _maybe_fetch(
+        "public_forum_qa.json", create_public_forum_qa_data, "[5/6]"
+    )
 
     # Source 6: Synthetic Q&A
     qa_pairs = _maybe_fetch("synthetic_qa.json", create_synthetic_qa_pairs, "[6/6]")
 
-    total = (len(health_topics) + len(definitions) + len(mayo_data)
-             + len(guidelines) + len(forum_qa) + len(qa_pairs))
+    total = (
+        len(health_topics)
+        + len(definitions)
+        + len(mayo_data)
+        + len(guidelines)
+        + len(forum_qa)
+        + len(qa_pairs)
+    )
     print(f"\n{'='*60}")
     print(f"Collection complete. Total documents: {total}")
     print(f"  MedlinePlus health topics   : {len(health_topics)}")

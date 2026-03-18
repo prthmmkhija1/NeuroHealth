@@ -3,11 +3,12 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-from tests.helpers import vector_store_ready, import_pipeline
 
+from tests.helpers import import_pipeline, vector_store_ready
 
 # Use shared helpers from conftest
 _vector_store_ready = vector_store_ready
@@ -35,14 +36,23 @@ def test_long_input_truncation():
 
 def test_emergency_keywords_overdose():
     from src.modules.intent_recognizer import classify_intent
-    for msg in ["heart attack", "took too many pills", "swallowed poison", "drank bleach"]:
+
+    for msg in [
+        "heart attack",
+        "took too many pills",
+        "swallowed poison",
+        "drank bleach",
+    ]:
         r = classify_intent(msg)
-        assert r["intent"] == "EMERGENCY", f"{msg} should be EMERGENCY, got {r['intent']}"
+        assert (
+            r["intent"] == "EMERGENCY"
+        ), f"{msg} should be EMERGENCY, got {r['intent']}"
     print("PASS: Emergency keywords (incl. overdose)")
 
 
 def test_urgency_overdose():
     from src.modules.urgency_assessor import assess_urgency
+
     for msg in ["overdose on pills", "took too many pills", "swallowed poison"]:
         r = assess_urgency(msg)
         assert r["level"] == "EMERGENCY", f"{msg} should be EMERGENCY, got {r['level']}"
@@ -51,10 +61,11 @@ def test_urgency_overdose():
 
 def test_safety_poison_control():
     from src.modules.safety_guardrails import check_safety
+
     r = check_safety(
         "Rest and drink water. Consult a healthcare professional.",
         "EMERGENCY",
-        "I took too many pills"
+        "I took too many pills",
     )
     assert "MISSING_POISON_CONTROL" in r["issues"]
     corrected = r["corrected_response"].lower()
@@ -64,10 +75,11 @@ def test_safety_poison_control():
 
 def test_safety_crisis_resources():
     from src.modules.safety_guardrails import check_safety
+
     r = check_safety(
         "I understand you feel bad. Consult a healthcare professional.",
         "EMERGENCY",
-        "I want to kill myself"
+        "I want to kill myself",
     )
     assert "MISSING_CRISIS_RESOURCES" in r["issues"]
     assert "988" in r["corrected_response"]
@@ -76,10 +88,11 @@ def test_safety_crisis_resources():
 
 def test_safety_emergency_redirect():
     from src.modules.safety_guardrails import check_safety
+
     r = check_safety(
         "You should rest and drink fluids. Consult a healthcare professional.",
         "EMERGENCY",
-        "chest pain"
+        "chest pain",
     )
     assert "MISSING_EMERGENCY_REDIRECT" in r["issues"]
     assert "911" in r["corrected_response"]
@@ -88,11 +101,12 @@ def test_safety_emergency_redirect():
 
 def test_safety_dangerous_patterns():
     from src.modules.safety_guardrails import check_safety
+
     # Test stop medication
     r = check_safety(
         "You should stop taking your medication immediately. Consult a healthcare professional.",
         "ROUTINE",
-        "medication question"
+        "medication question",
     )
     assert not r["is_safe"]
     print("PASS: Dangerous pattern detection")
@@ -100,6 +114,7 @@ def test_safety_dangerous_patterns():
 
 def test_conversation_manager():
     from src.modules.conversation_manager import ConversationManager
+
     cm = ConversationManager(session_id="test")
     cm.add_user_message("hello")
     assert cm.message_count == 1
@@ -114,9 +129,12 @@ def test_conversation_manager():
 
 def test_response_formatter():
     from src.modules.response_formatter import format_response
+
     r = format_response(
-        "test", {"level": "EMERGENCY", "call_to_action": "Call 911", "warning_signs": []},
-        None, "test"
+        "test",
+        {"level": "EMERGENCY", "call_to_action": "Call 911", "warning_signs": []},
+        None,
+        "test",
     )
     assert r["urgency_level"] == "EMERGENCY"
     assert r["urgency_color"] == "#FF0000"
@@ -125,10 +143,16 @@ def test_response_formatter():
 
 def test_needs_clarification():
     from src.modules.response_formatter import format_response
+
     r = format_response(
         "test",
-        {"level": "NEEDS_CLARIFICATION", "call_to_action": "Provide more details", "warning_signs": []},
-        None, "test"
+        {
+            "level": "NEEDS_CLARIFICATION",
+            "call_to_action": "Provide more details",
+            "warning_signs": [],
+        },
+        None,
+        "test",
     )
     assert r["urgency_level"] == "NEEDS_CLARIFICATION"
     assert r["urgency_color"] == "#999999"
@@ -137,6 +161,7 @@ def test_needs_clarification():
 
 def test_appointment_emergency():
     from src.modules.appointment_recommender import recommend_appointment
+
     r = recommend_appointment("chest pain", {"level": "EMERGENCY"}, None)
     assert r["appointment_type"] == "Emergency Room (ER)"
     assert r["urgency"] == "IMMEDIATELY"

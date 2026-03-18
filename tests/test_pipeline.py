@@ -13,8 +13,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from tests.helpers import vector_store_ready, import_pipeline
-
+from tests.helpers import import_pipeline, vector_store_ready
 
 # Use shared helpers from conftest
 _vector_store_ready = vector_store_ready
@@ -27,10 +26,12 @@ def test_emergency_detection():
 
     result = process_message("I'm having crushing chest pain and my left arm is numb")
 
-    assert result["response"]["urgency_level"] == "EMERGENCY", \
-        f"Expected EMERGENCY, got {result['response']['urgency_level']}"
-    assert "911" in result["response"]["text"].lower(), \
-        "Emergency response should mention 911"
+    assert (
+        result["response"]["urgency_level"] == "EMERGENCY"
+    ), f"Expected EMERGENCY, got {result['response']['urgency_level']}"
+    assert (
+        "911" in result["response"]["text"].lower()
+    ), "Emergency response should mention 911"
 
     print("✓ Emergency detection test passed")
 
@@ -41,10 +42,12 @@ def test_out_of_scope():
 
     result = process_message("What is the capital of France?")
 
-    assert result["response"]["urgency_level"] == "N/A", \
-        f"Expected N/A urgency, got {result['response']['urgency_level']}"
-    assert "health" in result["response"]["text"].lower(), \
-        "Out-of-scope response should mention health"
+    assert (
+        result["response"]["urgency_level"] == "N/A"
+    ), f"Expected N/A urgency, got {result['response']['urgency_level']}"
+    assert (
+        "health" in result["response"]["text"].lower()
+    ), "Out-of-scope response should mention health"
 
     print("✓ Out-of-scope test passed")
 
@@ -72,10 +75,14 @@ def test_routine_query():
     result = process_message("I have a runny nose and mild cough since yesterday")
 
     urgency = result["response"]["urgency_level"]
-    assert urgency in ["ROUTINE", "SELF_CARE", "SOON"], \
-        f"Mild cold should be ROUTINE/SELF_CARE/SOON, got {urgency}"
-    assert "911" not in result["response"]["text"].lower(), \
-        "Routine response should NOT mention 911"
+    assert urgency in [
+        "ROUTINE",
+        "SELF_CARE",
+        "SOON",
+    ], f"Mild cold should be ROUTINE/SELF_CARE/SOON, got {urgency}"
+    assert (
+        "911" not in result["response"]["text"].lower()
+    ), "Routine response should NOT mention 911"
 
     print("✓ Routine query test passed")
 

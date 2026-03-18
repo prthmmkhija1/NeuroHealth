@@ -11,9 +11,10 @@ We use a free local model (sentence-transformers all-MiniLM-L6-v2).
 Zero API cost — runs entirely on your machine or the A100 GPU.
 """
 
-import os
 import json
+import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
