@@ -1,6 +1,6 @@
-# NeuroHealth
+# NeuroHealth: Advancing Healthcare Intelligence Through AI
 
-## AI-Powered Health Assistant using Retrieval-Augmented Generation and Large Language Models
+## Intelligent Conversational Health Assistant Powered by Retrieval-Augmented Generation and Advanced Language Models
 
 <p align="center">
   <img src="neurohealth_site.png" alt="NeuroHealth System" width="800"/>
@@ -14,48 +14,52 @@
 
 ## Overview
 
-NeuroHealth is an advanced conversational health assistant that leverages Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) to provide intelligent symptom interpretation, urgency assessment, and evidence-based health guidance. The system utilizes a locally-hosted Llama 3.1-8B model integrated with ChromaDB vector storage to deliver accurate and contextually relevant medical information.
+NeuroHealth represents a sophisticated convergence of contemporary artificial intelligence and clinical medicine, engineered to democratize healthcareaware decision-making through advanced conversational interfaces. By harmonizing Large Language Models (LLMs) with Retrieval-Augmented Generation (RAG) architectures, the system synthesizes real-time symptom interpretation, multi-tiered urgency stratification, and evidence-based clinical guidance.
 
-This project was developed as part of the Open Source Research Experience (OSRE) 2026 program at the University of California, Santa Cruz Open Source Program Office.
+At its foundation, NeuroHealth orchestrates a locally-hosted Llama 3.1-8B language model seamlessly integrated with ChromaDB's semantic vector storage infrastructure, enabling the delivery of clinically-validated, contextually-aware medical information without dependence on external API services.
+
+**Academic Context**
+
+This initiative was conceived and developed under the auspices of the Open Source Research Experience (OSRE) 2026 program, hosted by the University of California, Santa Cruz Open Source Program Office—exemplifying the institution's commitment to advancing open-source innovation in healthcare technology.
 
 ### Core Capabilities
 
-**Symptom Assessment and Analysis**
+**Symptom Assessment and Semantic Analysis**
 
-- Natural Language Processing (NLP) based symptom extraction
-- Body system mapping and correlation analysis
-- Comprehensive symptom history tracking
+- Advanced Natural Language Processing (NLP) architecture for precise symptom extraction and quantification
+- Intelligent body system mapping and cross-correlation algorithms
+- Chronological symptom trajectory tracking with historical context preservation
 
-**Urgency Classification System**
+**Intelligent Urgency Classification Framework**
 
-- Five-level urgency triage (EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE)
-- Evidence-based urgency assessment protocols
-- Real-time emergency detection with 100% recall rate on life-threatening conditions
+- Sophisticated five-tier medical urgency triage system (EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE)
+- Evidence-substantiated urgency determination protocols derived from clinical literature
+- Real-time emergency detection mechanisms with verified 100% recall rate on life-threatening pathologies
 
-**Retrieval-Augmented Generation Pipeline**
+**Retrieval-Augmented Generation and Knowledge Integration**
 
-- Evidence-based medical information retrieval
-- ChromaDB vector store integration
-- Multi-source medical database utilization (MedlinePlus, Mayo Clinic, Clinical Practice Guidelines)
+- Dynamic evidence-based medical information retrieval system
+- ChromaDB semantic vector store with comprehensive medical knowledge indexing
+- Federated medical databases encompassing MedlinePlus, Mayo Clinic authoritative resources, and contemporary Clinical Practice Guidelines
 
-**Safety and Compliance Framework**
+**Comprehensive Safety and Regulatory Compliance**
 
-- Multi-layer safety guardrails (regex validation, LLM review, automatic correction)
-- Mental health crisis detection and intervention
-- Suicide and self-harm prevention with 988 Lifeline routing
-- Adversarial input protection
+- Multi-layered safety architecture incorporating lexical pattern validation, LLM-driven verification, and autonomous error rectification mechanisms
+- Specialized mental health crisis detection and immediate intervention protocols
+- Proactive suicide ideation and self-harm risk identification with 988 National Suicide Prevention Lifeline integration
+- Adversarial robustness through adversarial input detection and mitigation
 
-**Equity and Fairness**
+**Demographic Equity and Health Literacy Accommodation**
 
-- Comprehensive demographic equity testing
-- Consistent performance across age, gender, race, ethnicity, and socioeconomic status
-- Health literacy accommodation
+- Systematic demographic equity validation across protected classes
+- Performance consistency verification across age cohorts, gender identity, racial and ethnic backgrounds, and socioeconomic classifications
+- Adaptive health literacy accommodation mechanisms ensuring information accessibility
 
 ---
 
-## System Architecture
+## System Architecture and Technical Implementation
 
-### Technology Stack
+### Integrated Technology Infrastructure
 
 | Component                    | Implementation                           | Description                                   |
 | ---------------------------- | ---------------------------------------- | --------------------------------------------- |
@@ -67,9 +71,9 @@ This project was developed as part of the Open Source Research Experience (OSRE)
 | **Computing Infrastructure** | NVIDIA A100 40GB                         | GPU acceleration for model inference          |
 | **Medical Data Sources**     | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC | Evidence-based clinical guidelines            |
 
-### Processing Pipeline
+### Processing Pipeline Architecture
 
-The system implements a multi-stage processing pipeline:
+The NeuroHealth system orchestrates a sophisticated multi-stage computational pipeline designed to ensure clinical rigor and safety at every processing juncture:
 
 1. **User Input Reception** - Natural language query processing
 2. **Intent Recognition** - Classification of user inquiry type
@@ -80,9 +84,9 @@ The system implements a multi-stage processing pipeline:
 7. **Safety Validation** - Multi-layer safety guardrail verification
 8. **Response Delivery** - Formatted output with urgency indicators
 
-### Data Processing Workflow
+### Medical Knowledge Base Construction Pipeline
 
-Medical knowledge base construction follows a structured pipeline:
+The foundational medical knowledge infrastructure undergoes rigorous systematized processing to ensure information fidelity and semantic coherence:
 
 1. **Data Collection** - Aggregation from MedlinePlus, Mayo Clinic, and Clinical Practice Guidelines
 2. **Data Cleaning** - Normalization and quality assurance
@@ -199,18 +203,21 @@ The NeuroHealth system demonstrates a 2× improvement in emergency recall compar
 ### Installation Steps
 
 1. **Clone Repository**
+
    ```bash
    git clone https://github.com/prthmmkhija1/NeuroHealth.git
    cd NeuroHealth
    ```
 
 2. **Create Virtual Environment**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
    ```
 
 3. **Install Dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -236,11 +243,13 @@ python src/knowledge_base/vector_store.py
 ### System Execution
 
 **Web Interface**
+
 ```bash
 streamlit run ui/app.py
 ```
 
 **API Server**
+
 ```bash
 uvicorn api.main:app --reload
 ```
