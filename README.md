@@ -1,152 +1,129 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/OSRE-2026-brightgreen?style=for-the-badge&logo=google-scholar" alt="OSRE 2026"/>
-  <img src="https://img.shields.io/badge/UC_Santa_Cruz-OSPO-blue?style=for-the-badge&logo=google-classroom" alt="UC Santa Cruz"/>
-  <img src="https://img.shields.io/badge/License-CC_BY_4.0-lightgrey?style=for-the-badge" alt="License"/>
-</p>
+# NeuroHealth
 
-<h1 align="center">🧠 NeuroHealth</h1>
-
-<p align="center">
-  <strong>AI-Powered Health Assistant using RAG + LLM</strong><br/>
-  <em>Intelligent symptom interpretation, urgency triage, and personalized health guidance</em>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/LLM-Llama_3.1--8B-purple?logo=meta" alt="Llama"/>
-  <img src="https://img.shields.io/badge/RAG-ChromaDB-FF6B6B?logo=databricks" alt="ChromaDB"/>
-  <img src="https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi" alt="FastAPI"/>
-</p>
-
----
+## AI-Powered Health Assistant using Retrieval-Augmented Generation and Large Language Models
 
 <p align="center">
   <img src="neurohealth_site.png" alt="NeuroHealth System" width="800"/>
 </p>
 
----
+### Medical Disclaimer
 
-> ⚠️ **Medical Disclaimer:** NeuroHealth is a research prototype and is **NOT** a substitute for professional medical advice. Always consult a qualified healthcare professional. In an emergency, call **911** immediately.
-
----
-
-## 🎯 About
-
-**NeuroHealth** is an LLM-based conversational health assistant that addresses critical limitations in traditional symptom checkers by leveraging **Retrieval-Augmented Generation (RAG)** with a locally-hosted **Llama 3.1-8B** model. Built for [OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/) at UC Santa Cruz.
-
-### Key Features
-
-- 🔍 **Symptom Assessment** — NLP-based symptom extraction with body system mapping
-- 🚨 **Urgency Triage** — 5-level classification (EMERGENCY → SELF_CARE)
-- 📚 **RAG Pipeline** — Evidence-based responses using ChromaDB vector store
-- 🛡️ **Safety Guardrails** — Multi-layer protection (regex + LLM review + auto-correction)
-- 🆘 **Emergency Detection** — 100% recall on life-threatening cases
-- 🧠 **Crisis Intervention** — Suicide/self-harm detection with 988 Lifeline routing
-- ⚖️ **Equity Evaluation** — Tested for demographic fairness (100% consistency)
+**IMPORTANT:** NeuroHealth is a research prototype developed for academic purposes and is NOT intended to replace professional medical advice, diagnosis, or treatment. Users must consult qualified healthcare professionals for medical concerns. In case of medical emergencies, immediately contact emergency services (911 in the United States).
 
 ---
 
-## 🏗️ Architecture
+## Overview
 
-### System Pipeline
+NeuroHealth is an advanced conversational health assistant that leverages Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) to provide intelligent symptom interpretation, urgency assessment, and evidence-based health guidance. The system utilizes a locally-hosted Llama 3.1-8B model integrated with ChromaDB vector storage to deliver accurate and contextually relevant medical information.
 
-```mermaid
-flowchart LR
-    A["<b>User Input</b>"]
-    B["<b>Intent<br/>Recognizer</b>"]
-    C["<b>Symptom<br/>Extractor</b>"]
-    D["<b>Urgency<br/>Assessor</b>"]
-    E["<b>RAG Retrieval<br/>ChromaDB</b>"]
-    F["<b>LLM Generator<br/>Llama 3.1-8B</b>"]
-    G["<b>Safety Guard<br/>4 layers</b>"]
-    H["<b>Response</b>"]
+This project was developed as part of the Open Source Research Experience (OSRE) 2026 program at the University of California, Santa Cruz Open Source Program Office.
 
-    A --> B --> C --> D --> E --> F --> G --> H
-    E -.->|"<b>MedlinePlus<br/>Mayo Clinic<br/>Guidelines</b>"| E
+### Core Capabilities
 
-    style A fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style B fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style C fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style D fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
-    style E fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#f8d7da,stroke:#333,stroke-width:2px,color:#000
-    style G fill:#d1ecf1,stroke:#333,stroke-width:2px,color:#000
-    style H fill:#d4edda,stroke:#333,stroke-width:2px,color:#000
-```
+**Symptom Assessment and Analysis**
+- Natural Language Processing (NLP) based symptom extraction
+- Body system mapping and correlation analysis
+- Comprehensive symptom history tracking
 
-### Data Processing Pipeline
+**Urgency Classification System**
+- Five-level urgency triage (EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE)
+- Evidence-based urgency assessment protocols
+- Real-time emergency detection with 100% recall rate on life-threatening conditions
 
-```mermaid
-flowchart LR
-    A["<b>MedlinePlus</b>"]
-    B["<b>Mayo Clinic</b>"]
-    C["<b>CPG Dataset</b>"]
-    D["<b>Collector</b>"]
-    E["<b>Cleaner</b>"]
-    F["<b>Chunker</b>"]
-    G["<b>Embedder<br/>MiniLM-L6</b>"]
-    H["<b>ChromaDB<br/>Vector Store</b>"]
-    I["<b>Validator</b>"]
+**Retrieval-Augmented Generation Pipeline**
+- Evidence-based medical information retrieval
+- ChromaDB vector store integration
+- Multi-source medical database utilization (MedlinePlus, Mayo Clinic, Clinical Practice Guidelines)
 
-    A --> D
-    B --> D
-    C --> D
-    D --> E --> F --> G --> H
-    F --> I
-    I -.->|"<b>Feedback</b>"| G
+**Safety and Compliance Framework**
+- Multi-layer safety guardrails (regex validation, LLM review, automatic correction)
+- Mental health crisis detection and intervention
+- Suicide and self-harm prevention with 988 Lifeline routing
+- Adversarial input protection
 
-    style A fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style B fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style C fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style D fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style E fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
-    style G fill:#fff3cd,stroke:#333,stroke-width:2px,color:#000
-    style H fill:#d4edda,stroke:#333,stroke-width:2px,color:#000
-    style I fill:#f8d7da,stroke:#333,stroke-width:2px,color:#000
-```
+**Equity and Fairness**
+- Comprehensive demographic equity testing
+- Consistent performance across age, gender, race, ethnicity, and socioeconomic status
+- Health literacy accommodation
 
 ---
 
-## 🛠️ Tech Stack
+## System Architecture
 
-| Component        | Technology                                          |
-| ---------------- | --------------------------------------------------- |
-| **LLM**          | Llama 3.1-8B-Instruct (local, zero API cost)        |
-| **Embeddings**   | all-MiniLM-L6-v2 (sentence-transformers)            |
-| **Vector DB**    | ChromaDB (persistent, local)                        |
-| **Web UI**       | Streamlit                                           |
-| **API**          | FastAPI with OpenAPI docs                           |
-| **GPU**          | Nvidia A100 40GB                                    |
-| **Data Sources** | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC guidelines |
+### Technology Stack
+
+| Component | Implementation | Description |
+|-----------|---------------|-------------|
+| **Large Language Model** | Llama 3.1-8B-Instruct | Locally hosted, zero API cost inference model |
+| **Embedding Model** | all-MiniLM-L6-v2 | Sentence transformer for semantic encoding |
+| **Vector Database** | ChromaDB | Persistent local vector storage |
+| **Web Interface** | Streamlit | Interactive user interface |
+| **API Framework** | FastAPI | RESTful API with OpenAPI documentation |
+| **Computing Infrastructure** | NVIDIA A100 40GB | GPU acceleration for model inference |
+| **Medical Data Sources** | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC | Evidence-based clinical guidelines |
+
+### Processing Pipeline
+
+The system implements a multi-stage processing pipeline:
+
+1. **User Input Reception** - Natural language query processing
+2. **Intent Recognition** - Classification of user inquiry type
+3. **Symptom Extraction** - Identification and structuring of reported symptoms
+4. **Urgency Assessment** - Five-level triage classification
+5. **RAG Retrieval** - Evidence-based information retrieval from ChromaDB
+6. **LLM Generation** - Contextual response generation using Llama 3.1-8B
+7. **Safety Validation** - Multi-layer safety guardrail verification
+8. **Response Delivery** - Formatted output with urgency indicators
+
+### Data Processing Workflow
+
+Medical knowledge base construction follows a structured pipeline:
+
+1. **Data Collection** - Aggregation from MedlinePlus, Mayo Clinic, and Clinical Practice Guidelines
+2. **Data Cleaning** - Normalization and quality assurance
+3. **Text Chunking** - Document segmentation for optimal retrieval
+4. **Embedding Generation** - Vector representation using MiniLM-L6
+5. **Vector Storage** - Persistent storage in ChromaDB
+6. **Validation** - Quality assurance and feedback loop
 
 ---
 
-## 🚀 Quick Start
+## Installation and Deployment
 
-### Prerequisites
+### System Requirements
 
-- Python 3.10+
-- CUDA GPU (16GB+ VRAM recommended)
-- [HuggingFace account](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) with Llama 3.1 access
+- Python 3.10 or higher
+- CUDA-compatible GPU with 16GB+ VRAM (recommended)
+- HuggingFace account with Llama 3.1 model access
 
-### Installation
+### Installation Steps
 
-```bash
-git clone https://github.com/prthmmkhija1/NeuroHealth.git
-cd NeuroHealth
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/prthmmkhija1/NeuroHealth.git
+   cd NeuroHealth
+   ```
 
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+2. **Create Virtual Environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
 
-pip install -r requirements.txt
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-cp .env.example .env
-# Edit .env with your HUGGINGFACE_TOKEN
-```
+4. **Configure Environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env file and add your HUGGINGFACE_TOKEN
+   ```
 
-### Build Knowledge Base
+### Knowledge Base Construction
+
+Execute the following scripts in sequence to build the medical knowledge base:
 
 ```bash
 python src/data_pipeline/collector.py
@@ -156,114 +133,104 @@ python src/knowledge_base/embedder.py
 python src/knowledge_base/vector_store.py
 ```
 
-### Run
+### System Execution
 
+**Web Interface**
 ```bash
-# Web UI
 streamlit run ui/app.py
+```
 
-# API Server
+**API Server**
+```bash
 uvicorn api.main:app --reload
 ```
 
 ---
 
-## 📊 Evaluation Results
+## Evaluation and Performance Metrics
 
-### Benchmark Performance (37 Test Cases)
+### Benchmark Results (37 Test Cases)
 
-| Metric               | Score       | Target |
-| -------------------- | ----------- | ------ |
-| **Emergency Recall** | **100%** ✅ | 100%   |
-| Intent Accuracy      | 85.7%       | 80%+   |
-| Safety Pass Rate     | 97.3%       | 95%+   |
-| Urgency Accuracy     | 42.8%       | 60%+   |
+| Performance Metric | Achieved Score | Target Threshold | Status |
+|-------------------|----------------|------------------|---------|
+| **Emergency Recall** | **100%** | 100% | **✓ Met** |
+| Intent Accuracy | 85.7% | 80%+ | ✓ Exceeded |
+| Safety Pass Rate | 97.3% | 95%+ | ✓ Exceeded |
+| Urgency Classification Accuracy | 42.8% | 60%+ | In Progress |
 
-> **Emergency Recall = 100%** means every life-threatening case (chest pain, stroke, anaphylaxis, overdose) was correctly identified and routed to emergency services.
+**Critical Achievement:** The system maintains 100% emergency recall, ensuring all life-threatening conditions (chest pain, stroke symptoms, anaphylaxis, overdose) receive appropriate emergency routing.
 
 <p align="center">
   <img src="evaluation/figures/benchmark_overview.png" alt="Benchmark Overview" width="700"/>
 </p>
 
----
+### Comparative Analysis
 
-### Baseline Comparison
+| System Implementation | Emergency Recall Rate | Intent Classification Accuracy |
+|----------------------|----------------------|-------------------------------|
+| **NeuroHealth (RAG + Llama 3.1)** | **100%** | **85.7%** |
+| Keyword/Rule-Based Baseline | 50% | 45.0% |
 
-| System                        | Emergency Recall | Intent Accuracy |
-| ----------------------------- | ---------------- | --------------- |
-| **NeuroHealth (RAG + Llama)** | **100%**         | **85.7%**       |
-| Keyword/Rule-Based            | 50%              | 45.0%           |
+The NeuroHealth system demonstrates a 2× improvement in emergency recall compared to traditional rule-based approaches, representing a critical advancement in patient safety.
 
-> NeuroHealth achieves **2× emergency recall** vs baseline — the critical safety improvement.
-
----
-
-### Urgency Classification Matrix
+### Urgency Classification Performance
 
 <p align="center">
   <img src="evaluation/figures/urgency_confusion_matrix.png" alt="Urgency Confusion Matrix" width="600"/>
 </p>
 
----
+### Component Ablation Analysis
 
-### Ablation Study
+| System Configuration | Emergency Recall | Intent Accuracy | Safety Pass Rate |
+|---------------------|------------------|-----------------|------------------|
+| Complete Pipeline | 100% | 75.0% | 97.3% |
+| Without RAG Module | 100% | 85.7% | 94.6% |
+| Without Intent Recognition | 100% | 32.1% | 97.3% |
+| **Without Urgency Assessment** | **0%** | 85.7% | 97.3% |
 
-| Configuration  | Emergency Recall | Intent Acc | Safety Pass |
-| -------------- | ---------------- | ---------- | ----------- |
-| Full Pipeline  | 100%             | 75.0%      | 97.3%       |
-| No RAG         | 100%             | 85.7%      | 94.6%       |
-| No Intent      | 100%             | 32.1%      | 97.3%       |
-| **No Urgency** | **0%** ❌        | 85.7%      | 97.3%       |
-
-> Removing Urgency Assessment drops emergency recall to 0% — confirming it's the most critical component.
+**Key Finding:** Removal of the Urgency Assessment module results in complete failure of emergency detection, confirming its critical role in patient safety.
 
 <p align="center">
   <img src="evaluation/figures/ablation_study.png" alt="Ablation Study" width="700"/>
 </p>
 
----
+### Safety and Adversarial Testing (27 Test Cases)
 
-### Safety & Adversarial Testing (27 Cases)
-
-| Category                | Tests | Status        |
-| ----------------------- | ----- | ------------- |
-| Jailbreak attempts      | 4     | ✅ All passed |
-| Mental health crisis    | 4     | ✅ All passed |
-| Overdose/Poison Control | 1     | ✅ Passed     |
-| **CRITICAL failures**   | —     | **0** ✅      |
+| Test Category | Number of Tests | Outcome |
+|--------------|----------------|---------|
+| Jailbreak Attempts | 4 | All Passed |
+| Mental Health Crisis Detection | 4 | All Passed |
+| Overdose/Poison Control | 1 | Passed |
+| **Critical Failures** | — | **0** |
 
 <p align="center">
   <img src="evaluation/figures/safety_breakdown.png" alt="Safety Breakdown" width="700"/>
 </p>
 
----
+### Demographic Equity Assessment
 
-### Demographic Equity
-
-| Group                | Consistency |
-| -------------------- | ----------- |
-| Age groups           | 100%        |
-| Health literacy      | 100%        |
-| Gender               | 100%        |
-| Race/ethnicity       | 100%        |
-| Socioeconomic status | 100%        |
-| **Overall**          | **100%** ✅ |
+| Demographic Category | Consistency Score |
+|---------------------|-------------------|
+| Age Groups | 100% |
+| Health Literacy Levels | 100% |
+| Gender | 100% |
+| Race and Ethnicity | 100% |
+| Socioeconomic Status | 100% |
+| **Overall Consistency** | **100%** |
 
 <p align="center">
   <img src="evaluation/figures/equity_consistency.png" alt="Equity Consistency" width="700"/>
 </p>
 
----
+### Computational Performance Analysis (NVIDIA A100 40GB)
 
-### Inference Profiling (A100 40GB)
-
-| Component           | Latency    | %        |
-| ------------------- | ---------- | -------- |
-| Response Generation | 16.11s     | 33.4%    |
-| Appointment Rec.    | 10.34s     | 21.5%    |
-| Urgency Assessment  | 8.28s      | 17.2%    |
-| Symptom Extraction  | 5.95s      | 12.4%    |
-| **Total**           | **48.16s** | **100%** |
+| System Component | Latency | Percentage of Total |
+|-----------------|---------|---------------------|
+| Response Generation | 16.11s | 33.4% |
+| Appointment Recommendation | 10.34s | 21.5% |
+| Urgency Assessment | 8.28s | 17.2% |
+| Symptom Extraction | 5.95s | 12.4% |
+| **Total Processing Time** | **48.16s** | **100%** |
 
 <p align="center">
   <img src="evaluation/figures/latency_breakdown.png" alt="Latency Breakdown" width="600"/>
@@ -275,18 +242,21 @@ uvicorn api.main:app --reload
 
 ---
 
-## 🔌 API Reference
+## API Documentation
 
-### Base URL: `http://localhost:8000`
+### Base URL
+```
+http://localhost:8000
+```
 
-### Endpoints
+### REST Endpoints
 
-#### `POST /api/v1/chat`
+#### Chat Endpoint
+**POST** `/api/v1/chat`
 
-Send a message to NeuroHealth.
+Submit a health-related query to the NeuroHealth system.
 
-**Request:**
-
+**Request Format:**
 ```json
 {
   "message": "I have chest pain and difficulty breathing",
@@ -294,8 +264,7 @@ Send a message to NeuroHealth.
 }
 ```
 
-**Response:**
-
+**Response Format:**
 ```json
 {
   "session_id": "20260318_120000",
@@ -305,83 +274,91 @@ Send a message to NeuroHealth.
 }
 ```
 
-#### Other Endpoints
+#### Additional Endpoints
 
-- `GET /health` — Health check
-- `POST /api/v1/chat/stream` — SSE streaming
-- `GET /api/v1/sessions/{id}` — Get session history
-- `POST /api/v1/feedback` — Submit feedback
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | System health status check |
+| `/api/v1/chat/stream` | POST | Server-Sent Events (SSE) streaming responses |
+| `/api/v1/sessions/{id}` | GET | Retrieve session conversation history |
+| `/api/v1/feedback` | POST | Submit user feedback |
 
-**Full documentation:** http://localhost:8000/docs
+**Complete API Documentation:** Available at `http://localhost:8000/docs` (OpenAPI/Swagger interface)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 NeuroHealth/
 ├── src/
-│   ├── data_pipeline/      # Data collection & processing
-│   ├── knowledge_base/     # Vector database (ChromaDB)
-│   ├── modules/            # Pipeline components (intent, urgency, safety)
-│   ├── rag/                # RAG retrieval & generation
-│   └── pipeline.py         # Main orchestrator
-├── evaluation/             # Benchmark & ablation studies
-│   └── figures/            # Generated visualizations
-├── api/                    # FastAPI server
-├── ui/                     # Streamlit interface
-├── tests/                  # Unit & integration tests
-└── .github/                # CI/CD & templates
+│   ├── data_pipeline/      # Data collection and processing modules
+│   ├── knowledge_base/     # ChromaDB vector database management
+│   ├── modules/            # Core pipeline components (intent, urgency, safety)
+│   ├── rag/                # Retrieval-Augmented Generation implementation
+│   └── pipeline.py         # Main orchestration module
+├── evaluation/             # Performance benchmarks and ablation studies
+│   └── figures/            # Generated evaluation visualizations
+├── api/                    # FastAPI server implementation
+├── ui/                     # Streamlit user interface
+├── tests/                  # Unit and integration test suites
+└── .github/                # Continuous integration and deployment workflows
 ```
 
 ---
 
-## 🚦 Urgency Levels
+## Urgency Classification System
 
-```
-🔴 EMERGENCY  →  Call 911 immediately    →  Immediate
-🟠 URGENT     →  See doctor within hours →  Same day
-🟡 SOON       →  See doctor in 1-2 days  →  1-2 days
-🟢 ROUTINE    →  Schedule appointment    →  This week
-🔵 SELF_CARE  →  Manage at home          →  Self-guided
-```
+The system implements a five-level urgency classification framework:
+
+| Level | Indicator | Recommended Action | Timeline |
+|-------|-----------|-------------------|----------|
+| **EMERGENCY** | 🔴 Red | Contact emergency services (911) immediately | Immediate |
+| **URGENT** | 🟠 Orange | Seek medical attention within hours | Same day |
+| **SOON** | 🟡 Yellow | Schedule medical consultation | 1-2 days |
+| **ROUTINE** | 🟢 Green | Schedule standard appointment | Within one week |
+| **SELF_CARE** | 🔵 Blue | Self-management appropriate | As needed |
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-This project is part of [OSRE 2026](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+NeuroHealth is developed as part of the Open Source Research Experience (OSRE) 2026 program. Contributions are welcome following the guidelines outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Contribution Process
 
 1. Fork the repository
-2. Create a feature branch
-3. Make changes and add tests
-4. Run `pytest tests/`
-5. Push and open a Pull Request
+2. Create a feature branch from `main`
+3. Implement changes with appropriate test coverage
+4. Execute test suite: `pytest tests/`
+5. Submit Pull Request with detailed description
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **[UC Santa Cruz OSPO](https://ucsc-ospo.github.io/)** - OSRE 2026 Program
-- **[MedlinePlus / NIH](https://medlineplus.gov/)** - Medical data source (public domain)
-- **[Meta AI](https://huggingface.co/meta-llama)** - Llama 3.1-8B model
-- **[ChromaDB](https://www.trychroma.com/)** - Vector database
+**Program Support**
+- University of California, Santa Cruz Open Source Program Office (UCSC OSPO)
+- Open Source Research Experience (OSRE) 2026 Program
+
+**Data Sources**
+- MedlinePlus / National Institutes of Health (NIH) - Public domain medical information
+- Mayo Clinic - Clinical practice guidelines
+- USPSTF/AHA/CDC - Evidence-based clinical recommendations
+
+**Technology Partners**
+- Meta AI - Llama 3.1-8B language model
+- ChromaDB - Vector database infrastructure
+- Hugging Face - Model hosting and distribution
 
 ---
 
-## 📄 License
+## Project Information
 
-Licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+**Program:** Open Source Research Experience (OSRE) 2026  
+**Institution:** University of California, Santa Cruz - Open Source Program Office
 
----
-
-<p align="center">
-  <strong>Open Source Research Experience (OSRE) 2026</strong><br/>
-  <strong>UC Santa Cruz Open Source Program Office</strong>
-</p>
-
-<p align="center">
-  <a href="https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/">GSOC Project Page</a> •
-  <a href="https://github.com/prthmmkhija1/NeuroHealth">GitHub Repository</a> •
-  <a href="https://github.com/prthmmkhija1/NeuroHealth/issues">Issues</a>
-</p>
+**Resources:**
+- [GSOC Project Page](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/)
+- [GitHub Repository](https://github.com/prthmmkhija1/NeuroHealth)
+- [Issue Tracker](https://github.com/prthmmkhija1/NeuroHealth/issues)
