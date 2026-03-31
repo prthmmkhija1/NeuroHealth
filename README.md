@@ -1,9 +1,17 @@
-# NeuroHealth: Advancing Healthcare Intelligence Through AI
+# 🧠 NeuroHealth
 
-## Intelligent Conversational Health Assistant Powered by Retrieval-Augmented Generation and Advanced Language Models
+### *Where Artificial Intelligence Meets Clinical Precision*
+
+> **Pioneering the Future of Healthcare — An Intelligent Conversational Health Assistant Engineered with Retrieval-Augmented Generation and State-of-the-Art Language Models**
 
 <p align="center">
   <img src="neurohealth_site.png" alt="NeuroHealth System" width="800"/>
+</p>
+
+---
+
+<p align="center">
+  <strong>🔬 Research-Grade AI</strong> · <strong>🏥 Clinical Rigor</strong> · <strong>🛡️ Safety-First Architecture</strong> · <strong>🌍 Open Source Innovation</strong>
 </p>
 
 ### Medical Disclaimer
@@ -97,9 +105,15 @@ The foundational medical knowledge infrastructure undergoes rigorous systematize
 
 ---
 
-## Evaluation and Performance Metrics
+## 📊 Evaluation and Performance Metrics
 
-### Benchmark Results (37 Test Cases)
+### Rigorous Validation — Quantifying Excellence Through Empirical Analysis
+
+The NeuroHealth system has undergone comprehensive evaluation through a meticulously designed benchmark suite, ensuring clinical reliability and patient safety across diverse scenarios.
+
+---
+
+### 🎯 Benchmark Results (37 Test Cases)
 
 | Performance Metric              | Achieved Score | Target Threshold | Status      |
 | ------------------------------- | -------------- | ---------------- | ----------- |
@@ -108,28 +122,28 @@ The foundational medical knowledge infrastructure undergoes rigorous systematize
 | Safety Pass Rate                | 97.3%          | 95%+             | ✓ Exceeded  |
 | Urgency Classification Accuracy | 42.8%          | 60%+             | In Progress |
 
-**Critical Achievement:** The system maintains 100% emergency recall, ensuring all life-threatening conditions (chest pain, stroke symptoms, anaphylaxis, overdose) receive appropriate emergency routing.
+> **🏆 Critical Achievement:** The system maintains **100% emergency recall**, ensuring all life-threatening conditions—chest pain, stroke symptoms, anaphylaxis, overdose—receive appropriate emergency routing without exception.
 
 <p align="center">
   <img src="evaluation/figures/benchmark_overview.png" alt="Benchmark Overview" width="700"/>
 </p>
 
-### Comparative Analysis
+### ⚖️ Comparative Analysis — Demonstrating Measurable Impact
 
 | System Implementation             | Emergency Recall Rate | Intent Classification Accuracy |
 | --------------------------------- | --------------------- | ------------------------------ |
 | **NeuroHealth (RAG + Llama 3.1)** | **100%**              | **85.7%**                      |
 | Keyword/Rule-Based Baseline       | 50%                   | 45.0%                          |
 
-The NeuroHealth system demonstrates a 2× improvement in emergency recall compared to traditional rule-based approaches, representing a critical advancement in patient safety.
+> The NeuroHealth system demonstrates a **2× improvement** in emergency recall compared to traditional rule-based approaches — a critical advancement in patient safety that could translate to saved lives in real-world deployment scenarios.
 
-### Urgency Classification Performance
+### 🔬 Urgency Classification Performance
 
 <p align="center">
   <img src="evaluation/figures/urgency_confusion_matrix.png" alt="Urgency Confusion Matrix" width="600"/>
 </p>
 
-### Component Ablation Analysis
+### 🧪 Component Ablation Analysis — Understanding What Matters Most
 
 | System Configuration           | Emergency Recall | Intent Accuracy | Safety Pass Rate |
 | ------------------------------ | ---------------- | --------------- | ---------------- |
@@ -138,13 +152,13 @@ The NeuroHealth system demonstrates a 2× improvement in emergency recall compar
 | Without Intent Recognition     | 100%             | 32.1%           | 97.3%            |
 | **Without Urgency Assessment** | **0%**           | 85.7%           | 97.3%            |
 
-**Key Finding:** Removal of the Urgency Assessment module results in complete failure of emergency detection, confirming its critical role in patient safety.
+> **⚠️ Key Finding:** Removal of the Urgency Assessment module results in **complete failure** of emergency detection, empirically confirming its indispensable role in patient safety architecture.
 
 <p align="center">
   <img src="evaluation/figures/ablation_study.png" alt="Ablation Study" width="700"/>
 </p>
 
-### Safety and Adversarial Testing (27 Test Cases)
+### 🛡️ Safety and Adversarial Testing (27 Test Cases)
 
 | Test Category                  | Number of Tests | Outcome    |
 | ------------------------------ | --------------- | ---------- |
@@ -157,7 +171,7 @@ The NeuroHealth system demonstrates a 2× improvement in emergency recall compar
   <img src="evaluation/figures/safety_breakdown.png" alt="Safety Breakdown" width="700"/>
 </p>
 
-### Demographic Equity Assessment
+### 🌐 Demographic Equity Assessment — Ensuring Fairness Across All Communities
 
 | Demographic Category    | Consistency Score |
 | ----------------------- | ----------------- |
@@ -172,7 +186,7 @@ The NeuroHealth system demonstrates a 2× improvement in emergency recall compar
   <img src="evaluation/figures/equity_consistency.png" alt="Equity Consistency" width="700"/>
 </p>
 
-### Computational Performance Analysis (NVIDIA A100 40GB)
+### ⚡ Computational Performance Analysis (NVIDIA A100 40GB)
 
 | System Component           | Latency    | Percentage of Total |
 | -------------------------- | ---------- | ------------------- |
