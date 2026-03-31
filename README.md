@@ -48,19 +48,6 @@ This initiative was conceived and developed under the auspices of the Open Sourc
 - ChromaDB semantic vector store with comprehensive medical knowledge indexing
 - Federated medical databases encompassing MedlinePlus, Mayo Clinic authoritative resources, and contemporary Clinical Practice Guidelines
 
-**Comprehensive Safety and Regulatory Compliance**
-
-- Multi-layered safety architecture incorporating lexical pattern validation, LLM-driven verification, and autonomous error rectification mechanisms
-- Specialized mental health crisis detection and immediate intervention protocols
-- Proactive suicide ideation and self-harm risk identification with 988 National Suicide Prevention Lifeline integration
-- Adversarial robustness through adversarial input detection and mitigation
-
-**Demographic Equity and Health Literacy Accommodation**
-
-- Systematic demographic equity validation across protected classes
-- Performance consistency verification across age cohorts, gender identity, racial and ethnic backgrounds, and socioeconomic classifications
-- Adaptive health literacy accommodation mechanisms ensuring information accessibility
-
 ---
 
 ## System Architecture and Technical Implementation
@@ -88,7 +75,6 @@ The NeuroHealth system orchestrates a sophisticated multi-stage computational pi
 5. **RAG Retrieval** - Evidence-based information retrieval from ChromaDB
 6. **LLM Generation** - Contextual response generation using Llama 3.1-8B
 7. **Safety Validation** - Multi-layer safety guardrail verification
-8. **Response Delivery** - Formatted output with urgency indicators
 
 ### Medical Knowledge Base Construction Pipeline
 
