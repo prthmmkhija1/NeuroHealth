@@ -1,18 +1,16 @@
 # 🧠 NeuroHealth
 
-### *Where Artificial Intelligence Meets Clinical Precision*
-
-> **Pioneering the Future of Healthcare — An Intelligent Conversational Health Assistant Engineered with Retrieval-Augmented Generation and State-of-the-Art Language Models**
+### _AI Meets Clinical Precision_
 
 <p align="center">
   <img src="neurohealth_site.png" alt="NeuroHealth System" width="800"/>
 </p>
 
----
-
 <p align="center">
-  <strong>🔬 Research-Grade AI</strong> · <strong>🏥 Clinical Rigor</strong> · <strong>🛡️ Safety-First Architecture</strong> · <strong>🌍 Open Source Innovation</strong>
+  <strong>🔬 Research-Grade AI</strong> · <strong>🏥 Clinical Rigor</strong> · <strong>🛡️ Safety-First</strong> · <strong>🌍 Open Source</strong>
 </p>
+
+---
 
 ### Medical Disclaimer
 
