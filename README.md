@@ -24,10 +24,6 @@ NeuroHealth represents a sophisticated convergence of contemporary artificial in
 
 At its foundation, NeuroHealth orchestrates a locally-hosted Llama 3.1-8B language model seamlessly integrated with ChromaDB's semantic vector storage infrastructure, enabling the delivery of clinically-validated, contextually-aware medical information without dependence on external API services.
 
-**Academic Context**
-
-This initiative was conceived and developed under the auspices of the Open Source Research Experience (OSRE) 2026 program, hosted by the University of California, Santa Cruz Open Source Program Office—exemplifying the institution's commitment to advancing open-source innovation in healthcare technology.
-
 ### Core Capabilities
 
 **Symptom Assessment and Semantic Analysis**
@@ -73,8 +69,6 @@ The NeuroHealth system orchestrates a sophisticated multi-stage computational pi
 3. **Symptom Extraction** - Identification and structuring of reported symptoms
 4. **Urgency Assessment** - Five-level triage classification
 5. **RAG Retrieval** - Evidence-based information retrieval from ChromaDB
-6. **LLM Generation** - Contextual response generation using Llama 3.1-8B
-7. **Safety Validation** - Multi-layer safety guardrail verification
 
 ### Medical Knowledge Base Construction Pipeline
 
@@ -85,7 +79,6 @@ The foundational medical knowledge infrastructure undergoes rigorous systematize
 3. **Text Chunking** - Document segmentation for optimal retrieval
 4. **Embedding Generation** - Vector representation using MiniLM-L6
 5. **Vector Storage** - Persistent storage in ChromaDB
-6. **Validation** - Quality assurance and feedback loop
 
 ---
 
