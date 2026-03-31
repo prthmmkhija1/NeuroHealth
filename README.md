@@ -21,27 +21,32 @@ This project was developed as part of the Open Source Research Experience (OSRE)
 ### Core Capabilities
 
 **Symptom Assessment and Analysis**
+
 - Natural Language Processing (NLP) based symptom extraction
 - Body system mapping and correlation analysis
 - Comprehensive symptom history tracking
 
 **Urgency Classification System**
+
 - Five-level urgency triage (EMERGENCY, URGENT, SOON, ROUTINE, SELF_CARE)
 - Evidence-based urgency assessment protocols
 - Real-time emergency detection with 100% recall rate on life-threatening conditions
 
 **Retrieval-Augmented Generation Pipeline**
+
 - Evidence-based medical information retrieval
 - ChromaDB vector store integration
 - Multi-source medical database utilization (MedlinePlus, Mayo Clinic, Clinical Practice Guidelines)
 
 **Safety and Compliance Framework**
+
 - Multi-layer safety guardrails (regex validation, LLM review, automatic correction)
 - Mental health crisis detection and intervention
 - Suicide and self-harm prevention with 988 Lifeline routing
 - Adversarial input protection
 
 **Equity and Fairness**
+
 - Comprehensive demographic equity testing
 - Consistent performance across age, gender, race, ethnicity, and socioeconomic status
 - Health literacy accommodation
@@ -52,15 +57,15 @@ This project was developed as part of the Open Source Research Experience (OSRE)
 
 ### Technology Stack
 
-| Component | Implementation | Description |
-|-----------|---------------|-------------|
-| **Large Language Model** | Llama 3.1-8B-Instruct | Locally hosted, zero API cost inference model |
-| **Embedding Model** | all-MiniLM-L6-v2 | Sentence transformer for semantic encoding |
-| **Vector Database** | ChromaDB | Persistent local vector storage |
-| **Web Interface** | Streamlit | Interactive user interface |
-| **API Framework** | FastAPI | RESTful API with OpenAPI documentation |
-| **Computing Infrastructure** | NVIDIA A100 40GB | GPU acceleration for model inference |
-| **Medical Data Sources** | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC | Evidence-based clinical guidelines |
+| Component                    | Implementation                           | Description                                   |
+| ---------------------------- | ---------------------------------------- | --------------------------------------------- |
+| **Large Language Model**     | Llama 3.1-8B-Instruct                    | Locally hosted, zero API cost inference model |
+| **Embedding Model**          | all-MiniLM-L6-v2                         | Sentence transformer for semantic encoding    |
+| **Vector Database**          | ChromaDB                                 | Persistent local vector storage               |
+| **Web Interface**            | Streamlit                                | Interactive user interface                    |
+| **API Framework**            | FastAPI                                  | RESTful API with OpenAPI documentation        |
+| **Computing Infrastructure** | NVIDIA A100 40GB                         | GPU acceleration for model inference          |
+| **Medical Data Sources**     | MedlinePlus, Mayo Clinic, USPSTF/AHA/CDC | Evidence-based clinical guidelines            |
 
 ### Processing Pipeline
 
@@ -85,6 +90,101 @@ Medical knowledge base construction follows a structured pipeline:
 4. **Embedding Generation** - Vector representation using MiniLM-L6
 5. **Vector Storage** - Persistent storage in ChromaDB
 6. **Validation** - Quality assurance and feedback loop
+
+---
+
+## Evaluation and Performance Metrics
+
+### Benchmark Results (37 Test Cases)
+
+| Performance Metric              | Achieved Score | Target Threshold | Status      |
+| ------------------------------- | -------------- | ---------------- | ----------- |
+| **Emergency Recall**            | **100%**       | 100%             | **✓ Met**   |
+| Intent Accuracy                 | 85.7%          | 80%+             | ✓ Exceeded  |
+| Safety Pass Rate                | 97.3%          | 95%+             | ✓ Exceeded  |
+| Urgency Classification Accuracy | 42.8%          | 60%+             | In Progress |
+
+**Critical Achievement:** The system maintains 100% emergency recall, ensuring all life-threatening conditions (chest pain, stroke symptoms, anaphylaxis, overdose) receive appropriate emergency routing.
+
+<p align="center">
+  <img src="evaluation/figures/benchmark_overview.png" alt="Benchmark Overview" width="700"/>
+</p>
+
+### Comparative Analysis
+
+| System Implementation             | Emergency Recall Rate | Intent Classification Accuracy |
+| --------------------------------- | --------------------- | ------------------------------ |
+| **NeuroHealth (RAG + Llama 3.1)** | **100%**              | **85.7%**                      |
+| Keyword/Rule-Based Baseline       | 50%                   | 45.0%                          |
+
+The NeuroHealth system demonstrates a 2× improvement in emergency recall compared to traditional rule-based approaches, representing a critical advancement in patient safety.
+
+### Urgency Classification Performance
+
+<p align="center">
+  <img src="evaluation/figures/urgency_confusion_matrix.png" alt="Urgency Confusion Matrix" width="600"/>
+</p>
+
+### Component Ablation Analysis
+
+| System Configuration           | Emergency Recall | Intent Accuracy | Safety Pass Rate |
+| ------------------------------ | ---------------- | --------------- | ---------------- |
+| Complete Pipeline              | 100%             | 75.0%           | 97.3%            |
+| Without RAG Module             | 100%             | 85.7%           | 94.6%            |
+| Without Intent Recognition     | 100%             | 32.1%           | 97.3%            |
+| **Without Urgency Assessment** | **0%**           | 85.7%           | 97.3%            |
+
+**Key Finding:** Removal of the Urgency Assessment module results in complete failure of emergency detection, confirming its critical role in patient safety.
+
+<p align="center">
+  <img src="evaluation/figures/ablation_study.png" alt="Ablation Study" width="700"/>
+</p>
+
+### Safety and Adversarial Testing (27 Test Cases)
+
+| Test Category                  | Number of Tests | Outcome    |
+| ------------------------------ | --------------- | ---------- |
+| Jailbreak Attempts             | 4               | All Passed |
+| Mental Health Crisis Detection | 4               | All Passed |
+| Overdose/Poison Control        | 1               | Passed     |
+| **Critical Failures**          | —               | **0**      |
+
+<p align="center">
+  <img src="evaluation/figures/safety_breakdown.png" alt="Safety Breakdown" width="700"/>
+</p>
+
+### Demographic Equity Assessment
+
+| Demographic Category    | Consistency Score |
+| ----------------------- | ----------------- |
+| Age Groups              | 100%              |
+| Health Literacy Levels  | 100%              |
+| Gender                  | 100%              |
+| Race and Ethnicity      | 100%              |
+| Socioeconomic Status    | 100%              |
+| **Overall Consistency** | **100%**          |
+
+<p align="center">
+  <img src="evaluation/figures/equity_consistency.png" alt="Equity Consistency" width="700"/>
+</p>
+
+### Computational Performance Analysis (NVIDIA A100 40GB)
+
+| System Component           | Latency    | Percentage of Total |
+| -------------------------- | ---------- | ------------------- |
+| Response Generation        | 16.11s     | 33.4%               |
+| Appointment Recommendation | 10.34s     | 21.5%               |
+| Urgency Assessment         | 8.28s      | 17.2%               |
+| Symptom Extraction         | 5.95s      | 12.4%               |
+| **Total Processing Time**  | **48.16s** | **100%**            |
+
+<p align="center">
+  <img src="evaluation/figures/latency_breakdown.png" alt="Latency Breakdown" width="600"/>
+</p>
+
+<p align="center">
+  <img src="evaluation/figures/component_latency_bars.png" alt="Component Latencies" width="700"/>
+</p>
 
 ---
 
@@ -147,104 +247,10 @@ uvicorn api.main:app --reload
 
 ---
 
-## Evaluation and Performance Metrics
-
-### Benchmark Results (37 Test Cases)
-
-| Performance Metric | Achieved Score | Target Threshold | Status |
-|-------------------|----------------|------------------|---------|
-| **Emergency Recall** | **100%** | 100% | **✓ Met** |
-| Intent Accuracy | 85.7% | 80%+ | ✓ Exceeded |
-| Safety Pass Rate | 97.3% | 95%+ | ✓ Exceeded |
-| Urgency Classification Accuracy | 42.8% | 60%+ | In Progress |
-
-**Critical Achievement:** The system maintains 100% emergency recall, ensuring all life-threatening conditions (chest pain, stroke symptoms, anaphylaxis, overdose) receive appropriate emergency routing.
-
-<p align="center">
-  <img src="evaluation/figures/benchmark_overview.png" alt="Benchmark Overview" width="700"/>
-</p>
-
-### Comparative Analysis
-
-| System Implementation | Emergency Recall Rate | Intent Classification Accuracy |
-|----------------------|----------------------|-------------------------------|
-| **NeuroHealth (RAG + Llama 3.1)** | **100%** | **85.7%** |
-| Keyword/Rule-Based Baseline | 50% | 45.0% |
-
-The NeuroHealth system demonstrates a 2× improvement in emergency recall compared to traditional rule-based approaches, representing a critical advancement in patient safety.
-
-### Urgency Classification Performance
-
-<p align="center">
-  <img src="evaluation/figures/urgency_confusion_matrix.png" alt="Urgency Confusion Matrix" width="600"/>
-</p>
-
-### Component Ablation Analysis
-
-| System Configuration | Emergency Recall | Intent Accuracy | Safety Pass Rate |
-|---------------------|------------------|-----------------|------------------|
-| Complete Pipeline | 100% | 75.0% | 97.3% |
-| Without RAG Module | 100% | 85.7% | 94.6% |
-| Without Intent Recognition | 100% | 32.1% | 97.3% |
-| **Without Urgency Assessment** | **0%** | 85.7% | 97.3% |
-
-**Key Finding:** Removal of the Urgency Assessment module results in complete failure of emergency detection, confirming its critical role in patient safety.
-
-<p align="center">
-  <img src="evaluation/figures/ablation_study.png" alt="Ablation Study" width="700"/>
-</p>
-
-### Safety and Adversarial Testing (27 Test Cases)
-
-| Test Category | Number of Tests | Outcome |
-|--------------|----------------|---------|
-| Jailbreak Attempts | 4 | All Passed |
-| Mental Health Crisis Detection | 4 | All Passed |
-| Overdose/Poison Control | 1 | Passed |
-| **Critical Failures** | — | **0** |
-
-<p align="center">
-  <img src="evaluation/figures/safety_breakdown.png" alt="Safety Breakdown" width="700"/>
-</p>
-
-### Demographic Equity Assessment
-
-| Demographic Category | Consistency Score |
-|---------------------|-------------------|
-| Age Groups | 100% |
-| Health Literacy Levels | 100% |
-| Gender | 100% |
-| Race and Ethnicity | 100% |
-| Socioeconomic Status | 100% |
-| **Overall Consistency** | **100%** |
-
-<p align="center">
-  <img src="evaluation/figures/equity_consistency.png" alt="Equity Consistency" width="700"/>
-</p>
-
-### Computational Performance Analysis (NVIDIA A100 40GB)
-
-| System Component | Latency | Percentage of Total |
-|-----------------|---------|---------------------|
-| Response Generation | 16.11s | 33.4% |
-| Appointment Recommendation | 10.34s | 21.5% |
-| Urgency Assessment | 8.28s | 17.2% |
-| Symptom Extraction | 5.95s | 12.4% |
-| **Total Processing Time** | **48.16s** | **100%** |
-
-<p align="center">
-  <img src="evaluation/figures/latency_breakdown.png" alt="Latency Breakdown" width="600"/>
-</p>
-
-<p align="center">
-  <img src="evaluation/figures/component_latency_bars.png" alt="Component Latencies" width="700"/>
-</p>
-
----
-
 ## API Documentation
 
 ### Base URL
+
 ```
 http://localhost:8000
 ```
@@ -252,11 +258,13 @@ http://localhost:8000
 ### REST Endpoints
 
 #### Chat Endpoint
+
 **POST** `/api/v1/chat`
 
 Submit a health-related query to the NeuroHealth system.
 
 **Request Format:**
+
 ```json
 {
   "message": "I have chest pain and difficulty breathing",
@@ -265,6 +273,7 @@ Submit a health-related query to the NeuroHealth system.
 ```
 
 **Response Format:**
+
 ```json
 {
   "session_id": "20260318_120000",
@@ -276,12 +285,12 @@ Submit a health-related query to the NeuroHealth system.
 
 #### Additional Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | System health status check |
-| `/api/v1/chat/stream` | POST | Server-Sent Events (SSE) streaming responses |
-| `/api/v1/sessions/{id}` | GET | Retrieve session conversation history |
-| `/api/v1/feedback` | POST | Submit user feedback |
+| Endpoint                | Method | Description                                  |
+| ----------------------- | ------ | -------------------------------------------- |
+| `/health`               | GET    | System health status check                   |
+| `/api/v1/chat/stream`   | POST   | Server-Sent Events (SSE) streaming responses |
+| `/api/v1/sessions/{id}` | GET    | Retrieve session conversation history        |
+| `/api/v1/feedback`      | POST   | Submit user feedback                         |
 
 **Complete API Documentation:** Available at `http://localhost:8000/docs` (OpenAPI/Swagger interface)
 
@@ -311,45 +320,13 @@ NeuroHealth/
 
 The system implements a five-level urgency classification framework:
 
-| Level | Indicator | Recommended Action | Timeline |
-|-------|-----------|-------------------|----------|
-| **EMERGENCY** | 🔴 Red | Contact emergency services (911) immediately | Immediate |
-| **URGENT** | 🟠 Orange | Seek medical attention within hours | Same day |
-| **SOON** | 🟡 Yellow | Schedule medical consultation | 1-2 days |
-| **ROUTINE** | 🟢 Green | Schedule standard appointment | Within one week |
-| **SELF_CARE** | 🔵 Blue | Self-management appropriate | As needed |
-
----
-
-## Contributing
-
-NeuroHealth is developed as part of the Open Source Research Experience (OSRE) 2026 program. Contributions are welcome following the guidelines outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
-
-### Contribution Process
-
-1. Fork the repository
-2. Create a feature branch from `main`
-3. Implement changes with appropriate test coverage
-4. Execute test suite: `pytest tests/`
-5. Submit Pull Request with detailed description
-
----
-
-## Acknowledgments
-
-**Program Support**
-- University of California, Santa Cruz Open Source Program Office (UCSC OSPO)
-- Open Source Research Experience (OSRE) 2026 Program
-
-**Data Sources**
-- MedlinePlus / National Institutes of Health (NIH) - Public domain medical information
-- Mayo Clinic - Clinical practice guidelines
-- USPSTF/AHA/CDC - Evidence-based clinical recommendations
-
-**Technology Partners**
-- Meta AI - Llama 3.1-8B language model
-- ChromaDB - Vector database infrastructure
-- Hugging Face - Model hosting and distribution
+| Level         | Indicator | Recommended Action                           | Timeline        |
+| ------------- | --------- | -------------------------------------------- | --------------- |
+| **EMERGENCY** | 🔴 Red    | Contact emergency services (911) immediately | Immediate       |
+| **URGENT**    | 🟠 Orange | Seek medical attention within hours          | Same day        |
+| **SOON**      | 🟡 Yellow | Schedule medical consultation                | 1-2 days        |
+| **ROUTINE**   | 🟢 Green  | Schedule standard appointment                | Within one week |
+| **SELF_CARE** | 🔵 Blue   | Self-management appropriate                  | As needed       |
 
 ---
 
@@ -359,6 +336,7 @@ NeuroHealth is developed as part of the Open Source Research Experience (OSRE) 2
 **Institution:** University of California, Santa Cruz - Open Source Program Office
 
 **Resources:**
+
 - [GSOC Project Page](https://ucsc-ospo.github.io/project/osre26/nelbl/neurohealth/)
 - [GitHub Repository](https://github.com/prthmmkhija1/NeuroHealth)
 - [Issue Tracker](https://github.com/prthmmkhija1/NeuroHealth/issues)
